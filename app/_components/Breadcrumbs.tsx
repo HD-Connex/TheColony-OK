@@ -1,0 +1,1 @@
+import Link from 'next/link'; export default function Breadcrumbs({items}: {items: {label:string; href?:string}[]}) { return <nav>{items.map((i,idx) => i.href ? <Link key={idx} href={i.href}>{i.label}</Link> : <span key={idx}>{i.label}</span> )}</nav>; }

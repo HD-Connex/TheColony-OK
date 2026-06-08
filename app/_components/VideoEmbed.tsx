@@ -1,0 +1,1 @@
+export default function VideoEmbed({src}: {src?:string|null}) { return src ? <iframe src={src} /> : null; }

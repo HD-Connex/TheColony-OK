@@ -1,0 +1,1 @@
+'use client'; export default function AudioPlayer({src}: {src?:string|null}) { return src ? <audio controls src={src} /> : null; }

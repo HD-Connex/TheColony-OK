@@ -1,0 +1,1 @@
+export default function PageHeader({eyebrow, title, lede}: {eyebrow?:string; title:string; lede?:string}) { return <header><div>{eyebrow}</div><h1>{title}</h1><p>{lede}</p></header>; }

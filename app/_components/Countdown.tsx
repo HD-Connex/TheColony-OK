@@ -1,0 +1,1 @@
+'use client'; import {useEffect, useState} from 'react'; export default function Countdown({target, label}: {target?:string; label?:string}) { const [t,setT]=useState(''); useEffect(()=>{const iv=setInterval(()=>setT(new Date().toISOString()),1000);return()=>clearInterval(iv);},[]); return <div>{label} {t}</div>; }

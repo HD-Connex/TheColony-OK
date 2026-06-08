@@ -1,0 +1,1 @@
+export default function Footer() { return <footer><small>© The Colony OK — consolidated root</small></footer>; }

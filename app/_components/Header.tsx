@@ -1,0 +1,2 @@
+import Link from 'next/link';
+export default function Header() { return <header><nav><Link href="/">The Colony OK</Link> | <Link href="/live">Live</Link> | <Link href="/podcasts">Podcasts</Link></nav></header>; }

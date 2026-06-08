@@ -1,0 +1,1 @@
+import Image from 'next/image'; export default function ContributorCard({name, image, slug}: {name:string; image?:string; slug?:string}) { return <div><img src={image || '/assets/images/hosts/dan-hollis.jpg'} alt={name} /> <a href={`/contributors/${slug||name.toLowerCase()}`}>{name}</a></div>; }
