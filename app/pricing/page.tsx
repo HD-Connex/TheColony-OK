@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import Breadcrumbs from "../_components/Breadcrumbs";
 import PageHeader from "../_components/PageHeader";
+import CheckoutButton from "../_components/CheckoutButton";
 import { MEMBERSHIP_PLANS } from "@/lib/tiers";
 
 export const metadata: Metadata = {
@@ -61,9 +62,9 @@ export default function PricingPage() {
                     Start free
                   </Link>
                 ) : (
-                  <Link className="btn btn--primary btn--full" href="/membership">
-                    Sign in to subscribe
-                  </Link>
+                  <CheckoutButton planId={plan.id} className="btn btn--primary btn--full">
+                    Subscribe
+                  </CheckoutButton>
                 )}
               </div>
               <ul className="pricing-card__perks">

@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 import Breadcrumbs from "../../_components/Breadcrumbs";
 import PageHeader from "../../_components/PageHeader";
 import JsonLd from "../../_components/JsonLd";
+import WatchlistButton from "../../_components/WatchlistButton";
 import { getVideoSeriesBySlug, getSeriesEpisodes, getPublishedSeriesSlugs } from "@/lib/series";
 import { formatDuration, formatDate } from "@/lib/format";
 import { tierLocked, tierLabel } from "@/lib/tiers";
@@ -104,11 +105,14 @@ export default async function SeriesPage({ params }: PageProps) {
                 title={series.title}
                 lede={series.tagline ?? undefined}
               />
-              {episodes[0] && (
-                <Link className="btn btn--primary" href={`/shows/${series.slug}/${episodes[0].slug}`}>
-                  ▶ Play latest
-                </Link>
-              )}
+              <div style={{ display: "flex", flexWrap: "wrap", gap: ".75rem", alignItems: "center" }}>
+                {episodes[0] && (
+                  <Link className="btn btn--primary" href={`/shows/${series.slug}/${episodes[0].slug}`}>
+                    ▶ Play latest
+                  </Link>
+                )}
+                <WatchlistButton seriesId={series.id} className="btn btn--outline" />
+              </div>
             </div>
           </section>
 

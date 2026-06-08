@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-client";
 import { MEMBERSHIP_PLANS } from "@/lib/tiers";
+import BillingPortalButton from "./BillingPortalButton";
 
 export default function MembershipAccount() {
   const { user, isMember, loading, signOut } = useAuth();
@@ -52,9 +53,7 @@ export default function MembershipAccount() {
           <span className={`badge${isMember ? "" : ""}`}>{isMember ? "Active" : "Free"}</span>
         </div>
         {isMember ? (
-          <button className="btn btn--outline btn--full" type="button" disabled title="Stripe billing portal coming soon">
-            Open billing portal (coming soon)
-          </button>
+          <BillingPortalButton className="btn btn--outline btn--full" />
         ) : (
           <Link className="btn btn--primary btn--full" href="/pricing">
             Upgrade membership

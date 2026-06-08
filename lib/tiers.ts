@@ -25,7 +25,14 @@ export function isEntitled(required: string | null | undefined, isMember: boolea
   return TIER_RANK[normalizeTier(required)] <= (isMember ? TIER_RANK.member : TIER_RANK.free);
 }
 
-/** Marketing plans shown on /pricing (Stripe checkout wired later). */
+/** Stripe price env keys for paid plans (any match grants `member` access). */
+export type StripePriceEnvKey =
+  | "STRIPE_PRICE_MEMBER"
+  | "STRIPE_PRICE_SETTLER"
+  | "STRIPE_PRICE_PATRIOT"
+  | "STRIPE_PRICE_FOUNDER";
+
+/** Marketing plans shown on /pricing. */
 export interface MembershipPlan {
   id: string;
   name: string;
@@ -33,6 +40,14 @@ export interface MembershipPlan {
   blurb: string;
   highlight?: boolean;
   perks: string[];
+  stripePriceEnv?: StripePriceEnvKey;
+}
+
+/** Resolve Stripe price id for a marketing plan id. */
+export function priceIdForPlan(planId: string): string | null {
+  const plan = MEMBERSHIP_PLANS.find((p) => p.id === planId);
+  if (!plan?.stripePriceEnv) return null;
+  return process.env[plan.stripePriceEnv] ?? null;
 }
 
 export const MEMBERSHIP_PLANS: MembershipPlan[] = [
@@ -53,6 +68,7 @@ export const MEMBERSHIP_PLANS: MembershipPlan[] = [
     name: "Settler",
     price: 4.99,
     highlight: true,
+    stripePriceEnv: "STRIPE_PRICE_SETTLER",
     blurb: "The founding price. Full library, ad-free, the way Colony OK members started.",
     perks: [
       "Everything in Neighbor",

@@ -1,21 +1,30 @@
-# Host / Personality Images for thecolony-app Root Project
+# Host / Personality Images
 
-These are the crisp, clean, perfect images for each personality/podcast host (Oklahoma vibes aesthetic: navy/cream/red, professional yet trendy, local spotlight energy).
+Placeholder headshots live here so `next/image` never 404s in dev or production. Replace with crisp OK-aesthetic portraits when available.
 
-**Source (gathered from C: session proxy since D: drive malfunctioned):** 
-C:\Users\hizzysdreambox\.grok\sessions\D%3A%5C1Projects%5Cthecolony-app\019ea4ef-b4d9-7160-a696-8a905df10291\images\
+## File mapping (code → asset)
 
-**Mapping to root project (public/assets/images/hosts/):**
-- Use the 4 jpgs with names matching code: jake-merrick.jpg, marcus-webb.jpg, rachel-torres.jpg, dan-hollis.jpg (or update [slug]page hostPhoto logic + per-ep rail).
-- Alternative names in some notes (robert-kane etc) for future; current code uses the 4 above for spotlight.
+| Slug / match | File | Used by |
+|--------------|------|---------|
+| `jake-merrick` or name contains "jake" | `jake-merrick.jpg` | `ContributorCard`, `StoryCard`, `app/podcasts/[slug]/page.tsx` |
+| name contains "marcus" | `marcus-webb.jpg` | same |
+| name contains "rachel" or "torres" | `rachel-torres.jpg` | same |
+| name contains "dan", "hollis", or "pastor" | `dan-hollis.jpg` | same |
+| all other contributors (no `headshot_url`) | `/assets/images/author-1.svg` | same |
 
-**Usage in root:**
-- ContributorCard, per-ep rail, personality spotlight pages use next/image with these (alt="[Name], The Colony OK personality", sizes, lazy).
-- OK motifs: subtle land/wheat overlays if editing.
-- From TRACK_B_Perfection_Patches (pushed in this repo): Add to design system for density vs competitors (Daily Wire carousels, Blaze grids).
+Resolution order in components: `contributor.headshot_url` → host JPG above → `author-1.svg`.
 
-When cloning this thecolony-app repo to D:\1Projects\thecolony-app (or your restored location), copy the 4 jpgs from the session path above (or your local backup) into this public/assets/images/hosts/ folder BEFORE npm run dev / deploy. Upload via GitHub web UI (Add file > upload) to the branch if not using local git.
+## Current placeholders
 
-These spotlight the journalist contributions as requested. Part of the consolidated root project in thecolony-app only (GitHub hizzy-made-it/thecolony-app).
+- **Host JPGs** — minimal valid 1×1 JPEG stubs (regenerate: `node scripts/create-host-placeholders.mjs`).
+- **`author-1.svg`** — cream/navy/red generic avatar at `public/assets/images/author-1.svg`.
 
-**For Vercel:** Images in public/ are served statically from the GH branch deploy.
+## Replacing with real photos
+
+1. Drop 4 JPGs into this folder using the exact filenames above (square crop, ≥ 320×320 recommended).
+2. Optional: set `headshot_url` on contributor records to override slug-based mapping.
+3. Commit binaries to the repo branch Vercel deploys from (`public/` is served statically).
+
+## Aesthetic notes
+
+Oklahoma vibes: navy (`#1a2b4a`), cream (`#e8e4dc`), accent red (`#c41e3a`). Professional local-spotlight energy for personality cards and podcast rails.

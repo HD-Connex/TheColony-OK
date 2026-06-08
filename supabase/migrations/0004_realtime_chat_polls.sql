@@ -58,8 +58,8 @@ ALTER TABLE live_poll_votes ENABLE ROW LEVEL SECURITY;
 -- Read: public for chat (transparency) or member-only? Start public read for engagement, write member.
 CREATE POLICY "live_chat_read" ON live_chat_messages FOR SELECT USING (true); -- or (auth.role() = 'authenticated' AND is_member())
 CREATE POLICY "live_chat_insert" ON live_chat_messages FOR INSERT WITH CHECK (
-  auth.uid() IS NOT NULL AND 
-  (SELECT is_member FROM profiles WHERE id = auth.uid()) -- adjust to your profiles/entitlements
+  auth.uid() IS NOT NULL AND
+  COALESCE((SELECT is_member FROM public.members WHERE user_id = auth.uid()), false)
 );
 
 -- Similar for polls (read active, vote if member)

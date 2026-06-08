@@ -2,8 +2,11 @@
 .env.local
 .env.*.local
 .env.vercel.test
+.env.vercel.*.tmp
 node_modules/
 .next/
 .vercel/
 terminals/
 *.tsbuildinfo
+
+.vercel
