@@ -3,6 +3,10 @@
   "framework": "nextjs",
   "crons": [
     {
+      "path": "/api/cron/ingest-rss",
+      "schedule": "*/20 * * * *"
+    },
+    {
       "path": "/api/cron/poll-feeds",
       "schedule": "*/20 * * * *"
     }
