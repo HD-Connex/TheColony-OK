@@ -18,127 +18,386 @@ type HlsInstance = {
 
 type HlsGlobal = { Hls?: new (config?: any) => HlsInstance };
 
-interface VideoPlayerProps {
-  src?: string | null;
-  muxPlaybackId?: string | null;
-  poster?: string | null;
-  episodeId?: string;
-  autoPlay?: boolean;
-  controls?: boolean;
-  onTimeUpdate?: (t: number) => void;
-  onPlayChange?: (playing: boolean) => void;
-  seekCmd?: { time: number; token: number } | null; // for sync from EpisodePlayer
-}
-
+/** Native HTML5 video for direct MP4/HLS. For .m3u8 on browsers without native
+ *  HLS (i.e. not Safari), hls.js is loaded on demand from a CDN — so it's not a
+ *  bundled dependency. When `episodeId` is set, playback progress is saved for
+ *  the signed-in viewer (continue-watching).
+ *
+ *  Enhanced with custom editorial chrome for live/replay...
+ *
+ *  Also accepts optional seekTo + onTimeChange/onPlayingChange for EpisodePlayer
+ *  podcast dual audio/video sync (mode toggle preserves position) and chapters.
+ *  (Only active for !isLive replay cases in podcast context.)
+ */
 export default function VideoPlayer({
   src,
-  muxPlaybackId,
   poster,
+  title,
   episodeId,
-  autoPlay = false,
-  controls = true,
-  onTimeUpdate,
-  onPlayChange,
-  seekCmd,
-}: VideoPlayerProps) {
-  const videoRef = useRef<HTMLVideoElement>(null);
+  isLive = false,
+  seekTo,
+  onTimeChange,
+  onPlayingChange,
+}: {
+  src: string;
+  poster?: string;
+  title?: string;
+  episodeId?: string;
+  isLive?: boolean;
+  /** Support for podcast EpisodePlayer dual-source mode sync (pause+seek on toggle) and chapters seek.
+   *  Only effective for native (non-embed) video sources. Optional to not affect series/live usage. */
+  seekTo?: number | null;
+  onTimeChange?: (t: number) => void;
+  onPlayingChange?: (p: boolean) => void;
+}) {
+  const ref = useRef<HTMLVideoElement>(null);
   const hlsRef = useRef<HlsInstance | null>(null);
+  const lastSeekRef = useRef<number | null>(null);
+  const [reloadToken, setReloadToken] = useState(0);
+
+  // UI state for custom chrome
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [latency, setLatency] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [levels, setLevels] = useState<Array<{ idx: number; label: string }>>([]);
+  const [currentLevel, setCurrentLevel] = useState(-1); // -1 = auto
 
-  const effectiveSrc = src || (muxPlaybackId ? `https://stream.mux.com/${muxPlaybackId}.m3u8` : null);
-
+  // Save watch progress (throttled) for the native player (replays/episodes).
   useEffect(() => {
-    const video = videoRef.current;
-    if (!video || !effectiveSrc) return;
-
-    const isHls = effectiveSrc.includes('.m3u8');
-    let hls: HlsInstance | null = null;
-
-    const cleanupHls = () => {
-      if (hlsRef.current) {
-        try { hlsRef.current.destroy(); } catch {}
-        hlsRef.current = null;
-      }
+    const video = ref.current;
+    if (!video || !episodeId) return;
+    let last = 0;
+    const onTime = () => {
+      const now = Date.now();
+      if (now - last < 10000) return;
+      last = now;
+      if (video.currentTime > 3) saveProgress(episodeId, video.currentTime, video.duration);
     };
+    const onPause = () => { if (video.currentTime > 3) saveProgress(episodeId, video.currentTime, video.duration); };
+    video.addEventListener("timeupdate", onTime);
+    video.addEventListener("pause", onPause);
+    return () => { video.removeEventListener("timeupdate", onTime); video.removeEventListener("pause", onPause); };
+  }, [episodeId]);
 
-    if (isHls && typeof window !== 'undefined') {
-      const loadHls = async () => {
-        try {
-          if (!(window as any).Hls) {
-            await new Promise((res, rej) => {
-              const s = document.createElement('script');
-              s.src = HLS_CDN;
-              s.onload = res;
-              s.onerror = rej;
-              document.head.appendChild(s);
-            });
-          }
-          const HlsCtor = (window as HlsGlobal).Hls;
-          if (HlsCtor && HlsCtor.isSupported && HlsCtor.isSupported()) {
-            cleanupHls();
-            hls = new HlsCtor({ lowLatencyMode: true });
-            hlsRef.current = hls;
-            hls.loadSource(effectiveSrc);
-            hls.attachMedia(video);
-            hls.on('error', () => setError('HLS load error'));
-          } else {
-            video.src = effectiveSrc; // fallback native
-          }
-        } catch (e) {
-          video.src = effectiveSrc;
-        }
-      };
-      loadHls();
-    } else if (effectiveSrc) {
-      video.src = effectiveSrc;
+  // ─── Podcast dual-source sync support (slice 2) + reporting for parent (EpisodePlayer) ───
+  // seekTo allows mode switch / chapters to hand off position without reset.
+  // on*Change feed parent currentTime/playing so it can capture on toggle.
+  useEffect(() => {
+    const v = ref.current;
+    if (!v || seekTo == null) return;
+    if (seekTo !== lastSeekRef.current) {
+      const clamped = Math.max(0, Math.min(seekTo, (v.duration || seekTo) as number));
+      v.currentTime = clamped;
+      setCurrentTime(clamped);
+      lastSeekRef.current = seekTo;
+      onTimeChange?.(clamped);
     }
+  }, [seekTo, onTimeChange]);
+
+  // Report time/playing state to parent (for sync handoff + chapters). Separate listeners so we don't
+  // mutate the big attach effect.
+  useEffect(() => {
+    const v = ref.current;
+    if (!v) return;
+    const reportTime = () => { onTimeChange?.(v.currentTime || 0); };
+    const reportPlay = () => onPlayingChange?.(true);
+    const reportPause = () => onPlayingChange?.(false);
+    v.addEventListener("timeupdate", reportTime);
+    v.addEventListener("play", reportPlay);
+    v.addEventListener("pause", reportPause);
+    return () => {
+      v.removeEventListener("timeupdate", reportTime);
+      v.removeEventListener("play", reportPlay);
+      v.removeEventListener("pause", reportPause);
+    };
+  }, [onTimeChange, onPlayingChange]);
+
+  // Core video + HLS attach + custom control listeners. Re-runs on src or manual reconnect (reloadToken).
+  useEffect(() => {
+    const video = ref.current;
+    if (!video) return;
+
+    setError(null);
+    setIsPlaying(false);
+    setCurrentTime(0);
+    setDuration(0);
+    setLatency(null);
+    setLevels([]);
+    setCurrentLevel(-1);
+    hlsRef.current = null;
+
+    const isHls = /\.m3u8(\?|$)/.test(src);
+
+    const updateLatency = () => {
+      if (!isLive || !video) {
+        setLatency(null);
+        return;
+      }
+      const hls = hlsRef.current;
+      let lat: number | null = null;
+      if (hls && typeof hls.liveSyncPosition === "number" && hls.liveSyncPosition > 0) {
+        lat = Math.max(0, hls.liveSyncPosition - video.currentTime);
+      } else if (video.buffered && video.buffered.length > 0) {
+        const end = video.buffered.end(video.buffered.length - 1);
+        lat = Math.max(0, end - video.currentTime);
+      }
+      if (lat != null) setLatency(Math.round(lat * 10) / 10);
+    };
 
     const onTime = () => {
-      if (onTimeUpdate) onTimeUpdate(video.currentTime);
-      if (episodeId) saveProgress(episodeId, video.currentTime, video.duration || 0);
+      setCurrentTime(video.currentTime || 0);
+      if (!duration && video.duration && isFinite(video.duration)) setDuration(video.duration);
+      updateLatency();
     };
-    const onPlay = () => onPlayChange && onPlayChange(true);
-    const onPause = () => onPlayChange && onPlayChange(false);
-    const onErr = () => setError('Playback error');
+    const onPlay = () => setIsPlaying(true);
+    const onPause = () => setIsPlaying(false);
+    const onLoaded = () => {
+      if (video.duration && isFinite(video.duration)) setDuration(video.duration);
+      updateLatency();
+    };
+    const onErr = () => {
+      setError("Stream error — tap reconnect");
+    };
+    const onProgress = () => updateLatency();
 
-    video.addEventListener('timeupdate', onTime);
-    video.addEventListener('play', onPlay);
-    video.addEventListener('pause', onPause);
-    video.addEventListener('error', onErr);
+    video.addEventListener("timeupdate", onTime);
+    video.addEventListener("play", onPlay);
+    video.addEventListener("pause", onPause);
+    video.addEventListener("loadedmetadata", onLoaded);
+    video.addEventListener("error", onErr);
+    video.addEventListener("progress", onProgress);
 
-    if (autoPlay) video.play().catch(() => {});
+    // Attach source (native or hls.js)
+    if (!isHls || video.canPlayType("application/vnd.apple.mpegurl")) {
+      video.src = src;
+      // For native live-ish, still allow basic latency via buffer
+      const natIv = setInterval(updateLatency, 1200);
+      return () => {
+        clearInterval(natIv);
+        video.removeEventListener("timeupdate", onTime);
+        video.removeEventListener("play", onPlay);
+        video.removeEventListener("pause", onPause);
+        video.removeEventListener("loadedmetadata", onLoaded);
+        video.removeEventListener("error", onErr);
+        video.removeEventListener("progress", onProgress);
+      };
+    }
+
+    // HLS path via CDN
+    let cancelled = false;
+    const w = window as unknown as HlsGlobal;
+
+    const attachHls = () => {
+      if (cancelled || !w.Hls) return;
+      const inst = new w.Hls({ enableWorker: true, lowLatencyMode: true });
+      inst.loadSource(src);
+      inst.attachMedia(video);
+      hlsRef.current = inst;
+
+      // Capture quality levels + live edge
+      const handleManifest = () => {
+        if (!inst.levels || !inst.levels.length) return;
+        const ls = inst.levels.map((l, idx) => ({
+          idx,
+          label: l.height ? `${l.height}p` : l.bitrate ? `${Math.round(l.bitrate / 1000)}k` : `L${idx}`,
+        }));
+        setLevels([{ idx: -1, label: "AUTO" }, ...ls]);
+        setCurrentLevel(inst.currentLevel ?? -1);
+      };
+      inst.on("hlsManifestParsed" as any, handleManifest);
+      inst.on("hlsLevelSwitched" as any, () => setCurrentLevel(inst.currentLevel ?? -1));
+
+      // Initial latency tick
+      setTimeout(updateLatency, 800);
+    };
+
+    if (w.Hls) {
+      attachHls();
+    } else {
+      const existing = document.querySelector<HTMLScriptElement>(`script[src="${HLS_CDN}"]`);
+      if (existing) existing.addEventListener("load", attachHls);
+      else {
+        const s = document.createElement("script");
+        s.src = HLS_CDN;
+        s.async = true;
+        s.onload = attachHls;
+        document.head.appendChild(s);
+      }
+    }
 
     return () => {
-      video.removeEventListener('timeupdate', onTime);
-      video.removeEventListener('play', onPlay);
-      video.removeEventListener('pause', onPause);
-      video.removeEventListener('error', onErr);
-      cleanupHls();
+      cancelled = true;
+      const h = hlsRef.current;
+      if (h) {
+        try { h.destroy(); } catch {}
+        hlsRef.current = null;
+      }
+      video.removeEventListener("timeupdate", onTime);
+      video.removeEventListener("play", onPlay);
+      video.removeEventListener("pause", onPause);
+      video.removeEventListener("loadedmetadata", onLoaded);
+      video.removeEventListener("error", onErr);
+      video.removeEventListener("progress", onProgress);
     };
-  }, [effectiveSrc, episodeId, autoPlay, onTimeUpdate, onPlayChange]);
+  }, [src, reloadToken, isLive, duration]);
 
-  // Handle external seekCmd for sync (from EpisodePlayer dual mode)
-  useEffect(() => {
-    if (seekCmd && videoRef.current) {
-      videoRef.current.currentTime = seekCmd.time;
+  // --- Custom control actions ---
+  const togglePlay = () => {
+    const v = ref.current;
+    if (!v) return;
+    if (v.paused) v.play().catch(() => {});
+    else v.pause();
+  };
+
+  const seek = (t: number) => {
+    const v = ref.current;
+    if (!v) return;
+    v.currentTime = Math.max(0, Math.min(t, v.duration || t));
+    setCurrentTime(v.currentTime);
+  };
+
+  const goLiveEdge = () => {
+    const v = ref.current;
+    const h = hlsRef.current;
+    if (!v) return;
+    if (h && typeof h.liveSyncPosition === "number" && h.liveSyncPosition > 0) {
+      v.currentTime = h.liveSyncPosition;
+    } else if (v.buffered && v.buffered.length > 0) {
+      v.currentTime = Math.max(0, v.buffered.end(v.buffered.length - 1) - 0.5);
+    } else if (v.duration && isFinite(v.duration)) {
+      v.currentTime = Math.max(0, v.duration - 1);
     }
-  }, [seekCmd]);
+    if (v.paused) v.play().catch(() => {});
+  };
 
-  if (!effectiveSrc) {
-    return <div className="video-placeholder">No video source</div>;
-  }
+  const reconnect = () => {
+    const v = ref.current;
+    const h = hlsRef.current;
+    if (h) {
+      try { h.destroy(); } catch {}
+      hlsRef.current = null;
+    }
+    if (v) {
+      v.pause();
+      v.removeAttribute("src");
+      v.load();
+    }
+    setError(null);
+    setReloadToken((t) => t + 1); // re-run attach effect
+  };
+
+  const setQuality = (idx: number) => {
+    const h = hlsRef.current;
+    if (!h) return;
+    h.currentLevel = idx; // -1 auto
+    setCurrentLevel(idx);
+  };
+
+  const fmtTime = (t: number) => {
+    if (!isFinite(t) || t <= 0) return "0:00";
+    const m = Math.floor(t / 60);
+    const s = Math.floor(t % 60);
+    return `${m}:${s.toString().padStart(2, "0")}`;
+  };
+
+  const showSeek = !isLive && duration > 0;
 
   return (
-    <div className="video-player">
+    <div className="live-player live-player--custom">
       <video
-        ref={videoRef}
-        poster={poster || undefined}
-        controls={controls}
+        ref={ref}
+        poster={poster}
+        title={title}
         playsInline
-        className="w-full"
-        aria-label="Video player"
+        preload="metadata"
+        onClick={togglePlay}
       />
-      {error && <div role="alert" className="video-error">{error}</div>}
+
+      {/* Center play affordance (large, editorial, only when paused) */}
+      {!isPlaying && !error && (
+        <button
+          type="button"
+          className="live-player__center-play"
+          onClick={togglePlay}
+          aria-label="Play stream"
+        >
+          <svg width="42" height="42" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+            <polygon points="6,4 20,12 6,20" />
+          </svg>
+        </button>
+      )}
+
+      {/* Error state with reconnect */}
+      {error && (
+        <div className="live-player__offline live-player__error">
+          <div className="live-player__offline-icon">!</div>
+          <span className="live-player__status">{error}</span>
+          <button type="button" className="btn btn--outline btn--sm" onClick={reconnect}>RECONNECT</button>
+        </div>
+      )}
+
+      {/* Custom chrome bar (restrained, mono, alarm accents, token-driven) */}
+      <div className="live-chrome" role="group" aria-label="Player controls">
+        <button
+          type="button"
+          className="live-chrome__btn live-chrome__play"
+          onClick={togglePlay}
+          disabled={!!error}
+          aria-label={isPlaying ? "Pause" : "Play"}
+        >
+          {isPlaying ? (
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" /><rect x="14" y="5" width="4" height="14" /></svg>
+          ) : (
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="6,4 20,12 6,20" /></svg>
+          )}
+        </button>
+
+        {showSeek && (
+          <>
+            <input
+              type="range"
+              className="live-chrome__seek"
+              min={0}
+              max={duration || 0}
+              step={0.1}
+              value={Math.min(currentTime, duration || currentTime)}
+              onChange={(e) => seek(parseFloat(e.target.value))}
+              aria-label="Seek"
+            />
+            <span className="live-chrome__time">
+              {fmtTime(currentTime)} / {fmtTime(duration)}
+            </span>
+          </>
+        )}
+
+        {isLive && (
+          <div className="live-chrome__live">
+            {latency != null ? <span className="live-chrome__latency">LAT {latency}s</span> : <span className="live-chrome__latency">LIVE</span>}
+            <button type="button" className="live-chrome__btn live-chrome__go" onClick={goLiveEdge} disabled={!!error}>
+              GO LIVE
+            </button>
+          </div>
+        )}
+
+        {levels.length > 1 && (
+          <select
+            className="live-chrome__quality"
+            value={currentLevel}
+            onChange={(e) => setQuality(parseInt(e.target.value, 10))}
+            aria-label="Quality"
+          >
+            {levels.map((l) => (
+              <option key={l.idx} value={l.idx}>{l.label}</option>
+            ))}
+          </select>
+        )}
+
+        <button type="button" className="live-chrome__btn live-chrome__reconnect" onClick={reconnect} aria-label="Reconnect stream">
+          ⟳
+        </button>
+      </div>
     </div>
   );
 }

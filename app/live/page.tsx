@@ -20,8 +20,10 @@ function whenLabel(e: LiveEvent): string {
   const d = new Date(iso).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).toUpperCase();
   return e.status === "live" ? `LIVE NOW · ${d}` : e.status === "ended" ? `REPLAY · ${d}` : d;
 }
+
 export default async function LivePage() {
   const { live, upcoming, replays } = await getLiveEvents();
+
   const items: StageItem[] = [...live, ...replays].map((e) => {
     const pb = playbackFor(e);
     return {
@@ -35,7 +37,9 @@ export default async function LivePage() {
       tierLabel: tierLabel(e.tier_required),
     };
   });
+
   const nextUp = upcoming[0];
+
   return (
     <>
       {live[0] && (
@@ -49,6 +53,7 @@ export default async function LivePage() {
           publisher: { "@id": "https://thecolonyok.com/#organization" },
         }} />
       )}
+
       <main id="main">
         <div className="container">
           <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Watch Live" }]} />
@@ -57,6 +62,7 @@ export default async function LivePage() {
             title="Watch Live"
             lede="Live broadcasts and the full replay archive. Tune in free, or join for members-only events. We mirror the stream across YouTube, Rumble, and Locals."
           />
+
           {items.length > 0 ? (
             <LiveStage items={items} />
           ) : (
@@ -77,6 +83,7 @@ export default async function LivePage() {
               </div>
             </section>
           )}
+
           {upcoming.length > 0 && (
             <section className="section" aria-label="Upcoming broadcasts">
               <header className="section-header">

@@ -22,6 +22,17 @@ import { useAuth } from "@/lib/auth-client";
  * - Best-of-n: 24/7 as graceful fallback > hard OFF AIR; chat/polls as engagement layer matching Blaze "Off the Record".
  */
 
+export interface StageItem {  // exported for home/live pages compat
+  id: string;
+  title: string;
+  kind?: string;
+  src?: string | null;
+  isLive?: boolean;
+  when?: string;
+  locked?: boolean;
+  tierLabel?: string;
+}
+
 interface LiveEvent {
   id: string;
   title: string;
@@ -32,13 +43,15 @@ interface LiveEvent {
 }
 
 interface LiveStageProps {
-  events: LiveEvent[];
+  events?: LiveEvent[];
+  items?: any[]; // compat for pages passing StageItem[] as items
   initialActiveId?: string;
 }
 
-export default function LiveStage({ events: initialEvents = [], initialActiveId }: LiveStageProps) {
-  const [events, setEvents] = useState(initialEvents);
-  const [activeId, setActiveId] = useState<string | null>(initialActiveId ?? events[0]?.id ?? null);
+export default function LiveStage({ events: initialEvents = [], items, initialActiveId }: LiveStageProps) {
+  const evts = (initialEvents && initialEvents.length ? initialEvents : items) || [];
+  const [events, setEvents] = useState(evts);
+  const [activeId, setActiveId] = useState<string | null>(initialActiveId ?? evts[0]?.id ?? null);
   const [viewerCount, setViewerCount] = useState(42); // realtime
   const [channel247, setChannel247] = useState<Live247Channel | null>(null);
   const prefersReduced = useReducedMotion();

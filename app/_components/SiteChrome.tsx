@@ -1,1 +1,9 @@
-export default function SiteChrome({ children, header, footer }: { children: React.ReactNode; header?: React.ReactNode; footer?: React.ReactNode }) { return <><header>{header}</header><main>{children}</main><footer>{footer}</footer></>; }
+import React from 'react';
+
+export default function SiteChrome({ header, footer, children }: { header?: React.ReactNode; footer?: React.ReactNode; children: React.ReactNode }) {
+  return <>
+    {header}
+    <main>{children}</main>
+    {footer}
+  </>;
+}
