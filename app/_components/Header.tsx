@@ -1,21 +1,76 @@
 import Link from "next/link";
-import LiveNowBar from "./LiveNowBar";
+import HeaderNav from "./HeaderNav";
+import { getArticles } from "@/lib/articles";
 
-export default function Header() {
+function formatTimeCT(iso?: string | null): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.valueOf())) return "";
+  return (
+    d
+      .toLocaleTimeString("en-US", {
+        hour: "numeric",
+        minute: "2-digit",
+        timeZone: "America/Chicago",
+      })
+      .toUpperCase() + " CT"
+  );
+}
+
+function TickerItems({ items }: { items: { href: string; title: string; filed: string }[] }) {
+  if (!items.length) return null;
+  const doubled = [...items, ...items];
+  return (
+    <>
+      {doubled.map((item, i) => (
+        <span className="ticker__item" key={`${item.href}-${i}`}>
+          <Link href={item.href}>{item.title}</Link>
+          <span className="ticker__filed">{item.filed}</span>
+        </span>
+      ))}
+    </>
+  );
+}
+
+export default async function Header() {
+  const articles = await getArticles({ limit: 5 });
+  const tickerItems = articles.map((a) => ({
+    href: `/stories/${a.slug}`,
+    title: a.title,
+    filed: formatTimeCT(a.published_at),
+  }));
+
+  if (!tickerItems.length) {
+    tickerItems.push(
+      { href: "/live", title: "Tonight 7PM — Colony Report with Jake Merrick", filed: "7:00 PM CT" },
+      { href: "/pricing", title: "Join The Colony — independent press from $4.99/mo", filed: "OPEN" },
+    );
+  }
+
   return (
     <header className="site-header">
-      <div className="container site-header__inner">
-        <Link href="/" className="site-header__logo">
-          The Colony
-        </Link>
-        <LiveNowBar />
-        <nav className="site-header__nav" aria-label="Primary">
-          <Link href="/live">Live</Link>
-          <Link href="/shows">Shows</Link>
-          <Link href="/podcasts">Podcasts</Link>
-          <Link href="/news">News</Link>
-          <Link href="/pricing">Pricing</Link>
+      <a className="skip-link" href="#main">
+        Skip to main content
+      </a>
+      <div className="container">
+        <nav className="nav" aria-label="Main navigation">
+          <Link className="nav__logo" href="/">
+            <span className="nav__logo-text">
+              THE<span>COLONY</span>OK
+            </span>
+            <span className="nav__logo-mark">EST 2026 / N°01</span>
+          </Link>
+          <HeaderNav />
         </nav>
+      </div>
+
+      <div className="breaking-bar" role="region" aria-label="Breaking news">
+        <span className="breaking-bar__label">▼ FILED</span>
+        <div className="ticker">
+          <div className="ticker__track">
+            <TickerItems items={tickerItems} />
+          </div>
+        </div>
       </div>
     </header>
   );
