@@ -68,3 +68,13 @@ All in one thecolony-app (GitHub + Vercel frontend + Supabase backend via this r
 Test the live stream perfection, podcast video (audio only or video), framer motion animations/reduced, realtime chat/polls, and personality spotlight with the crisp images.
 
 Ready for your testing! The root is consolidated.
+
+## Root Consolidation Complete (2026-06-08 update)
+
+- **package.json**: Pushed to root (was missing). Includes "framer-motion", "@supabase/supabase-js", "next", "react", "react-dom", plus mux/stripe/resend for full features, and tailwindcss/postcss in dev for completeness. Makes thecolony-app root deployable from latest-for-testing on Vercel.
+- **Framer-motion verified in root code on GH**: EpisodePlayer.tsx (import { useReducedMotion } from "framer-motion"), LiveStage.tsx (import { motion, AnimatePresence, useReducedMotion } for queue stagger, pulse, layout, reduced-safe animations). Also now in pushed spotlight components.
+- **Images for spotlight**: 4 refined crisp OK personality portraits generated/refined with image_gen tool (prompts from multimodal reads of originals: navy/cream/red, wheat/land/OK motifs, professional conservative trendy). Binaries pushed under public/assets/images/hosts/ as dan-hollis.jpg, jake-merrick.jpg, marcus-webb.jpg, rachel-torres.jpg (names match existing code mappings in components). hosts/README.md updated with actuals + usage (no longer just mapping note).
+- **Spotlight components added to root**: ContributorCard.tsx and StoryCard.tsx pushed (were missing on GH _components/; they use the hosts/*.jpg + framer-motion motion whileHover for personality photo pop + next/image).
+- **All changes documented as "in the root"**: video player (EpisodePlayer + VideoPlayer), live 24/7 + realtime (LiveStage + LiveChat/LivePoll + lib), framer, images/spotlight, package now complete in hizzy-made-it/thecolony-app latest-for-testing only. See also ROOT_CONSOLIDATION.md .
+
+Local after pull: npm i ; the jpgs are in public/assets/images/hosts/ ; run dev to see spotlight with motion + players.

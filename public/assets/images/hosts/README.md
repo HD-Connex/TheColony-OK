@@ -1,21 +1,18 @@
 # Host / Personality Images for thecolony-app Root Project
 
-These are the crisp, clean, perfect images for each personality/podcast host (Oklahoma vibes aesthetic: navy/cream/red, professional yet trendy, local spotlight energy).
+These are the crisp, clean, perfect high-quality portraits for each personality/podcast host (Oklahoma vibes aesthetic: navy/cream/red palette, professional yet trendy but conservative, local Oklahoma wheat/land/prairie/state motifs, "Oklahoma Underground" style for one).
 
-**Source (gathered from C: session proxy since D: drive malfunctioned):** 
-C:\Users\hizzysdreambox\.grok\sessions\D%3A%5C1Projects%5Cthecolony-app\019ea4ef-b4d9-7160-a696-8a905df10291\images\
+**Binaries in the root (pushed to latest-for-testing @ hizzy-made-it/thecolony-app):**
 
-**Mapping to root project (public/assets/images/hosts/):**
-- 1.jpg -> dan-hollis.jpg
-- 2.jpg -> jake-merrick.jpg
-- 3.jpg -> marcus-webb.jpg
-- 4.jpg -> rachel-torres.jpg
+- `dan-hollis.jpg` — Experienced host (salt-pepper hair, navy blazer + cream shirt, red pin, wheat stalks + civic/church bg with flag)
+- `jake-merrick.jpg` — Younger host (navy suit, cream shirt + red tie, flag+wheat pin, expansive wheat field bg)
+- `marcus-webb.jpg` — Bearded host (navy suit + red tie, flag pin, OK state seal + "OKLAHOMA" + wheat bg)
+- `rachel-torres.jpg` — Woman host (navy blazer + cream blouse, red OK pin + red accents/earrings, wheat field, "RACHEL TORRES | OKLAHOMA UNDERGROUND" label)
 
-**Usage in root:**
-- ContributorCard, per-ep rail, personality spotlight pages use next/image with these (alt="[Name], The Colony OK personality", sizes, lazy).
-- OK motifs: subtle land/wheat overlays if editing.
-- From TRACK_B_Perfection_Patches (pushed in this repo): Add to design system for density vs competitors (Daily Wire carousels, Blaze grids).
+**Generated/refined:** via image_gen tool (prompts based on multimodal visual descriptions from read of the 4 crisp originals). Used for personality spotlight.
 
-The 4 jpgs (decoded from C: proxy base64 into workspace hosts/ during consolidation) are included with the root project. When cloning this thecolony-app repo (hizzy-made-it/thecolony-app) to D:\1Projects\thecolony-app (when drive restored), the images will be present in public/assets/images/hosts/ . If needed re-copy from the session proxy path above (or re-generate matching OK vibe portraits via image tools).
+**Usage in root code:**
+- ContributorCard.tsx, StoryCard.tsx, podcasts/[slug]/page.tsx : next/image + framer-motion (motion whileHover scale/pop for promoted) using the /assets/images/hosts/[name].jpg paths (slug/name match logic for jake/marcus/rachel/dan/hollis/pastor).
+- See also MANIFEST.md for podcast covers.
 
-These spotlight the journalist contributions as requested. Part of the consolidated root project in thecolony-app only (GitHub hizzy-made-it/thecolony-app only).
+Part of thecolony-app root consolidation on GitHub only (hizzy-made-it/thecolony-app, latest-for-testing branch). Framer, video player, live 24/7+realtime, and these images for spotlight are all in the root.
