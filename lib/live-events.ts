@@ -65,3 +65,40 @@ export async function getLiveEventsClient(): Promise<LiveBundle> {
 }
 
 export { tierLocked, tierLabel };
+
+/** Map server LiveEvent rows to StageItem props for LiveStage (shared by /live + home). */
+export function eventsToStageItems(
+  events: LiveEvent[],
+  whenLabel: (e: LiveEvent) => string,
+): Array<{
+  id: string;
+  title: string;
+  kind: string;
+  src: string | null;
+  isLive: boolean;
+  when: string;
+  locked: boolean;
+  tierLabel: string;
+}> {
+  return events.map((e) => {
+    const pb = playbackFor(e);
+    return {
+      id: e.id,
+      title: e.title,
+      kind: pb.kind,
+      src: pb.src,
+      isLive: e.status === "live",
+      when: whenLabel(e),
+      locked: tierLocked(e.tier_required),
+      tierLabel: tierLabel(e.tier_required),
+    };
+  });
+}
+
+/** Client refresh: fetch + bundle + map to StageItems for realtime updates in LiveStage. */
+export async function refreshStageItems(
+  whenLabel: (e: LiveEvent) => string,
+): Promise<ReturnType<typeof eventsToStageItems>> {
+  const bundle = await getLiveEventsClient();
+  return eventsToStageItems([...bundle.live, ...bundle.replays], whenLabel);
+}

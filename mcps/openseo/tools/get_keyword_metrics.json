@@ -1,0 +1,52 @@
+{
+  "name": "get_keyword_metrics",
+  "description": "Hydrate up to 700 known keywords with search volume, keyword difficulty (KD), search intent, CPC, competition, and monthly trends in a single call. Use it to score candidate or known keywords — including Search Console striking-distance queries — by real demand and ranking difficulty. Charges DataForSEO Labs credits.",
+  "inputSchema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+      "projectId": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Required. The OpenSEO project ID to scope this call to. Get one from list_projects."
+      },
+      "keywords": {
+        "minItems": 1,
+        "maxItems": 700,
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        }
+      },
+      "locationCode": {
+        "type": "integer",
+        "exclusiveMinimum": 0,
+        "maximum": 9007199254740991,
+        "description": "DataForSEO location code. Defaults to 2840 (United States). See dataforseo.com/help-center/locations."
+      },
+      "languageCode": {
+        "type": "string",
+        "minLength": 2,
+        "description": "Language code (e.g. 'en', 'es', 'fr'). Defaults to 'en'."
+      },
+      "includeMonthlyTrends": {
+        "type": "boolean"
+      },
+      "sortBy": {
+        "type": "string",
+        "enum": [
+          "search_volume",
+          "keyword_difficulty",
+          "cpc",
+          "competition"
+        ]
+      }
+    },
+    "required": [
+      "projectId",
+      "keywords"
+    ]
+  }
+}

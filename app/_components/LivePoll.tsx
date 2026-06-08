@@ -40,20 +40,18 @@ export default function LivePoll({ poll, isMember, currentUserId }: LivePollProp
     async function loadVotes() {
       const { data } = await sb
         .from('live_poll_votes')
-        .select('option_index')
+        .select('option_index,user_id')
         .eq('poll_id', poll.id);
 
       if (!active || !data) return;
       const tally: Record<number, number> = {};
-      data.forEach((v: any) => {
+      let ownIdx: number | null = null;
+      data.forEach((v: { option_index: number; user_id: string }) => {
         tally[v.option_index] = (tally[v.option_index] || 0) + 1;
+        if (currentUserId && v.user_id === currentUserId) ownIdx = v.option_index;
       });
       setVotes(tally);
-
-      // check own vote
-      if (currentUserId) {
-        const own = data.find((v: any) => /* need join or separate query */ false); // stub: separate query in real
-      }
+      setUserVote(ownIdx);
       setLoading(false);
     }
 

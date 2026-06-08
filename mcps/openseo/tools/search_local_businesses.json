@@ -1,0 +1,64 @@
+{
+  "name": "search_local_businesses",
+  "description": "Searches DataForSEO Business Listings near a coordinate. Use this to find local business candidates or nearby competitors; it does not run Maps rank checks or Q&A. Charges DataForSEO Business Data credits.",
+  "inputSchema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+      "projectId": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Required. The OpenSEO project ID to scope this call to. Get one from list_projects."
+      },
+      "query": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 200
+      },
+      "near": {
+        "type": "object",
+        "properties": {
+          "latitude": {
+            "type": "number",
+            "minimum": -90,
+            "maximum": 90
+          },
+          "longitude": {
+            "type": "number",
+            "minimum": -180,
+            "maximum": 180
+          },
+          "radiusKm": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 100000
+          }
+        },
+        "required": [
+          "latitude",
+          "longitude",
+          "radiusKm"
+        ]
+      },
+      "categories": {
+        "minItems": 1,
+        "maxItems": 10,
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        }
+      },
+      "limit": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 50
+      }
+    },
+    "required": [
+      "projectId",
+      "near"
+    ]
+  }
+}

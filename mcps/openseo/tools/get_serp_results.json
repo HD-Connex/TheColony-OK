@@ -1,0 +1,48 @@
+{
+  "name": "get_serp_results",
+  "description": "Fetch live Google organic search results for 1-10 keywords. Use this to inspect who ranks for a query, verify competitors, compare SERPs across keywords, or gather source URLs before content planning. Charges credits per keyword (~30-60 each). Does not save results to OpenSEO. Per-keyword errors don't fail the batch.",
+  "inputSchema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+      "projectId": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Required. The OpenSEO project ID to scope this call to. Get one from list_projects."
+      },
+      "queries": {
+        "minItems": 1,
+        "maxItems": 10,
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "keyword": {
+              "type": "string",
+              "minLength": 1
+            },
+            "locationCode": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "description": "DataForSEO location code. Defaults to 2840 (United States). See dataforseo.com/help-center/locations."
+            },
+            "languageCode": {
+              "type": "string",
+              "minLength": 2,
+              "description": "Language code (e.g. 'en', 'es', 'fr'). Defaults to 'en'."
+            }
+          },
+          "required": [
+            "keyword"
+          ]
+        },
+        "description": "1-10 queries. Bulk-friendly — prefer this over multiple single-query calls."
+      }
+    },
+    "required": [
+      "projectId",
+      "queries"
+    ]
+  }
+}

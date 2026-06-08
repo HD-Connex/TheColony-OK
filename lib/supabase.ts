@@ -18,11 +18,14 @@ export function supabaseAdmin(): SupabaseClient {
   return admin;
 }
 
+export function supabaseConfigured(): boolean {
+  return Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+}
+
 export function supabasePublic(): SupabaseClient {
   if (pub) return pub;
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!url || !key) throw new Error("Missing SUPABASE_URL or ANON_KEY");
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://placeholder.supabase.co";
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "placeholder-anon-key";
   pub = createClient(url, key, { auth: { persistSession: false } });
   return pub;
 }
@@ -57,6 +60,8 @@ export interface Episode {
   episode_no: number | null;
   cover_url: string | null;
   slug: string;
+  host_name?: string | null;
+  published_at?: string | null;
   created_at: string;
   // Podcast video support (Phase 6 / priority 1): optional video "version" of episode
   // (like Spotify video podcasts). Ingested via RSS (video mime enclosure or itunes:video),

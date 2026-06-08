@@ -1,0 +1,89 @@
+{
+  "name": "use_browser",
+  "description": "Control persistent Chrome browser with automatic page capture.\n\nEvery DOM action (navigate, click, type, select, eval) auto-captures to the session dir:\n- {prefix}.png — viewport screenshot\n- {prefix}.md — page content as structured markdown\n- {prefix}.html — full rendered DOM\n- {prefix}-console.txt — browser console messages\n\nPrefer reading these files to using 'extract' or 'screenshot' whenever possible.\n\nSchema: 4 parameters — action, selector (CSS/XPath or null), payload (string or object), timeout (ms).\nselector targets a DOM element (null/omit for navigation, eval, tab management, etc.).\npayload is a string for simple actions (navigate=URL, type=text, eval=JS, keyboard_press=key).\npayload is an object for structured actions (set_viewport={width,height}, drag_drop={target}, etc.).\nTabs are tracked as sticky state; use switch_tab to change the active tab.\nUse action='help' for full per-action payload shapes.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "action": {
+        "type": "string",
+        "enum": [
+          "navigate",
+          "back",
+          "forward",
+          "click",
+          "type",
+          "extract",
+          "screenshot",
+          "eval",
+          "select",
+          "attr",
+          "await_element",
+          "await_text",
+          "new_tab",
+          "close_tab",
+          "list_tabs",
+          "switch_tab",
+          "show_browser",
+          "hide_browser",
+          "browser_mode",
+          "set_profile",
+          "get_profile",
+          "help",
+          "hover",
+          "drag_drop",
+          "mouse_move",
+          "scroll",
+          "double_click",
+          "right_click",
+          "file_upload",
+          "keyboard_press",
+          "set_viewport",
+          "clear_viewport",
+          "get_viewport",
+          "clear_cookies",
+          "enable_console_logging",
+          "get_console_messages",
+          "clear_console_messages",
+          "kill_chrome",
+          "restart_chrome"
+        ],
+        "description": "Action to perform. action='help' lists all actions with payload shapes."
+      },
+      "selector": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "CSS or XPath selector — what to act on. Null/omitted for actions that don't target an element (navigate, eval, list_tabs, etc.). XPath must start with / or //. dialog::accept and dialog::dismiss are special selectors for handling open dialogs."
+      },
+      "payload": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "object",
+            "additionalProperties": {}
+          }
+        ],
+        "description": "Extra data for the action. String for simple cases (navigate=URL, type=text, eval=JS, keyboard_press=key, set_profile=name, new_tab=URL). Object for structured cases (set_viewport={width,height,mobile?}, keyboard_press={key,modifiers:{shift?,ctrl?,alt?,meta?}}, extract={format:'text'|'html'|'markdown'}, screenshot={path?,fullpage?}, scroll={deltaX?,deltaY?} or direction string, drag_drop={x,y} or selector string for target, mouse_move={x,y,steps?,fromX?,fromY?}, file_upload={files:[...]}, get_console_messages={since:epochMs}, await_text=text string or {text,timeout?}, switch_tab=tab index/url-substring/title-substring). See action='help' for per-action payload shapes."
+      },
+      "timeout": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 60000,
+        "description": "Timeout in ms for await_element / await_text actions."
+      },
+      "tab_index": {
+        "type": "integer",
+        "minimum": 0,
+        "description": "Legacy: behaves like switch_tab. Sets the active tab to this index before running the action. Prefer the switch_tab action."
+      }
+    },
+    "required": [
+      "action"
+    ],
+    "additionalProperties": false,
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

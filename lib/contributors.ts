@@ -43,6 +43,17 @@ export async function getContributorBySlug(slug: string): Promise<Contributor | 
   return (data as Contributor) ?? null;
 }
 
+export async function getContributorByName(name: string): Promise<Contributor | null> {
+  const sb = supabasePublic();
+  const { data } = await sb
+    .from("contributors")
+    .select(COLS)
+    .eq("status", "active")
+    .ilike("name", name)
+    .maybeSingle();
+  return (data as Contributor) ?? null;
+}
+
 export async function getActiveContributorSlugs(): Promise<string[]> {
   const sb = supabasePublic();
   const { data } = await sb.from("contributors").select("slug").eq("status", "active");

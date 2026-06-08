@@ -1,0 +1,60 @@
+{
+  "name": "get_google_business_questions",
+  "description": "Fetches Google Business Profile questions and answers for one business keyword near a coordinate. Run this only when Q&A evidence is needed. Charges DataForSEO Business Data credits.",
+  "inputSchema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+      "projectId": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Required. The OpenSEO project ID to scope this call to. Get one from list_projects."
+      },
+      "keyword": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 200
+      },
+      "near": {
+        "type": "object",
+        "properties": {
+          "latitude": {
+            "type": "number",
+            "minimum": -90,
+            "maximum": 90
+          },
+          "longitude": {
+            "type": "number",
+            "minimum": -180,
+            "maximum": 180
+          },
+          "radiusKm": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 100000
+          }
+        },
+        "required": [
+          "latitude",
+          "longitude",
+          "radiusKm"
+        ]
+      },
+      "depth": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 100
+      },
+      "languageCode": {
+        "type": "string",
+        "minLength": 2,
+        "description": "Language code (e.g. 'en', 'es', 'fr'). Defaults to 'en'."
+      }
+    },
+    "required": [
+      "projectId",
+      "keyword",
+      "near"
+    ]
+  }
+}

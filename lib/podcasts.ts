@@ -53,7 +53,7 @@ export interface PlayableEpisode {
   video_url?: string | null;
   mux_playback_id?: string | null;
   thumbnail_url?: string | null;
-  chapters?: Array<{ t: number; label: string }> | null;
+  chapters?: Array<{ t: number; label: string }>;
 }
 
 export async function getEpisodesByShowSlug(slug: string): Promise<Episode[]> {
@@ -72,7 +72,13 @@ export async function getEpisodeByShowAndEp(slug: string, ep: string): Promise<E
 }
 
 export async function getSiblingEpisodes(slug: string, currentId: string): Promise<Episode[]> {
-  return getEpisodesByShowSlug(slug);
+  const all = await getEpisodesByShowSlug(slug);
+  const idx = all.findIndex((e) => e.id === currentId);
+  if (idx < 0) return all;
+  const siblings: Episode[] = [];
+  if (idx > 0) siblings.push(all[idx - 1]);
+  if (idx < all.length - 1) siblings.push(all[idx + 1]);
+  return siblings;
 }
 
 export function episodeToPlayable(ep: Episode): PlayableEpisode {
@@ -86,6 +92,6 @@ export function episodeToPlayable(ep: Episode): PlayableEpisode {
     video_url: ep.video_url,
     mux_playback_id: ep.mux_playback_id,
     thumbnail_url: ep.thumbnail_url,
-    chapters: ep.chapters,
+    chapters: ep.chapters ?? undefined,
   };
 }

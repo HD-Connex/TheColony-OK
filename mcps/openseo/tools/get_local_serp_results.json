@@ -1,0 +1,73 @@
+{
+  "name": "get_local_serp_results",
+  "description": "Fetches one Google Maps or Local Finder SERP near a coordinate. Returns provider rows with rank fields intact; callers decide how to match a target business. Charges DataForSEO SERP credits.",
+  "inputSchema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+      "projectId": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Required. The OpenSEO project ID to scope this call to. Get one from list_projects."
+      },
+      "keyword": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 120
+      },
+      "near": {
+        "type": "object",
+        "properties": {
+          "latitude": {
+            "type": "number",
+            "minimum": -90,
+            "maximum": 90
+          },
+          "longitude": {
+            "type": "number",
+            "minimum": -180,
+            "maximum": 180
+          },
+          "zoom": {
+            "type": "integer",
+            "minimum": 4,
+            "maximum": 18
+          }
+        },
+        "required": [
+          "latitude",
+          "longitude"
+        ]
+      },
+      "searchType": {
+        "type": "string",
+        "enum": [
+          "maps",
+          "local_finder"
+        ]
+      },
+      "device": {
+        "type": "string",
+        "enum": [
+          "desktop",
+          "mobile"
+        ]
+      },
+      "depth": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 100
+      },
+      "languageCode": {
+        "type": "string",
+        "minLength": 2,
+        "description": "Language code (e.g. 'en', 'es', 'fr'). Defaults to 'en'."
+      }
+    },
+    "required": [
+      "projectId",
+      "keyword",
+      "near"
+    ]
+  }
+}

@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { supabaseBrowser } from '@/lib/auth-client'; // assumes existing
-import type { User } from '@supabase/supabase-js';
+import type { RealtimeChannel, User } from '@supabase/supabase-js';
 
 /**
  * Layer 3 Perfection: Realtime Live Chat starter.
@@ -39,7 +39,7 @@ export default function LiveChat({ liveEventId = null, isMember, currentUser }: 
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
-  const channelRef = useRef<ReturnType<typeof supabaseBrowser>['channel'] | null>(null);
+  const channelRef = useRef<RealtimeChannel | null>(null);
 
   const sb = supabaseBrowser();
 
@@ -48,13 +48,20 @@ export default function LiveChat({ liveEventId = null, isMember, currentUser }: 
     let active = true;
 
     async function load() {
-      const { data, error: loadErr } = await sb
+      let query = sb
         .from('live_chat_messages')
         .select('*')
-        .eq('live_event_id', liveEventId)
         .eq('is_deleted', false)
         .order('created_at', { ascending: false })
         .limit(50);
+
+      if (liveEventId) {
+        query = query.eq('live_event_id', liveEventId);
+      } else {
+        query = query.is('live_event_id', null);
+      }
+
+      const { data, error: loadErr } = await query;
 
       if (!active) return;
       if (loadErr) {

@@ -1,0 +1,22 @@
+{
+  "name": "get_rank_tracker",
+  "description": "Read-only access to rank tracker configs and their latest results. With `trackerId`, returns config + latest snapshot per keyword. Without it, lists all trackers in the project. Free — reads from OpenSEO state, no DataForSEO call. To trigger a new check, use the dashboard.",
+  "inputSchema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+      "projectId": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Required. The OpenSEO project ID to scope this call to. Get one from list_projects."
+      },
+      "trackerId": {
+        "description": "Rank tracker config ID. If omitted, lists all rank trackers in the project.",
+        "type": "string"
+      }
+    },
+    "required": [
+      "projectId"
+    ]
+  }
+}

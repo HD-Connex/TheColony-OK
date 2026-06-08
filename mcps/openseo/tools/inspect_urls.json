@@ -1,0 +1,33 @@
+{
+  "name": "inspect_urls",
+  "description": "Run Google Search Console's URL Inspection on up to 10 URLs of the connected property: index/coverage state, last crawl time, Google-selected vs declared canonical, and mobile/rich-results verdicts. Use it to answer 'is this page indexed? why not?'. Per-URL failures are reported inline. Read-only and free (no credits).",
+  "inputSchema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+      "projectId": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Required. The OpenSEO project ID to scope this call to. Get one from list_projects."
+      },
+      "urls": {
+        "minItems": 1,
+        "maxItems": 10,
+        "type": "array",
+        "items": {
+          "type": "string",
+          "format": "uri"
+        },
+        "description": "1–10 absolute URLs to inspect. Each must belong to the connected property."
+      },
+      "languageCode": {
+        "description": "BCP-47 language for the inspection result (e.g. 'en-US').",
+        "type": "string"
+      }
+    },
+    "required": [
+      "projectId",
+      "urls"
+    ]
+  }
+}

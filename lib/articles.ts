@@ -9,7 +9,18 @@ export interface Article {
   description: string | null;
   published_at: string;
   tier_required?: string | null;
-  // add more fields as needed
+  hero_url?: string | null;
+  hero_alt?: string | null;
+  category?: string | null;
+  member_only?: boolean;
+  dek?: string | null;
+  contributor?: {
+    slug: string;
+    name: string;
+    tier: string;
+    headshot_url?: string | null;
+    location?: string | null;
+  } | null;
 }
 
 export async function getArticles(opts: { limit?: number } = {}): Promise<Article[]> {

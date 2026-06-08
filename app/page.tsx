@@ -5,7 +5,7 @@ import StoryCard from "./_components/StoryCard";
 import LiveStage, { type StageItem } from "./_components/LiveStage";
 import { getArticles, getTierArticles, type Article } from "@/lib/articles";
 import { getShowsWithEpisodeCounts } from "@/lib/podcasts";
-import { getLiveEvents, playbackFor, tierLocked, tierLabel, type LiveEvent } from "@/lib/live-events";
+import { getLiveEvents, eventsToStageItems, type LiveEvent } from "@/lib/live-events";
 import { formatDate } from "@/lib/format";
 
 export const revalidate = 60;
@@ -36,19 +36,7 @@ export default async function HomePage() {
     const d = new Date(iso).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).toUpperCase();
     return e.status === "live" ? `LIVE NOW · ${d}` : e.status === "ended" ? `REPLAY · ${d}` : d;
   }
-  const liveItems: StageItem[] = [...live.live, ...live.replays].map((e) => {
-    const pb = playbackFor(e);
-    return {
-      id: e.id,
-      title: e.title,
-      kind: pb.kind,
-      src: pb.src,
-      isLive: e.status === "live",
-      when: whenLabel(e),
-      locked: tierLocked(e.tier_required),
-      tierLabel: tierLabel(e.tier_required),
-    };
-  });
+  const liveItems: StageItem[] = eventsToStageItems([...live.live, ...live.replays], whenLabel);
 
   // ... (rest of homepage content for news/podcasts/spotlight would be here in full; stubbed for core live/video test focus)
   return (
@@ -62,13 +50,10 @@ export default async function HomePage() {
             <p>Independent Oklahoma press — video, live, podcasts with realtime.</p>
           </section>
 
-          {/* Live embed on home for testing 24/7 + framer + realtime */}
-          {liveItems.length > 0 && (
-            <section className="home-live">
-              <h2>Live Now / 24/7</h2>
-              <LiveStage items={liveItems} />
-            </section>
-          )}
+          <section className="home-live">
+            <h2>Live Now / 24/7</h2>
+            <LiveStage items={liveItems} initialActiveId={live.live[0]?.id ?? null} />
+          </section>
 
           {/* Podcast preview for per-ep video test */}
           <section>

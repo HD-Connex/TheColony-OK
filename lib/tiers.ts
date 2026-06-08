@@ -24,3 +24,42 @@ export function tierLabel(t: string | null | undefined): string {
 export function isEntitled(required: string | null | undefined, isMember: boolean): boolean {
   return TIER_RANK[normalizeTier(required)] <= (isMember ? TIER_RANK.member : TIER_RANK.free);
 }
+
+/** Marketing plans shown on /pricing (Stripe checkout wired later). */
+export interface MembershipPlan {
+  id: string;
+  name: string;
+  price: number;
+  blurb: string;
+  highlight?: boolean;
+  perks: string[];
+}
+
+export const MEMBERSHIP_PLANS: MembershipPlan[] = [
+  {
+    id: "free",
+    name: "Neighbor",
+    price: 0,
+    blurb: "Sample the colony. Free previews, daily news, and select Oklahoma podcasts.",
+    perks: [
+      "Daily news & headlines",
+      "Free podcast episodes",
+      "First 3 minutes of every show",
+      "Live event previews",
+    ],
+  },
+  {
+    id: "member",
+    name: "Settler",
+    price: 4.99,
+    highlight: true,
+    blurb: "The founding price. Full library, ad-free, the way Colony OK members started.",
+    perks: [
+      "Everything in Neighbor",
+      "Full ad-free show & podcast library",
+      "Accurate resume across devices",
+      "Offline downloads (mobile)",
+      "AI transcripts & faith-aligned summaries",
+    ],
+  },
+];

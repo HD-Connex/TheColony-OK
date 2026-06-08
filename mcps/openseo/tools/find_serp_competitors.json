@@ -1,0 +1,90 @@
+{
+  "name": "find_serp_competitors",
+  "description": "Compares domains competing for a supplied keyword set using DataForSEO Labs SERP Competitors. Useful for market and search-intelligence reports; not radius-based local SEO. Charges DataForSEO Labs credits.",
+  "inputSchema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+      "projectId": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Required. The OpenSEO project ID to scope this call to. Get one from list_projects."
+      },
+      "keywords": {
+        "minItems": 1,
+        "maxItems": 100,
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        }
+      },
+      "market": {
+        "description": "Optional United States market object. Defaults to United States.",
+        "type": "object",
+        "properties": {
+          "country": {
+            "type": "string",
+            "enum": [
+              "US",
+              "USA",
+              "United States",
+              "United States of America"
+            ]
+          }
+        }
+      },
+      "resultTypes": {
+        "minItems": 1,
+        "maxItems": 4,
+        "type": "array",
+        "items": {
+          "type": "string",
+          "enum": [
+            "organic",
+            "paid",
+            "featured_snippet",
+            "local_pack"
+          ]
+        }
+      },
+      "excludeDomains": {
+        "minItems": 1,
+        "maxItems": 50,
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255
+        }
+      },
+      "includeSubdomains": {
+        "type": "boolean"
+      },
+      "sortBy": {
+        "type": "string",
+        "enum": [
+          "visibility",
+          "traffic_estimate",
+          "avg_position",
+          "keyword_count"
+        ]
+      },
+      "limit": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 100
+      },
+      "offset": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 1000
+      }
+    },
+    "required": [
+      "projectId",
+      "keywords"
+    ]
+  }
+}

@@ -4,7 +4,7 @@ import PageHeader from "../_components/PageHeader";
 import JsonLd from "../_components/JsonLd";
 import Countdown from "../_components/Countdown";
 import LiveStage, { type StageItem } from "../_components/LiveStage";
-import { getLiveEvents, playbackFor, tierLocked, tierLabel, type LiveEvent } from "@/lib/live-events";
+import { getLiveEvents, eventsToStageItems, tierLocked, tierLabel, type LiveEvent } from "@/lib/live-events";
 
 export const revalidate = 60;
 
@@ -24,19 +24,7 @@ function whenLabel(e: LiveEvent): string {
 export default async function LivePage() {
   const { live, upcoming, replays } = await getLiveEvents();
 
-  const items: StageItem[] = [...live, ...replays].map((e) => {
-    const pb = playbackFor(e);
-    return {
-      id: e.id,
-      title: e.title,
-      kind: pb.kind,
-      src: pb.src,
-      isLive: e.status === "live",
-      when: whenLabel(e),
-      locked: tierLocked(e.tier_required),
-      tierLabel: tierLabel(e.tier_required),
-    };
-  });
+  const items: StageItem[] = eventsToStageItems([...live, ...replays], whenLabel);
 
   const nextUp = upcoming[0];
 
@@ -63,9 +51,9 @@ export default async function LivePage() {
             lede="Live broadcasts and the full replay archive. Tune in free, or join for members-only events. We mirror the stream across YouTube, Rumble, and Locals."
           />
 
-          {items.length > 0 ? (
-            <LiveStage items={items} />
-          ) : (
+          <LiveStage items={items} initialActiveId={live[0]?.id ?? null} />
+
+          {items.length === 0 && (
             <section className="live-section" style={{ marginBottom: "var(--space-12)" }}>
               <div className="live-player">
                 <div className="live-player__offline">

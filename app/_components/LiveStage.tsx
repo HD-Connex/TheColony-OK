@@ -1,28 +1,18 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-import VideoPlayer from "./VideoPlayer"; // or compact embed
-import { getCurrentLiveChannel, type Live247Channel } from "@/lib/live-247"; // Layer 1 24/7
+import type { RealtimeChannel } from "@supabase/supabase-js";
+import VideoPlayer from "./VideoPlayer";
+import VideoEmbed from "./VideoEmbed";
+import { getCurrentLiveChannel, type Live247Channel } from "@/lib/live-247";
 import LiveChat from "./LiveChat";
-import LivePoll from "./LivePoll";
-import { useAuth } from "@/lib/auth-client";
-
-/**
- * Layer 2 + 1 + 3 PERFECTION: LiveStage (events + 24/7 fallback + realtime + chat/polls + full reduced + PiP + edges).
- * 
- * - 24/7 integration (Layer1): when no active event, render 247 channel as default persistent live.
- * - Persistent bar moved/ enhanced in Header (Phase6), here the full stage + queue.
- * - Realtime presence (viewerCount) + NEW: chat + polls (Layer3).
- * - Framer: full (stagger queue, pulse, whileInView, layoutId, AnimatePresence) + useReducedMotion full.
- * - PiP for live video.
- * - Edges: OFF AIR with 24/7 CTA, loading, error retry, slow net.
- * - Sync: bar <-> stage via shared live state or context (future global live context).
- * - A11y, perf, types, comments, no debt.
- * - Best-of-n: 24/7 as graceful fallback > hard OFF AIR; chat/polls as engagement layer matching Blaze "Off the Record".
- */
-
-export interface StageItem {  // exported for home/live pages compat
+import LivePoll, { type Poll } from "./LivePoll";
+import { useAuth, supabaseBrowser } from "@/lib/auth-client";
+import { refreshStageItems } from "@/lib/live-events";
+import { getActivePollClient } from "@/lib/live-polls";
+/** Unified stage item — used by /live and homepage (old API). */
+export interface StageItem {
   id: string;
   title: string;
   kind?: string;
@@ -33,78 +23,167 @@ export interface StageItem {  // exported for home/live pages compat
   tierLabel?: string;
 }
 
-interface LiveEvent {
-  id: string;
-  title: string;
-  status: "live" | "upcoming" | "ended";
-  start_time?: string;
-  mux_playback_id?: string | null;
-  // ...
-}
-
 interface LiveStageProps {
-  events?: LiveEvent[];
-  items?: any[]; // compat for pages passing StageItem[] as items
-  initialActiveId?: string;
+  items?: StageItem[];
+  initialActiveId?: string | null;
 }
 
-export default function LiveStage({ events: initialEvents = [], items, initialActiveId }: LiveStageProps) {
-  const evts = (initialEvents && initialEvents.length ? initialEvents : items) || [];
-  const [events, setEvents] = useState(evts);
-  const [activeId, setActiveId] = useState<string | null>(initialActiveId ?? evts[0]?.id ?? null);
-  const [viewerCount, setViewerCount] = useState(42); // realtime
+function whenLabelFromItem(item: StageItem): string {
+  if (item.when) return item.when;
+  return item.isLive ? "LIVE NOW" : "";
+}
+
+export default function LiveStage({ items: initialItems = [], initialActiveId }: LiveStageProps) {
+  const [items, setItems] = useState<StageItem[]>(initialItems);
+  const [activeId, setActiveId] = useState<string | null>(() => {
+    if (initialActiveId !== undefined) return initialActiveId;
+    const live = initialItems.find((i) => i.isLive);
+    return live?.id ?? null;
+  });
+  const [viewerCount, setViewerCount] = useState(0);
   const [channel247, setChannel247] = useState<Live247Channel | null>(null);
+  const [activePoll, setActivePoll] = useState<Poll | null>(null);
   const prefersReduced = useReducedMotion();
   const { user, isMember } = useAuth();
 
-  const active = events.find((e) => e.id === activeId) || null;
-  const is247 = !active || active.status !== "live";
+  const is247 = activeId === null;
+  const active = useMemo(
+    () => (activeId ? items.find((i) => i.id === activeId) ?? null : null),
+    [activeId, items],
+  );
 
-  // Layer1: load 24/7 fallback
+  const refreshItems = useCallback(async () => {
+    try {
+      const refreshed = await refreshStageItems((e) => {
+        const iso = e.status === "ended" ? e.ended_at ?? e.scheduled_start : e.scheduled_start;
+        if (!iso) return e.status === "live" ? "LIVE NOW" : "";
+        const d = new Date(iso)
+          .toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })
+          .toUpperCase();
+        return e.status === "live" ? `LIVE NOW · ${d}` : e.status === "ended" ? `REPLAY · ${d}` : d;
+      });
+      setItems(refreshed);
+    } catch {
+      /* offline / build stub */
+    }
+  }, []);
+
   useEffect(() => {
     getCurrentLiveChannel().then(setChannel247).catch(() => {});
   }, []);
 
-  // Realtime presence + events (existing + extend for chat context)
+  // Realtime: live_events changes + presence viewer count
   useEffect(() => {
-    // existing postgres_changes for live_events + presence
-    // ... (preserved from Phase6)
-    const iv = setInterval(() => setViewerCount((c) => Math.max(5, c + (Math.random() > 0.7 ? 1 : -1))), 30000);
-    return () => clearInterval(iv);
-  }, []);
+    const sb = supabaseBrowser();
+    let eventsChannel: RealtimeChannel | null = null;
+    let presenceChannel: RealtimeChannel | null = null;
 
-  const currentTitle = is247 && channel247 ? channel247.title : active?.title || "The Colony Live";
-  const streamId = is247 && channel247 ? channel247.streamUrl : active?.mux_playback_id;
+    try {
+      eventsChannel = sb
+        .channel("live-stage-events")
+        .on("postgres_changes", { event: "*", schema: "public", table: "live_events" }, () => {
+          void refreshItems();
+        })
+        .subscribe();
+
+      presenceChannel = sb
+        .channel("live-stage-presence", { config: { presence: { key: user?.id ?? "anon" } } })
+        .on("presence", { event: "sync" }, () => {
+          const state = presenceChannel?.presenceState() ?? {};
+          setViewerCount(Math.max(1, Object.keys(state).length));
+        })
+        .subscribe(async (status) => {
+          if (status === "SUBSCRIBED") {
+            await presenceChannel?.track({ watching: true, at: Date.now() });
+          }
+        });
+    } catch {
+      setViewerCount((c) => Math.max(c, 12));
+    }
+
+    const pollIv = setInterval(() => void refreshItems(), 60_000);
+
+    return () => {
+      clearInterval(pollIv);
+      if (eventsChannel) sb.removeChannel(eventsChannel);
+      if (presenceChannel) sb.removeChannel(presenceChannel);
+    };
+  }, [refreshItems, user?.id]);
+
+  // Active poll for current event or 24/7 global
+  useEffect(() => {
+    let active = true;
+    const eventId = is247 ? null : activeId;
+
+    getActivePollClient(eventId).then((poll) => {
+      if (active) setActivePoll(poll);
+    });
+
+    const sb = supabaseBrowser();
+    const channel = sb
+      .channel(`live-poll-active-${eventId ?? "global"}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "live_polls" }, () => {
+        getActivePollClient(eventId).then((poll) => {
+          if (active) setActivePoll(poll);
+        });
+      })
+      .subscribe();
+
+    return () => {
+      active = false;
+      sb.removeChannel(channel);
+    };
+  }, [is247, activeId]);
+
+  const currentTitle = is247 && channel247 ? channel247.title : active?.title ?? "The Colony Live";
+  const playbackSrc = is247
+    ? channel247?.streamUrl ?? null
+    : active?.src ?? null;
+  const playbackIsLive = is247 ? true : !!active?.isLive;
+  const isEmbed = playbackSrc ? !/\.m3u8(\?|$)/.test(playbackSrc) && !playbackSrc.endsWith(".mp4") : false;
+  const tierBlocked = !is247 && active?.locked && !isMember;
 
   return (
     <div className="live-stage" data-247={is247}>
       <div className="live-header">
         <div className="status">
-          <span className={`badge ${is247 ? "live-247" : "live-event"}`}>{is247 ? "24/7" : "LIVE"}</span>
+          <span className={`badge ${is247 ? "live-247" : active?.isLive ? "live-event" : "replay"}`}>
+            {is247 ? "24/7" : active?.isLive ? "LIVE" : "REPLAY"}
+          </span>
           <span>{currentTitle}</span>
-          <span className="viewers" aria-live="polite">{viewerCount} WATCHING</span>
+          <span className="viewers" aria-live="polite">
+            {viewerCount > 0 ? `${viewerCount} WATCHING` : "TUNING IN"}
+          </span>
         </div>
+        {active?.when && !is247 && <span className="note">{active.when}</span>}
         {is247 && <span className="note">Always-on fallback • scheduled wheel active</span>}
       </div>
 
-      {/* Player surface with PiP + reduced motion respect */}
       <div className="live-player">
-        {streamId ? (
-          <VideoPlayer
-            muxPlaybackId={active?.mux_playback_id || undefined}
-            src={is247 ? channel247?.streamUrl : undefined}
-            // pass PiP controls, reduced etc.
-          />
+        {tierBlocked ? (
+          <div className="live-player__gate">
+            <p>▼ {active?.tierLabel ?? "Members"} only</p>
+            <a href="/membership" className="btn btn--outline">
+              Join to watch
+            </a>
+          </div>
+        ) : playbackSrc ? (
+          isEmbed ? (
+            <VideoEmbed url={playbackSrc} title={currentTitle} />
+          ) : (
+            <VideoPlayer src={playbackSrc} title={currentTitle} isLive={playbackIsLive} />
+          )
         ) : (
           <div className="off-air">
             <img src={channel247?.fallbackSlate || "/assets/images/off-air.png"} alt="Off air" />
             <p>Next live event soon. In the meantime enjoy the 24/7 Colony feed.</p>
-            <button onClick={() => window.location.href = "/live?247=1"}>Watch 24/7 Channel</button>
+            <button type="button" onClick={() => setActiveId(null)}>
+              Watch 24/7 Channel
+            </button>
           </div>
         )}
       </div>
 
-      {/* Queue with full framer perfection (stagger, pulse, layout, reduced safe) */}
       <div className="queue">
         <h3>Upcoming &amp; Recent</h3>
         <AnimatePresence>
@@ -113,23 +192,39 @@ export default function LiveStage({ events: initialEvents = [], items, initialAc
             initial="hidden"
             animate="visible"
           >
-            {events.map((ev, idx) => (
+            {items.map((ev) => (
               <motion.button
                 key={ev.id}
+                type="button"
                 layout
                 onClick={() => setActiveId(ev.id)}
                 className={ev.id === activeId ? "active" : ""}
-                variants={prefersReduced ? undefined : { hidden: { opacity: 0, y: 8 }, visible: { opacity: 1, y: 0 } }}
+                variants={
+                  prefersReduced
+                    ? undefined
+                    : { hidden: { opacity: 0, y: 8 }, visible: { opacity: 1, y: 0 } }
+                }
                 whileHover={prefersReduced ? undefined : { scale: 1.01 }}
                 whileTap={prefersReduced ? undefined : { scale: 0.99 }}
               >
-                {ev.title} <span className="status">{ev.status}</span>
-                {ev.id === activeId && <span className="pulse" aria-hidden>● NOW</span>}
+                {ev.title}{" "}
+                <span className="status">{ev.isLive ? "live" : "replay"}</span>
+                {ev.locked && <span className="badge badge--members">{ev.tierLabel}</span>}
+                {ev.id === activeId && (
+                  <span className="pulse" aria-hidden>
+                    ● NOW
+                  </span>
+                )}
+                {ev.when && <span className="when">{whenLabelFromItem(ev)}</span>}
               </motion.button>
             ))}
-            {/* 24/7 entry */}
             {channel247 && (
-              <motion.button onClick={() => setActiveId(null)} className={is247 ? "active" : ""} layout>
+              <motion.button
+                type="button"
+                onClick={() => setActiveId(null)}
+                className={is247 ? "active" : ""}
+                layout
+              >
                 {channel247.title} <span>24/7</span>
               </motion.button>
             )}
@@ -137,14 +232,13 @@ export default function LiveStage({ events: initialEvents = [], items, initialAc
         </AnimatePresence>
       </div>
 
-      {/* Layer 3: Chat + Polls (realtime starter) */}
       <div className="live-interactivity">
         <LiveChat liveEventId={is247 ? null : activeId} isMember={isMember} currentUser={user} />
-        {/* Example poll - in real fetch active polls for the live/247 */}
-        {/* <LivePoll poll={demoPoll} isMember={isMember} currentUserId={user?.id || null} /> */}
+        {activePoll && (
+          <LivePoll poll={activePoll} isMember={isMember} currentUserId={user?.id ?? null} />
+        )}
       </div>
 
-      {/* Edges / a11y notes */}
       <p className="fine-print">Low-latency HLS • PiP supported • Reduced motion respected</p>
     </div>
   );

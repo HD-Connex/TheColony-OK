@@ -15,11 +15,11 @@ let browser: SupabaseClient | null = null;
 
 export function supabaseBrowser(): SupabaseClient {
   if (browser) return browser;
-  browser = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } },
-  );
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://placeholder.supabase.co";
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "placeholder-anon-key";
+  browser = createClient(url, key, {
+    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
+  });
   return browser;
 }
 
