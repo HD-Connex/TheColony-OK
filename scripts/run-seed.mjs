@@ -34,7 +34,7 @@ if (!DIRECT_URL) {
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const seedPath = join(__dirname, '..', 'supabase', 'seed-content.sql');
 
-const SEED_TABLES = ['shows', 'episodes', 'live_events', 'series', 'video_episodes'];
+const SEED_TABLES = ['shows', 'episodes', 'live_events', 'series', 'video_episodes', 'articles'];
 
 async function countRows(client, table) {
   const exists = await client.query(

@@ -201,6 +201,124 @@ WHERE NOT EXISTS (
 -- WHERE ser.slug = 'the-colony-report'
 --   AND NOT EXISTS (SELECT 1 FROM public.video_episodes WHERE series_id = ser.id AND slug = 'ep-101-seed');
 
+-- ─── 6. Published articles (public.articles table) ───
+-- Home hero + /news headlines — patriotic Oklahoma press theme.
+-- Production schema uses body (article text) + member_only (paywall flag).
+
+INSERT INTO public.articles (
+  id, slug, title, dek, body, status, member_only, hero_url, hero_alt, category, published_at
+)
+SELECT
+  'f1111111-1111-4111-8111-111111111101'::uuid,
+  'oklahoma-budget-crisis',
+  'What They Don''t Want You to Know About Oklahoma''s Budget Crisis',
+  'Six weeks inside the capitol. The numbers do not add up.',
+  'Our journalists spent six weeks inside the state capitol tracing how emergency funds, education dollars, and infrastructure bonds were rerouted without a public vote. Documents obtained through open-records requests show a pattern of last-minute amendments pushed through after midnight sessions. What we found will make you angry — and it is why independent Oklahoma media exists.',
+  'published',
+  false,
+  '/assets/images/story-lead.svg',
+  'Oklahoma state capitol at dusk — budget crisis investigation',
+  'Investigations',
+  now() - interval '6 hours'
+WHERE NOT EXISTS (
+  SELECT 1 FROM public.articles WHERE slug = 'oklahoma-budget-crisis'
+);
+
+INSERT INTO public.articles (
+  id, slug, title, dek, body, status, member_only, hero_url, hero_alt, category, published_at
+)
+SELECT
+  'f1111111-1111-4111-8111-111111111102'::uuid,
+  'lobbyist-network-silence',
+  'The Lobbyist Network That Keeps Oklahoma Voters in the Dark',
+  'Forty shell companies. Three firms. One closed door.',
+  'A coordinated roster of contract lobbyists has been shaping utility rates, education policy, and tax credits while their clients stay off the public docket. Colony reporters mapped more than forty LLC shells tied to three out-of-state firms operating from Oklahoma City office suites. Members get the full donor matrix, meeting logs, and the lawmakers who signed the confidentiality agreements.',
+  'published',
+  true,
+  '/assets/images/story-2.svg',
+  'Lobbyist network diagram — Oklahoma politics investigation',
+  'Politics',
+  now() - interval '1 day'
+WHERE NOT EXISTS (
+  SELECT 1 FROM public.articles WHERE slug = 'lobbyist-network-silence'
+);
+
+INSERT INTO public.articles (
+  id, slug, title, dek, body, status, member_only, hero_url, hero_alt, category, published_at
+)
+SELECT
+  'f1111111-1111-4111-8111-111111111103'::uuid,
+  'parents-curriculum-pushback',
+  'Oklahoma Parents Draw the Line on Classroom Curriculum Mandates',
+  'From Edmond to Lawton, families are taking back the classroom.',
+  'School board meetings from Edmond to Lawton have turned into standing-room-only forums as parents demand a say in reading lists, history standards, and vendor contracts. The Colony interviewed two dozen families who pulled public records on curriculum adoptions their districts never advertised. Their pushback is reshaping the 2026 legislative session — and both parties are scrambling to claim the parent vote.',
+  'published',
+  false,
+  '/assets/images/story-3.svg',
+  'Parents at an Oklahoma school board meeting on curriculum',
+  'Culture',
+  now() - interval '2 days'
+WHERE NOT EXISTS (
+  SELECT 1 FROM public.articles WHERE slug = 'parents-curriculum-pushback'
+);
+
+INSERT INTO public.articles (
+  id, slug, title, dek, body, status, member_only, hero_url, hero_alt, category, published_at
+)
+SELECT
+  'f1111111-1111-4111-8111-111111111104'::uuid,
+  'energy-sector-green-mandates',
+  'Oklahoma Energy Jobs on the Line as Green Mandates Hit the Pipeline',
+  'Pipeline country braces for mandates written on the coasts.',
+  'Proposed federal emissions rules and state-level renewable quotas threaten thousands of oil-field and refinery jobs across the Panhandle and eastern Oklahoma. Industry leaders warn that compliance timelines ignore the reality of rural power grids and existing pipeline contracts. We break down which counties face the steepest losses — and which lawmakers are quietly negotiating carve-outs.',
+  'published',
+  false,
+  '/assets/images/story-4.svg',
+  'Oklahoma oil field and pipeline infrastructure at sunset',
+  'Economy',
+  now() - interval '3 days'
+WHERE NOT EXISTS (
+  SELECT 1 FROM public.articles WHERE slug = 'energy-sector-green-mandates'
+);
+
+INSERT INTO public.articles (
+  id, slug, title, dek, body, status, member_only, hero_url, hero_alt, category, published_at
+)
+SELECT
+  'f1111111-1111-4111-8111-111111111105'::uuid,
+  'sheriffs-race-investigation',
+  'Inside the Sheriff''s Race That Oklahoma Power Brokers Don''t Want Audited',
+  'PAC money, off-book contracts, and a race too close to call.',
+  'Campaign finance filings for a contested sheriff''s race in central Oklahoma do not match the door-to-door spending volunteers reported on the ground. Colony investigators cross-referenced PAC transfers, in-kind donations, and off-book security contracts tied to a single consulting firm. The full audit — including names redacted from public filings — is available to members.',
+  'published',
+  true,
+  '/assets/images/story-lead.svg',
+  'Oklahoma sheriff campaign rally — campaign finance investigation',
+  'Investigations',
+  now() - interval '4 days'
+WHERE NOT EXISTS (
+  SELECT 1 FROM public.articles WHERE slug = 'sheriffs-race-investigation'
+);
+
+INSERT INTO public.articles (
+  id, slug, title, dek, body, status, member_only, hero_url, hero_alt, category, published_at
+)
+SELECT
+  'f1111111-1111-4111-8111-111111111106'::uuid,
+  'tulsa-dei-defund-vote',
+  'Tulsa Council Narrowly Votes to Defund City DEI Programs',
+  'A 5–4 vote, a packed chamber, and a veto fight ahead.',
+  'After a six-hour public hearing, the Tulsa City Council voted 5–4 to zero out diversity, equity, and inclusion line items in next year''s municipal budget. Protesters and pastors filled the chamber while business leaders warned the move could affect federal grant eligibility. The Colony has the roll-call vote, the amended budget pages, and what happens when the mayor''s veto pen lands.',
+  'published',
+  false,
+  '/assets/images/story-2.svg',
+  'Tulsa City Council chamber during DEI budget vote',
+  'State',
+  now() - interval '5 days'
+WHERE NOT EXISTS (
+  SELECT 1 FROM public.articles WHERE slug = 'tulsa-dei-defund-vote'
+);
+
 COMMIT;
 
 -- After seed:
