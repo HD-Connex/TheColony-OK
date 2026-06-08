@@ -1,15 +1,17 @@
-// Viewer progress stub (localStorage or supabase viewer_progress).
-export async function saveProgress(episodeId: string, position: number, duration: number) {
-  if (typeof window === 'undefined') return;
+// Stub viewer progress (localStorage backed). Used by VideoPlayer.
+const KEY = 'colony:progress';
+
+export async function saveProgress(episodeId: string, position: number, duration?: number) {
   try {
-    const key = `progress:${episodeId}`;
-    localStorage.setItem(key, JSON.stringify({ position, duration, at: Date.now() }));
+    const all = JSON.parse(localStorage.getItem(KEY) || '{}');
+    all[episodeId] = { position, duration: duration || 0, ts: Date.now() };
+    localStorage.setItem(KEY, JSON.stringify(all));
   } catch {}
 }
-export function getProgress(episodeId: string): { position: number; duration: number } | null {
-  if (typeof window === 'undefined') return null;
+
+export function getProgress(episodeId: string): number | null {
   try {
-    const raw = localStorage.getItem(`progress:${episodeId}`);
-    return raw ? JSON.parse(raw) : null;
+    const all = JSON.parse(localStorage.getItem(KEY) || '{}');
+    return all[episodeId]?.position ?? null;
   } catch { return null; }
 }
