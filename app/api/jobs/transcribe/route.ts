@@ -4,20 +4,8 @@
 // Uses after() for any background. For MVP: stub Claude call with dummy + comment for real integration.
 
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
 import { after } from 'next/server';
-
-// Lazy supabase client factory (avoids top-level env issues in build; per vercel best practices + worktree isolation)
-// Guard for missing env (common in isolated worktree builds without .env)
-const getSupabase = () => {
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-    return null as any; // dummy for build collection
-  }
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
-};
+import { supabaseAdmin } from "@/lib/supabase";
 
 export const runtime = 'nodejs';
 
@@ -27,10 +15,7 @@ function jsonError(message: string, status = 400) {
 
 export async function POST(req: Request) {
   try {
-    const supabase = getSupabase();
-    if (!supabase) {
-      return jsonError('Supabase not configured (build stub)', 500);
-    }
+    const supabase = supabaseAdmin();
 
     const { clipId, url } = await req.json();
     if (!clipId || !url) {

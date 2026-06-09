@@ -34,7 +34,7 @@ const vsBlazeSchema = {
         "Side-by-side comparison: Colony rural OK depth, member community, and reader-funded journalism vs BlazeTV national personalities.",
       thumbnailUrl: ["https://thecolonyok.com/assets/images/hosts/dan-hollis.jpg"],
       uploadDate: "2026-06-08",
-      contentUrl: "https://thecolonyok.com/podcasts/children-of-the-state",
+      contentUrl: "https://thecolonyok.com/podcasts/colony-report/real-video-ep",
     },
     {
       "@type": "Person",
@@ -151,7 +151,7 @@ export default function VsBlazePage() {
                 <p className="bio-card__role">Reader-funded Oklahoma press</p>
                 <ul className="bio-card__list">
                   <li>Founding tiers from $4.99/mo with transparent reader funding</li>
-                  <li>Local rural shows: Ag Report, Energy OK, Small Town Faith, and more</li>
+                  <li>Local rural shows: The Colony Report (flagship), Faith &amp; Freedom, Patriot Hour, OK Underground, Energy OK (Ag Report beats seeded)</li>
                   <li>Member clips and county forums — continuous community vs weekly chats</li>
                   <li>Full hub integration + PWA/TWA mobile with offline smart packs</li>
                   <li>

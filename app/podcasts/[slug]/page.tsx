@@ -13,7 +13,7 @@ import { formatDate, formatDurationLabel } from "@/lib/format";
 
 export const revalidate = 60;
 
-const SITE_URL = "https://thecolonyok.com";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://thecolonyok.com";
 
 interface PageProps {
   params: Promise<{ slug: string }>;

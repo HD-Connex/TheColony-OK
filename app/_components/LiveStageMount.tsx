@@ -7,9 +7,11 @@ interface Props {
   /** null = 24/7 loop; undefined = auto-pick first live event */
   initialActiveId?: string | null;
   prefer247?: boolean;
+  /** For teaser usage on home: hides redundant queue (sidebar provides schedule) to prevent layout overflow/overlap with following sections like Latest Dispatches */
+  compact?: boolean;
 }
 
-export default function LiveStageMount({ items, initialActiveId, prefer247 }: Props) {
+export default function LiveStageMount({ items, initialActiveId, prefer247, compact }: Props) {
   const liveItem = items.find((i) => i.isLive);
   let activeId: string | null;
 
@@ -23,5 +25,5 @@ export default function LiveStageMount({ items, initialActiveId, prefer247 }: Pr
     activeId = null;
   }
 
-  return <LiveStage items={items} initialActiveId={activeId} />;
+  return <LiveStage items={items} initialActiveId={activeId} compact={compact} />;
 }

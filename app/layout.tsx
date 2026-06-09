@@ -9,7 +9,9 @@ import SiteClient from "./_components/SiteClient";
 
 const SITE_URL = "https://thecolonyok.com";
 
-// Phase 3-05: Self-hosted fonts (next/font) per audit + vercel best practices.
+// Note for P7: Production URLs hard-coded to https://thecolonyok.com for canonical/OG/metadataBase.
+// Vercel preview deployments will use their *.vercel.app URLs (or NEXT_PUBLIC_SITE_URL if set in project envs);
+// this is expected — previews differ for testing. sitemap.ts / robots.ts also fall back identically.
 // Eliminates external Google Fonts request, improves CWV/INP, removes layout shift.
 const fontDisplay = Archivo_Black({
   subsets: ["latin"],

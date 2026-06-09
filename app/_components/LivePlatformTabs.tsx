@@ -19,24 +19,16 @@ export default function LivePlatformTabs() {
         <button
           key={platform.id}
           type="button"
-          className="tabs__tab"
+          className="tabs__tab tabs__tab--relative"
           role="tab"
           aria-selected={active === platform.id}
           onClick={() => setActive(platform.id)}
-          style={{ position: "relative" }}
         >
           {platform.label}
           {active === platform.id && !reduced && (
             <motion.span
               layoutId="live-platform-tab"
-              style={{
-                position: "absolute",
-                bottom: 0,
-                left: 0,
-                right: 0,
-                height: 2,
-                background: "var(--color-alarm)",
-              }}
+              className="live-tab-underline"
             />
           )}
         </button>

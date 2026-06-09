@@ -13,7 +13,7 @@ import { Paywall } from "../../_components/Paywall";
 
 export const revalidate = 120;
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://thecolonyok.com";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://thecolonyok.com";
 
 interface PageProps {
   params: Promise<{ slug: string }>;

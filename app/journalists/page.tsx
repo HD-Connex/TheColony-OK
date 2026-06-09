@@ -38,7 +38,7 @@ export default async function JournalistsPage() {
     example: tierLists[i][0] ?? null,
   }));
   const hasExamples = tierExamples.some((t) => t.example !== null);
-  const count = contributors.length || 4;
+  const count = contributors.length || 5; // reconciled to seeded contributors (Sarah, Marcus, Rachel, Dan, Wes)
 
   return (
     <InnerPageShell

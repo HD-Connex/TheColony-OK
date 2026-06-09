@@ -30,6 +30,10 @@ export function supabasePublic(): SupabaseClient {
   return pub;
 }
 
+// Single shared public client (anon key) — created once via the cached supabasePublic() factory.
+// (export const supabase = createClient... singleton per P5 requirement; delegates to avoid top-level env crashes on import during build)
+export const supabase = supabasePublic();
+
 // ─── Domain types ───
 
 export interface Show {

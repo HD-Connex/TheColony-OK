@@ -47,7 +47,8 @@ export const PRICING = {
 /** Gift redeem (Layer 8 cycle complete, adapted to current members) */
 export async function redeemGift(code: string, userId: string) {
   // TODO: implement with Supabase members + perk_grants table if added
-  console.log('Gift redeem stub (port from legacy thecolony-ok):', code, userId);
+  // Gift redeem stub (port from legacy thecolony-ok) — no console in prod path
+  void code; void userId;
   return { ok: true };
 }
 
@@ -62,11 +63,12 @@ export async function hasPerkAccess(userId: string | null, perk: string, context
 export async function logUsage(userId: string | null, type: string, metadata?: any) {
   if (!userId) return;
   // TODO: log to Supabase usage or analytics
-  console.log('Usage logged (port from legacy):', userId, type, metadata);
+  // Usage logged (port from legacy) — no console in prod path
+  void userId; void type; void metadata;
 }
 
 /** Webhook handler stub (full in api route) - sync sub status, grant perks on invoice paid etc. */
 export async function handleStripeEvent(event: Stripe.Event) {
   // ... switch on type: customer.subscription.updated -> update user status + grants
-  console.log('Stripe event handled (full impl in webhook, ported logic from thecolony-ok)');
+  // Stripe event handled (full impl in webhook, ported logic from thecolony-ok) — silent in prod
 }

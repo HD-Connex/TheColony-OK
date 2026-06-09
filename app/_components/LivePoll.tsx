@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { supabaseBrowser } from '@/lib/auth-client';
+import { supabaseConfigured } from '@/lib/supabase';
 
 /**
  * Layer 3: Live Poll component starter (pairs with LiveChat).
@@ -30,20 +31,37 @@ export default function LivePoll({ poll, isMember, currentUserId }: LivePollProp
   const [votes, setVotes] = useState<Record<number, number>>({});
   const [userVote, setUserVote] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const mountedRef = useRef(true);
   const sb = supabaseBrowser();
 
   const total = Object.values(votes).reduce((a, b) => a + b, 0);
 
-  useEffect(() => {
-    let active = true;
+  const loadVotes = useCallback(async () => {
+    if (!mountedRef.current) return;
+    setLoading(true);
+    setLoadError(null);
 
-    async function loadVotes() {
-      const { data } = await sb
+    if (!supabaseConfigured()) {
+      if (mountedRef.current) {
+        setLoadError('Poll results backend unavailable.');
+        setLoading(false);
+      }
+      return;
+    }
+
+    try {
+      const { data, error: qErr } = await sb
         .from('live_poll_votes')
         .select('option_index,user_id')
         .eq('poll_id', poll.id);
 
-      if (!active || !data) return;
+      if (!mountedRef.current) return;
+      if (qErr || !data) {
+        setLoadError('Could not load current poll results.');
+        return;
+      }
+
       const tally: Record<number, number> = {};
       let ownIdx: number | null = null;
       data.forEach((v: { option_index: number; user_id: string }) => {
@@ -52,21 +70,34 @@ export default function LivePoll({ poll, isMember, currentUserId }: LivePollProp
       });
       setVotes(tally);
       setUserVote(ownIdx);
-      setLoading(false);
+    } catch (e: any) {
+      if (mountedRef.current) setLoadError('Poll tally fetch failed.');
+    } finally {
+      if (mountedRef.current) setLoading(false);
     }
-
-    loadVotes();
-
-    const channel = sb
-      .channel(`poll-${poll.id}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'live_poll_votes', filter: `poll_id=eq.${poll.id}` }, () => {
-        // re-tally simple (in prod: incremental or RPC)
-        loadVotes();
-      })
-      .subscribe();
-
-    return () => { active = false; sb.removeChannel(channel); };
   }, [poll.id, currentUserId, sb]);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    void loadVotes();
+
+    let channel: any = null;
+    try {
+      channel = sb
+        .channel(`poll-${poll.id}`)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'live_poll_votes', filter: `poll_id=eq.${poll.id}` }, () => {
+          void loadVotes();
+        })
+        .subscribe();
+    } catch {}
+
+    return () => {
+      mountedRef.current = false;
+      if (channel) {
+        try { sb.removeChannel(channel); } catch {}
+      }
+    };
+  }, [poll.id, currentUserId, sb, loadVotes]);
 
   async function vote(optionIdx: number) {
     if (!isMember || !currentUserId || userVote !== null || !poll.is_active) return;
@@ -77,17 +108,19 @@ export default function LivePoll({ poll, isMember, currentUserId }: LivePollProp
     setVotes(prev => ({ ...prev, [optionIdx]: (prev[optionIdx] || 0) + 1 }));
     setUserVote(optionIdx);
 
-    const { error } = await sb.from('live_poll_votes').insert({
+    const { error: insertErr } = await sb.from('live_poll_votes').insert({
       poll_id: poll.id,
       user_id: currentUserId,
       option_index: optionIdx,
     });
 
-    if (error) {
+    if (insertErr) {
       // rollback
       setVotes(prevVotes);
       setUserVote(prevUser);
-      alert('Vote failed: ' + error.message);
+      setLoadError('Vote failed: ' + (insertErr.message || 'unknown'));
+      // clear transient vote err after a bit so UI usable
+      setTimeout(() => setLoadError(null), 2500);
     }
   }
 
@@ -118,7 +151,16 @@ export default function LivePoll({ poll, isMember, currentUserId }: LivePollProp
       </div>
 
       {!isMember && <p className="gate">Members vote live.</p>}
-      {loading && <p>Loading results…</p>}
+
+      {loading && <p aria-live="polite">Loading results…</p>}
+      {loadError && (
+        <p role="alert" className="poll-status poll-status--error">
+          {loadError}
+        </p>
+      )}
+      {!loading && !loadError && Object.keys(votes).length === 0 && (
+        <p className="poll-status">No votes yet — be the first!</p>
+      )}
     </div>
   );
 }

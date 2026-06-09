@@ -47,6 +47,10 @@ const KEY_TABLES = [
   'downloads',
   'transcripts',
   'content_embeddings',
+  'clips',
+  'threaded_comments',
+  'contributors',
+  'contributor_applications',
 ];
 
 const MIGRATION_FILES = [
@@ -58,8 +62,12 @@ const MIGRATION_FILES = [
   '0007_video_catalog.sql',
   '0008_watch_progress.sql',
   '0009_articles_stub.sql',
+  '0010_articles_contributors.sql',
   '0010_member_features.sql',
   '0011_ai_search.sql',
+  '0012_contributor_applications.sql',
+  '0013_contributors_table.sql',
+  '0014_clips_and_threaded_comments_rls.sql',
 ];
 
 async function ensureMigrationTable(client) {

@@ -21,7 +21,7 @@ const RATES = [
   },
   {
     title: "Monthly Network Partner",
-    meta: "ALL SHOWS · LIVE BROADCASTS · NEWSLETTER",
+    meta: "5 SHOWS (Colony Report, Faith & Freedom, Patriot Hour, OK Underground, Energy OK) · LIVE · NEWSLETTER",
     price: "$4,800/mo",
   },
 ];
@@ -44,17 +44,17 @@ export default function AdvertisePage() {
           </p>
         </div>
         <div className="stat-row__cell">
-          <div className="stat-row__value">146</div>
+          <div className="stat-row__value">12</div>
           <div className="stat-row__label">▼ Podcast Episodes</div>
           <p style={{ color: "var(--color-text-secondary)", fontSize: "var(--text-sm)", marginTop: "var(--space-2)" }}>
-            Across 4 shows. Avg 22-minute listen time. Pre-roll + mid-roll inventory.
+            Across 5 shows (The Colony Report, Faith &amp; Freedom, Patriot Hour, OK Underground, Energy OK). Avg 22-minute listen time. Pre-roll + mid-roll inventory. (Seeded catalog; production volume grows daily.)
           </p>
         </div>
         <div className="stat-row__cell">
           <div className="stat-row__value">1,200+</div>
           <div className="stat-row__label">▼ Paid Members</div>
           <p style={{ color: "var(--color-text-secondary)", fontSize: "var(--text-sm)", marginTop: "var(--space-2)" }}>
-            High-intent buyers. Newsletter open rate 58%. Click-through 12%.
+            Reader-funded core. 5 on masthead (post-seed). High-intent buyers. Newsletter open rate 58%. Click-through 12%.
           </p>
         </div>
       </div>

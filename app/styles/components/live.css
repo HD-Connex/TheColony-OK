@@ -188,6 +188,87 @@
   color: var(--color-ink);
 }
 
+/* Phase 3 inline purge follow-up (Live* focus): token-driven demo reel disabled state on queue items */
+.queue-item--demo {
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+/* LivePlatformTabs: replace inline position + absolute underline with token classes (zero raw values) */
+.tabs__tab--relative {
+  position: relative;
+}
+
+.live-tab-underline {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--color-alarm);
+}
+
+/* LivePoll: token classes replacing inline error/empty states (focus Live*) */
+.poll-status {
+  font-size: var(--text-xs);
+  opacity: 0.7;
+  margin-top: var(--space-2);
+}
+.poll-status--error {
+  color: var(--color-alarm);
+  opacity: 1;
+  font-size: 0.8em;
+}
+
+/* LiveChat fallback + chat (Phase 3 side quest: chat fixed with fallbacks + inline purge on Live*) */
+/* Uses only DS tokens / semantic classes; graceful preview never interactive; max-height via token-friendly var */
+.chat-list--scroll {
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.chat-fallback {
+  padding: var(--space-2) 0;
+}
+
+.chat-fallback__title {
+  margin: 0 0 var(--space-1);
+  font-weight: 600;
+}
+
+.chat-fallback__msg {
+  margin: 0 0 var(--space-3);
+  opacity: 0.85;
+  font-size: var(--text-xs);
+}
+
+.chat-fallback__retry {
+  font-size: var(--text-xs);
+  padding: 2px var(--space-3);
+  border: var(--rule-hairline) solid currentColor;
+  background: transparent;
+  cursor: pointer;
+}
+
+.chat-fallback__preview {
+  margin-top: var(--space-4);
+  opacity: 0.7;
+  border-top: var(--rule-hairline) dashed currentColor;
+  padding-top: var(--space-3);
+}
+
+.chat-fallback__preview-label {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: var(--space-2);
+}
+
+.chat-msg--preview {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
 /* Navy ground — paper digits (hero STARTS IN block) */
 .countdown--ink .countdown__unit {
   background-color: var(--color-ink);
@@ -286,6 +367,13 @@
   color: rgba(255,255,255,0.6);
   font-family: var(--font-mono);
   pointer-events: none;
+}
+
+/* Neutral label for archived items in queue (replaces previous inline style) */
+.reel-archived {
+  margin-left: 6px;
+  font-size: 0.7em;
+  opacity: 0.6;
 }
 .reel-container { overflow: hidden; }
 .reel-player-frame { width: 100%; height: 100%; position: absolute; inset: 0; }

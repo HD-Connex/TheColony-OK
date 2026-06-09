@@ -1,16 +1,14 @@
 import type { StageItem } from "@/app/_components/LiveStage";
 
 /**
- * "Recent 5" database of past live streams / replays for investor demo.
+ * Recent Streams data for the live hub archive queue / replays.
  * Populated from known Colony Report, Patriot Hour, OK Underground and related
- * live broadcasts (titles and schedule patterns from the platform).
+ * live broadcasts (titles and schedule patterns from the platform / seeded data).
  * 
- * For real investor demos, replace the `src` values with actual recent full
- * episode VOD URLs (YouTube, Rumble, or self-hosted HLS/Mux) from your archive.
- * The LiveStage player already supports YouTube/Rumble embeds and direct video.
+ * Replace the `src` values with actual recent full episode VOD URLs (YouTube, Rumble, or self-hosted HLS/Mux) from archive.
+ * The LiveStage player supports YouTube/Rumble embeds and direct video.
  *
- * Use the "Investor Demo: Recent 5" button on the /live page to load these into
- * the main player queue and play them sequentially on "live tv".
+ * "Recent Streams" section / data for /live (cleaned of dev/demo labels per P4).
  */
 export const RECENT_LIVE_STREAMS: StageItem[] = [
   {

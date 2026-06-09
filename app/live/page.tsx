@@ -99,15 +99,19 @@ export default async function LivePage({
                   <>
                     <div className="schedule-item schedule-item--current">
                       <span className="schedule-item__time">TONIGHT 7PM</span>
-                      <span className="schedule-item__show">Colony Report</span>
+                      <span className="schedule-item__show">The Colony Report — Live with Jake Merrick</span>
                     </div>
                     <div className="schedule-item">
                       <span className="schedule-item__time">THU 6PM</span>
-                      <span className="schedule-item__show">Patriot Hour Q&A</span>
+                      <span className="schedule-item__show">Patriot Hour</span>
                     </div>
                     <div className="schedule-item">
                       <span className="schedule-item__time">SAT 10AM</span>
-                      <span className="schedule-item__show">OK Underground Field Report</span>
+                      <span className="schedule-item__show">OK Underground — Field Report</span>
+                    </div>
+                    <div className="schedule-item">
+                      <span className="schedule-item__time">TUE 7PM</span>
+                      <span className="schedule-item__show">Energy OK — Patch Dispatch</span>
                     </div>
                   </>
                 )}

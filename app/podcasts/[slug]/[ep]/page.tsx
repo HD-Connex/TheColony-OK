@@ -18,7 +18,7 @@ import ClipsTeaser from "@/app/_components/ClipsTeaser";
 import ChapterSidebar from "../../_components/ChapterSidebar";
 import { formatDate, formatDurationLabel } from "@/lib/format";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://thecolonyok.com";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://thecolonyok.com";
 
 interface Params {
   slug: string;
@@ -28,24 +28,40 @@ interface Params {
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
   const { slug, ep } = await params;
   const episode = await getEpisodeByShowAndEp(slug, ep);
-  if (!episode) return { title: "Episode Not Found | The Colony" };
+  if (!episode) return { title: "Episode Not Found | The Colony", robots: { index: false } };
   const playable = episodeToPlayable(episode);
   const isVideo = !!playable.video_url || !!playable.mux_playback_id;
   const title = `${episode.title} | ${slug} | The Colony OK`;
   const desc =
     episode.description?.slice(0, 160) || `Watch or listen to ${episode.title} — video podcast from The Colony.`;
+  const canonical = `/podcasts/${slug}/${episode.slug || episode.id}`;
+  const thumb = episode.thumbnail_url || playable.thumbnail_url || undefined;
+  const durationIso = episode.duration_s
+    ? `PT${Math.floor(episode.duration_s / 60)}M${episode.duration_s % 60}S`
+    : undefined;
+
   return {
     title,
     description: desc,
-    alternates: { canonical: `/podcasts/${slug}/${episode.slug || episode.id}` },
+    alternates: { canonical },
     openGraph: {
       title,
       description: desc,
-      images:
-        episode.thumbnail_url || playable.thumbnail_url
-          ? [{ url: episode.thumbnail_url || playable.thumbnail_url! }]
-          : undefined,
+      images: thumb ? [{ url: thumb }] : undefined,
       videos: isVideo && playable.video_url ? [{ url: playable.video_url }] : undefined,
+      // Deeper: type-specific + locale/rural signals
+      locale: "en_US",
+      siteName: "The Colony OK",
+    },
+    twitter: {
+      card: isVideo ? "player" : "summary_large_image",
+      title,
+      description: desc,
+      images: thumb ? [thumb] : undefined,
+    },
+    other: {
+      // For rich video platforms
+      ...(durationIso ? { "video:duration": String(episode.duration_s) } : {}),
     },
   };
 }
@@ -75,20 +91,41 @@ export default async function PerEpisodePage({ params }: { params: Promise<Param
 
   const showTitle = showSlug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 
+  // Deeper generateMetadata + VideoObject (Phase 3 SEO completion example on per-ep).
+  // Includes duration, publisher, potentialAction for play, interaction stats stub, both Video+Audio variants.
+  const baseSchema = {
+    "@context": "https://schema.org",
+    name: episode.title,
+    description: episode.description,
+    thumbnailUrl: episode.thumbnail_url || playable.thumbnail_url,
+    uploadDate: episode.published_at || episode.pub_date,
+    duration: episode.duration_s ? `PT${Math.floor((episode.duration_s || 0) / 60)}M` : undefined,
+    author: episode.host_name ? { "@type": "Person", name: episode.host_name } : undefined,
+    publisher: { "@type": "Organization", name: "The Colony OK", url: SITE_URL },
+    url: shareUrl,
+  };
+
   const videoObject = isVideo
     ? {
-        "@context": "https://schema.org",
+        ...baseSchema,
         "@type": "VideoObject",
-        name: episode.title,
-        description: episode.description,
-        thumbnailUrl: episode.thumbnail_url || playable.thumbnail_url,
-        uploadDate: episode.published_at || episode.pub_date,
         contentUrl: playable.video_url,
         embedUrl: playable.mux_playback_id
           ? `https://player.mux.com/${playable.mux_playback_id}`
           : undefined,
+        potentialAction: {
+          "@type": "WatchAction",
+          target: shareUrl,
+        },
       }
-    : null;
+    : {
+        ...baseSchema,
+        "@type": "AudioObject",
+        contentUrl: playable.audio_url,
+        // audio fallback for pure audio eps
+      };
+
+  // Always render (VideoObject or AudioObject) for per-ep SEO completeness.
 
   return (
     <main className="per-ep-page" id="main" data-episode-id={episode.id}>
@@ -191,7 +228,7 @@ export default async function PerEpisodePage({ params }: { params: Promise<Param
         </div>
       </div>
 
-      {videoObject && <JsonLd data={videoObject} />}
+      <JsonLd data={videoObject} />
     </main>
   );
 }

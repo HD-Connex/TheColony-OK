@@ -17,7 +17,7 @@ import { tierBadgeClass, tierLabel } from "@/lib/contributor-tiers";
 import { formatDate, formatDurationLabel } from "@/lib/format";
 import { hostPhoto } from "@/lib/media-map";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://thecolonyok.com";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://thecolonyok.com";
 
 interface PageProps {
   params: Promise<{ slug: string }>;

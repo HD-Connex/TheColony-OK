@@ -81,8 +81,8 @@ export default function ContributorCard({
           <h3 className="contrib__name"><Link href={href}>{c.name}</Link></h3>
           {c.bio && <p className="contrib__bio">{c.bio}</p>}
           <Meta c={c} />
-          {teaser && <div className="contrib__meta text-xs" style={{ marginTop: "var(--space-1)" }}>{teaser}</div>}
-          <Link className="btn btn--outline btn--sm" href={href} style={{ alignSelf: "start" }}>Read their work →</Link>
+          {teaser && <div className="contrib__meta text-xs mt-1">{teaser}</div>}
+          <Link className="btn btn--outline btn--sm self-start" href={href}>Read their work →</Link>
         </div>
       </motion.article>
     );
@@ -102,7 +102,7 @@ export default function ContributorCard({
           {c.role && <span className="contrib__role">{c.role}</span>}
           {c.bio && <p className="contrib__bio" style={{ fontSize: "var(--text-sm)" }}>{c.bio}</p>}
           <Meta c={c} />
-          {teaser && <div className="contrib__meta text-xs" style={{ marginTop: "var(--space-1)" }}>{teaser}</div>}
+          {teaser && <div className="contrib__meta text-xs mt-1">{teaser}</div>}
         </div>
       </motion.article>
     );
@@ -120,7 +120,7 @@ export default function ContributorCard({
       <div>
         <h3 className="contrib__name">{c.name}</h3>
         {c.role && <span className="contrib__role">{c.role}</span>}
-        {teaser && <div style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--color-text-muted)", marginTop: 2 }}>{teaser}</div>}
+        {teaser && <div className="text-mono text-[10px] text-muted mt-0.5">{teaser}</div>}
       </div>
     </Link>
   );

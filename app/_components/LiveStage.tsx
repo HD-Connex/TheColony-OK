@@ -12,7 +12,6 @@ import LivePoll, { type Poll } from "./LivePoll";
 import { useAuth, supabaseBrowser } from "@/lib/auth-client";
 import { refreshStageItems } from "@/lib/live-events";
 import { getActivePollClient } from "@/lib/live-polls";
-import { RECENT_LIVE_STREAMS } from "@/lib/recent-live-streams";
 import YouTubeDemoReel from "./YouTubeDemoReel";
 /** Unified stage item — used by /live and homepage (old API). */
 export interface StageItem {
@@ -29,6 +28,8 @@ export interface StageItem {
 interface LiveStageProps {
   items?: StageItem[];
   initialActiveId?: string | null;
+  /** compact=true (home teaser): suppresses internal .queue (the sidebar already renders schedule) to stop extra boxes/queue content from flowing out of the .live-player grid cell and overlaying the next section ("Latest Dispatches"). */
+  compact?: boolean;
 }
 
 function whenLabelFromItem(item: StageItem): string {
@@ -36,7 +37,7 @@ function whenLabelFromItem(item: StageItem): string {
   return item.isLive ? "LIVE NOW" : "";
 }
 
-export default function LiveStage({ items: initialItems = [], initialActiveId }: LiveStageProps) {
+export default function LiveStage({ items: initialItems = [], initialActiveId, compact = false }: LiveStageProps) {
   const [items, setItems] = useState<StageItem[]>(initialItems);
   const [activeId, setActiveId] = useState<string | null>(() => {
     if (initialActiveId !== undefined) return initialActiveId;
@@ -160,8 +161,8 @@ export default function LiveStage({ items: initialItems = [], initialActiveId }:
           </span>
         </div>
         {demoReelActive && (
-          <span className="note" style={{ color: "var(--color-alarm)" }}>
-            Steady archive stream • auto-advancing • investor preview
+          <span className="note">
+            Steady archive stream • auto-advancing
           </span>
         )}
         {active?.when && !is247 && <span className="note">{active.when}</span>}
@@ -198,7 +199,7 @@ export default function LiveStage({ items: initialItems = [], initialActiveId }:
               alt="The Colony OK — Off air. Next live broadcast soon."
               width={640}
               height={360}
-              style={{ maxWidth: '100%', height: 'auto' }}
+              className="offair-slate"
             />
             <p>Next live event soon. In the meantime enjoy the 24/7 Colony feed.</p>
             <button type="button" onClick={() => setActiveId(null)}>
@@ -208,55 +209,23 @@ export default function LiveStage({ items: initialItems = [], initialActiveId }:
         )}
       </div>
 
-      <div className="queue">
-        <h3>
-          {demoReelActive ? "Demo Reel — Continuous Archived Stream (no controls)" : "Upcoming & Recent"}
-          {!demoReelActive && (
-            <button
-              type="button"
-              onClick={() => {
-                setItems(RECENT_LIVE_STREAMS);
-                setActiveId(RECENT_LIVE_STREAMS[0]?.id ?? null);
-                setDemoReelActive(true);
-              }}
-              style={{
-                fontSize: "0.65rem",
-                padding: "1px 6px",
-                marginLeft: "8px",
-                border: "1px solid currentColor",
-                background: "transparent",
-                color: "inherit",
-                cursor: "pointer",
-                verticalAlign: "middle",
-              }}
-              title="Load the Recent 5 past Colony live broadcasts as a steady autoplaying reel (investor demo)"
-            >
-              ▶ Recent 5 (Investor Demo)
-            </button>
-          )}
-          {demoReelActive && (
-            <button
-              type="button"
-              onClick={() => {
-                setDemoReelActive(false);
-                setActiveId(null);
-              }}
-              style={{
-                fontSize: "0.65rem",
-                padding: "1px 6px",
-                marginLeft: "8px",
-                border: "1px solid currentColor",
-                background: "rgba(236,16,36,0.9)",
-                color: "#fff",
-                cursor: "pointer",
-                verticalAlign: "middle",
-              }}
-              title="Stop the demo reel and return to normal live schedule"
-            >
-              EXIT REEL
-            </button>
-          )}
-        </h3>
+      {!compact && (
+        <div className="queue">
+          <h3>
+            {demoReelActive ? "Demo Reel — Continuous Archived Stream (no controls)" : "Recent Streams"}
+            {demoReelActive && (
+              <button
+                type="button"
+                onClick={() => {
+                  setDemoReelActive(false);
+                  setActiveId(null);
+                }}
+                className="reel-exit"
+              >
+                EXIT REEL
+              </button>
+            )}
+          </h3>
         <AnimatePresence>
           <motion.div
             variants={prefersReduced ? undefined : { visible: { transition: { staggerChildren: 0.06 } } }}
@@ -274,8 +243,7 @@ export default function LiveStage({ items: initialItems = [], initialActiveId }:
                   }
                   // In demo reel mode: no skipping — the reel auto-advances as a steady stream
                 }}
-                className={ev.id === activeId ? "active" : ""}
-                style={demoReelActive ? { pointerEvents: "none", opacity: 0.85 } : undefined}
+                className={`${ev.id === activeId ? "active" : ""}${demoReelActive ? " queue-item--demo" : ""}`}
                 variants={
                   prefersReduced
                     ? undefined
@@ -293,7 +261,7 @@ export default function LiveStage({ items: initialItems = [], initialActiveId }:
                   </span>
                 )}
                 {ev.when && <span className="when">{whenLabelFromItem(ev)}</span>}
-                {demoReelActive && <span style={{ marginLeft: 6, fontSize: "0.7em", opacity: 0.6 }} aria-hidden>archived</span>}
+                {demoReelActive && <span className="reel-archived" aria-hidden>archived</span>}
               </motion.button>
             ))}
             {channel247 && !demoReelActive && (
@@ -309,6 +277,7 @@ export default function LiveStage({ items: initialItems = [], initialActiveId }:
           </motion.div>
         </AnimatePresence>
       </div>
+      )}
 
       <div className="live-interactivity">
         <LiveChat liveEventId={is247 ? null : activeId} isMember={isMember} currentUser={user} />

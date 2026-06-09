@@ -47,7 +47,7 @@ export default function AboutPage() {
         <h2>The Team</h2>
         <p>
           Editorial leadership:{" "}
-          <Link href="/journalists">Sarah Mitchell, Marcus Webb, Rachel Torres, Pastor Dan Hollis</Link>. Founding
+          <Link href="/journalists">Sarah Mitchell, Marcus Webb, Rachel Torres, Pastor Dan Hollis, Wes Carter</Link> (5 on masthead post-seed). Founding
           publisher: Jake Merrick. Operations: JAM Media.
         </p>
       </article>

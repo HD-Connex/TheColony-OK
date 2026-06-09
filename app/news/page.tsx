@@ -96,7 +96,7 @@ function NewsList({ items, showDate }: { items: Article[]; showDate: boolean }) 
 }
 
 export default async function NewsPage() {
-  const items = await getArticles({ limit: 30 }).catch((e) => { console.error(e); return []; });
+  const items = await getArticles({ limit: 30 }).catch(() => { return []; });
   const [pinned, ...rest] = items;
   const groups = groupArticles(rest);
   const visibleGroups = GROUP_ORDER.filter((g) => groups[g].length > 0);

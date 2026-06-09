@@ -45,8 +45,8 @@ export default function MembershipAccount() {
         <p>Manage billing, change tier, or cancel anytime.</p>
         <div className="account-tier">
           <div>
-            <p style={{ fontWeight: 600, margin: 0 }}>{plan?.name ?? "Neighbor"}</p>
-            <p style={{ fontSize: ".875rem", color: "var(--color-text-secondary)", margin: ".25rem 0 0" }}>
+            <p className="font-semibold m-0">{plan?.name ?? "Neighbor"}</p>
+            <p className="text-sm" style={{ color: "var(--color-text-secondary)", margin: ".25rem 0 0" }}>
               {plan && plan.price > 0 ? `$${plan.price}/mo` : "Free tier"}
             </p>
           </div>

@@ -12,10 +12,11 @@ import { getShowsWithEpisodeCounts } from "@/lib/podcasts";
 import { getLiveEvents, eventsToStageItems } from "@/lib/live-events";
 import { formatDate, formatHeroDateline, formatTimeCT, formatLiveWhen, whenLabel } from "@/lib/format";
 import { CONTRIBUTOR_PLANS } from "@/lib/contributor-plans";
+import ClipsUploadForm from "./_components/ClipsUploadForm";
 
 export const revalidate = 60;
 
-const SITE_URL = "https://thecolonyok.com";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://thecolonyok.com";
 
 function authorName(a: Article): string {
   return (a.contributor?.name ?? "THE COLONY STAFF").toUpperCase();
@@ -244,6 +245,7 @@ export default async function HomePage() {
                 <LiveStageMount
                   items={liveItems}
                   initialActiveId={live.live[0]?.id ?? null}
+                  compact
                 />
               </div>
 
@@ -251,7 +253,7 @@ export default async function HomePage() {
                 <div className="live-status">
                   <span className="badge badge--new">{isOnAir ? "ON AIR" : "TONIGHT"}</span>
                   {nextLive && (
-                    <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", letterSpacing: "var(--track-wide)" }}>
+                    <span className="mono-eyebrow">
                       {nextLive.title.toUpperCase()}
                     </span>
                   )}
@@ -335,6 +337,15 @@ export default async function HomePage() {
                 </article>
               ))}
             </div>
+          </div>
+        </section>
+
+        {/* Member clips upload — direct follow-up to "Latest Dispatches" community area (post side-quest overlay fix).
+           Uses the Phase 2/3 clips backend (/api/clips/upload). Compact, token-aware form.
+           Real uploads need member auth + BLOB_READ_WRITE_TOKEN. */}
+        <section className="section section--paper">
+          <div className="container">
+            <ClipsUploadForm />
           </div>
         </section>
 

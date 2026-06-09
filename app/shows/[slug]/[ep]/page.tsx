@@ -17,7 +17,7 @@ import {
 import { formatDate, formatDuration, formatDurationLabel } from "@/lib/format";
 import { tierLocked, tierLabel } from "@/lib/tiers";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://thecolonyok.com";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://thecolonyok.com";
 
 interface Params {
   slug: string;

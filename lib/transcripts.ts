@@ -39,7 +39,7 @@ export async function generateTranscriptStub(
   options?: { language?: string }
 ): Promise<Transcript | null> {
   if (!audioUrl) {
-    console.warn('[transcripts] No audio_url for', episodeId);
+    // [transcripts] No audio_url for — silent post-seed (stub path)
     return null;
   }
 

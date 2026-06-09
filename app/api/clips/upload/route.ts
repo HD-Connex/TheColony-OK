@@ -6,20 +6,8 @@
 
 import { NextResponse } from 'next/server';
 import { put } from '@vercel/blob';
-import { createClient } from '@supabase/supabase-js';
 import { after } from 'next/server';
-
-// Lazy supabase client factory (avoids top-level env issues in build; per vercel best practices + worktree isolation)
-// Guard for missing env (common in isolated worktree builds without .env)
-const getSupabase = () => {
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-    return null as any; // dummy for build collection
-  }
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
-};
+import { supabaseAdmin } from "@/lib/supabase";
 
 export const runtime = 'nodejs'; // Full Node per vercel-functions (not edge, for Blob + DB + AI)
 
@@ -29,10 +17,7 @@ function jsonError(message: string, status = 400) {
 
 export async function POST(req: Request) {
   try {
-    const supabase = getSupabase();
-    if (!supabase) {
-      return jsonError('Supabase not configured (build stub)', 500);
-    }
+    const supabase = supabaseAdmin();
 
     // Auth via Supabase (vercel:auth + project existing pattern)
     const authHeader = req.headers.get('authorization');
@@ -76,16 +61,22 @@ export async function POST(req: Request) {
     }
 
     // Upload to Vercel Blob (per /vercel:vercel-storage directive for upload)
+    // IMPORTANT: BLOB_READ_WRITE_TOKEN must be set in Vercel project env (or .env.local for local).
+    // It is obtained from a Vercel Blob store (Storage tab). Without it, put() will fail at runtime (caught below).
+    // The lazy getSupabase + this try/catch + no top-level reads ensure `npm run build` succeeds even without .env.
+    if (!process.env.BLOB_READ_WRITE_TOKEN) {
+      console.warn('[clips/upload] BLOB_READ_WRITE_TOKEN missing at runtime — uploads will 500 until set on Vercel/Supabase Blob.');
+    }
     let blobUrl: string;
     try {
       const blob = await put(`clips/${user.id}/${Date.now()}-${file.name}`, file, {
         access: 'public',
-        token: process.env.BLOB_READ_WRITE_TOKEN, // Required for @vercel/blob
+        token: process.env.BLOB_READ_WRITE_TOKEN,
       });
       blobUrl = blob.url;
     } catch (e) {
       console.error('[clips/upload] Blob upload failed', e);
-      return jsonError('Upload failed', 500);
+      return jsonError('Upload failed (check BLOB_READ_WRITE_TOKEN)', 500);
     }
 
     // Create pending clip record (RLS will be enforced; service key bypass for server)
@@ -112,7 +103,7 @@ export async function POST(req: Request) {
       try {
         // Call existing /api/jobs/transcribe stub or enhance with Claude for summary/chapter
         // For now, log + would POST to jobs with clip id / blob url
-        console.log(`[clips/upload] Background transcribe triggered for clip ${clip.id} at ${blobUrl}`);
+        // [clips/upload] Background transcribe triggered (no console spam)
         // TODO: await fetch('/api/jobs/transcribe', { method: 'POST', body: JSON.stringify({ clipId: clip.id, url: blobUrl }) })
         // Then AI review (best-of-n, score), moderation queue or auto-approve per RICH.
       } catch (bgErr) {

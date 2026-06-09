@@ -15,6 +15,8 @@ let browser: SupabaseClient | null = null;
 
 export function supabaseBrowser(): SupabaseClient {
   if (browser) return browser;
+  // Single shared browser client (singleton). Config differs from server public (persist + detect for magic links).
+  // Aligns with lib/supabase.ts single shared export const supabase pattern (see also auth-server using supabasePublic).
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://placeholder.supabase.co";
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "placeholder-anon-key";
   browser = createClient(url, key, {

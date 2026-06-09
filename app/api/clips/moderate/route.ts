@@ -4,7 +4,7 @@
 // Calls safety on clip (stub or metadata), updates approved + score.
 
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { supabaseAdmin } from "@/lib/supabase";
 
 // Stub for ruflo-aidefence safety (in real: import and call with clip metadata or re-scan)
 async function runSafetyScan(clip: any): Promise<{ safe: boolean; score: number; reason?: string }> {
@@ -16,18 +16,6 @@ async function runSafetyScan(clip: any): Promise<{ safe: boolean; score: number;
   return { safe: true, score };
 }
 
-// Lazy supabase client factory (avoids top-level env issues in build; per vercel best practices + worktree isolation)
-// Guard for missing env (common in isolated worktree builds without .env)
-const getSupabase = () => {
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-    return null as any; // dummy for build collection
-  }
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
-};
-
 export const runtime = 'nodejs';
 
 function jsonError(message: string, status = 400) {
@@ -36,10 +24,7 @@ function jsonError(message: string, status = 400) {
 
 export async function POST(req: Request) {
   try {
-    const supabase = getSupabase();
-    if (!supabase) {
-      return jsonError('Supabase not configured (build stub)', 500);
-    }
+    const supabase = supabaseAdmin();
 
     // Simple admin check (vercel:auth + project patterns; enhance with real roles later)
     const authHeader = req.headers.get('authorization');

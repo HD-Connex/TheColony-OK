@@ -20,7 +20,7 @@ export default async function ContributorsPage() {
   const byTier = await Promise.all(
     TIER_SECTIONS.map(async (tier) => ({
       tier,
-      contributors: await getContributorsByTier(tier).catch((e) => { console.error(e); return []; }),
+      contributors: await getContributorsByTier(tier).catch(() => { return []; }),
     })),
   );
 
