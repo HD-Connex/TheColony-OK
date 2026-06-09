@@ -3,7 +3,7 @@
 ## Comprehensive Test Checklist (swarmed for deploy-ready root)
 
 **Pre-reqs for local or preview:**
-- Clone: `git clone -b latest-for-testing https://github.com/hizzy-made-it/thecolony-app.git thecolony-app && cd thecolony-app`
+- Clone: `git clone -b latest-for-testing https://github.com/hizzy-made-it/thecolony-app.git thecolony-app && cd thecolony-app` (thecolony-app production only; thecolony-ok GH archived after porting missing strategy docs + enhancements; legacy _archived_TheColony kept as design reference).
 - `npm install`
 - Supabase: link project, apply supabase/migrations/0003_episode_data_refinements.sql and 0004_realtime_chat_polls.sql (and prior if needed). Run supabase/seed-content.sql (or seed.sql) for test video ep e.g. show 'colony-report' + ep slug 'real-video-ep' or id with video_url/mux_playback_id + chapters JSONB.
 - Add 4 host jpgs to public/assets/images/hosts/ (jake-merrick.jpg, marcus-webb.jpg, rachel-torres.jpg, dan-hollis.jpg or per code mapping in [slug]page + README in hosts/). Use from C: session backup or generate matching OK aesthetic.

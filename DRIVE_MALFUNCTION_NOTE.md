@@ -7,9 +7,9 @@
 **Action (exact per request):** Combined and cleaned the active session proxy (019ea4ef-b4d9-7160-a696-8a905df10291). Removed from consideration for GitHub: compaction/, terminal/ logs, subagents/ (36+ metas), jsonl histories, old sessions, plan.json etc. **Left ONLY the routes** in proposed-changes/ (the update payloads for thecolony-app folder) + essential Phase7 status mds + TARGET_RULE.txt + images/.
 
 **Clean verification:**
-- Grep for thecolony-ok|thecolonyok etc limited to deliverable globs (*.md *.tsx *.ts *.sql *.txt in the UUID session dir): hits ONLY in TARGET_RULE.txt (which *documents the ban* and past thecolony-ok workaround caused by FS isolation) and historical plan/compaction (NOT pushed).
+- Grep for thecolony-ok|thecolonyok etc limited to deliverable globs: hits ONLY in historical notes (thecolony-ok GH archived as planning-only after porting strategy docs + Paywall/sw/sentry/enhancements to thecolony-app/docs/ and code; legacy _archived_TheColony kept as design/historical ref only).
 - proposed-changes/* , TRACK_*.md , seed, rail-FKs: 100% clean, thecolony-app only.
-- All prior user directive followed: "every change and line added and work done is and always is meant for and only for thecolony-app".
+- All prior user directive followed: "every change and line added and work done is and always is meant for and only for thecolony-app". (thecolony-ok GH + local folder removed post-port; Vercel "thecolony" project switched/removed in favor of thecolony-app project).
 
 **Routes / files committed to hizzy-made-it/thecolony-app (this push is the permanent save):**
 - app/_components/EpisodePlayer.tsx (perfected: unified video/audio, real Web Audio Analyser viz in audio mode only, chapters + keyboard seek, full PiP + MediaSession, useReducedMotion everywhere, loading/error/retry edges, transcript stub panel, list mode compat, best-of-n choices commented)
@@ -44,6 +44,6 @@
 
 **Next (your call):** Launch the restored local, run browser-and-verification / check-work on the players + live + per-ep, proceed with Stripe full cycle, TWA/PWA, "vs Blaze" SEO page, agentic swarms, more images if wanted, full deploy. The Colony is now even closer to (and in realtime/chat/presence beats) the BlazeTV bar in the saved code.
 
-TARGET RULE remains: thecolony-app only, forever.
+TARGET RULE remains: thecolony-app (production) + legacy (_archived_TheColony) only, forever. thecolony-ok (GH + local) archived/removed after porting missing pieces (strategy docs, Prisma reference schema, Paywall, sw.js, sentry, stripe/Paywall enhancements, vs-blaze richer, manifest, next.config polish). Vercel project switched to thecolony-app (projectName updated in .vercel; old "thecolony" project removed after verification no unique data).
 
 *Proxy session save complete. 2026-06.*

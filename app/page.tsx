@@ -303,16 +303,17 @@ export default async function HomePage() {
           </div>
         </section>
 
+        {/* Hub teaser — full depth lives on dedicated /news. Curated priority on home per agency hub model (inspired by newspaper front page + The Free Press/ProPublica excellence focus). */}
         <section className="section section--paper">
           <div className="container">
             <header className="section-header">
               <span className="section-header__number">N°04</span>
               <div className="section-header__group">
-                <h2 className="section-title">Daily News</h2>
-                <span className="section-header__dateline">FILED THIS MORNING · {newsItems.length} ITEMS</span>
+                <h2 className="section-title">Latest Dispatches</h2>
+                <span className="section-header__dateline">CURATED FOR THE HUB · {newsItems.length} THIS MORNING</span>
               </div>
               <Link className="section-link" href="/news">
-                All News →
+                Full News Desk →
               </Link>
             </header>
 

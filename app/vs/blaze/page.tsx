@@ -292,42 +292,17 @@ export default function VsBlazePage() {
             <Link className="btn btn--outline" href="/pricing">
               Upload Clips (Members)
             </Link>
+            <button className="px-4 py-1 bg-[#8B0000] text-white text-sm rounded ml-2">Upload Your 30s Clip (Members) • TWA Optimized</button>
+            <p className="text-[10px] mt-1">Clips feed personalization (L11) + live (L1) + vs national chats. See docs/RICH_COMMENTS_MEMBER_CLIPS.md + MOBILE_TWA_PWA_STRATEGY.md</p>
           </section>
 
-          <section className="membership-cta" aria-label="Join The Colony">
-            <div className="membership-cta__inner">
-              <div className="membership-cta__lead">
-                <p className="membership-cta__eyebrow">▼ JOIN THE BETTER VERSION</p>
-                <h2 className="membership-cta__title">Reader-funded independence. Oklahoma voice amplified.</h2>
-                <p className="membership-cta__subtitle">
-                  Transparent impact, full hub access, local shows, member clips, and ad-free journalism — from $4.99/mo.
-                </p>
-                <ul className="membership-cta__features">
-                  <li className="membership-cta__feature">All investigative articles — no paywall</li>
-                  <li className="membership-cta__feature">Full podcast library across every show</li>
-                  <li className="membership-cta__feature">Live streams + replay archives</li>
-                  <li className="membership-cta__feature">OK rural event access and member perks</li>
-                  <li className="membership-cta__feature">Cancel anytime — no contracts</li>
-                </ul>
-              </div>
-
-              <div className="membership-cta__price-card">
-                <div className="membership-cta__price">
-                  <span className="membership-cta__amount">$4.99</span>
-                  <span className="membership-cta__period">/MONTH</span>
-                </div>
-                <div className="membership-cta__actions">
-                  <Link className="btn btn--primary btn--lg btn--full" href="/pricing">
-                    View Membership
-                  </Link>
-                  <Link className="btn btn--outline btn--full" href="/live">
-                    Watch Live Now
-                  </Link>
-                </div>
-                <p className="membership-cta__disclaimer">PWA install · TWA on Android · Secure checkout via Stripe</p>
-              </div>
-            </div>
-            <div className="membership-cta__footer-band">▼ BETTER THAN BLAZE FOR OKLAHOMA AND RURAL PATRIOTS</div>
+          {/* Contextual close for comparison page — full hub value & membership pitch lives on home (as all-in-one) and /pricing (conversion). Per agency hub model + competitor (TheFP clear value, ProPublica trust signals). */}
+          <section className="section section--paper section--tight text-center" aria-label="Choose The Colony">
+            <p className="mono-eyebrow">▼ READER-FUNDED • OK-ROOTED • BETTER FOR LOCAL</p>
+            <Link className="btn btn--primary btn--lg" href="/pricing">
+              Join The Colony — from $4.99/mo (Founding)
+            </Link>
+            <p className="text-sm mt-2">Full details, perks, and comparison on the Membership page. Watch live now on the hub.</p>
           </section>
         </div>
       </main>

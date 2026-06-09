@@ -88,3 +88,49 @@
 }
 
 .btn--full { width: 100%; }
+
+/* Focus states (ui-ux-pro-max §1 Accessibility CRITICAL + §4 state-clarity) */
+.btn:focus-visible,
+.nav__link:focus-visible,
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+summary:focus-visible {
+  outline: 2px solid var(--color-alarm);
+  outline-offset: 2px;
+}
+
+/* Paywall — brutalist patriotic integration (ui-ux-pro-max: zero radius, semantic tokens, .btn, high contrast, no raw hex, mobile touch) */
+.paywall {
+  border: var(--rule-medium) solid var(--color-ink);
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+  padding: var(--space-8);
+  text-align: center;
+  margin-block: var(--space-8);
+}
+.paywall h3 {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-black);
+  letter-spacing: var(--track-tight);
+  text-transform: uppercase;
+  margin-bottom: var(--space-3);
+  color: var(--color-ink);
+}
+.paywall p {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: var(--leading-relaxed);
+  color: var(--color-text-ink-soft);
+  max-width: 48ch;
+  margin: 0 auto var(--space-4);
+}
+.paywall .paywall__disclaimer {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--track-wide);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin-top: var(--space-4);
+}

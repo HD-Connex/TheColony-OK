@@ -153,24 +153,23 @@ export default async function PodcastShowPage({ params }: PageProps) {
             </header>
 
             <div className="grid-feature">
-              <div style={{ padding: "var(--space-6)", borderRight: "var(--rule-hairline) solid var(--color-border)", display: "flex", gap: "var(--space-6)", alignItems: "flex-start" }}>
-                <div style={{ flexShrink: 0 }}>
+              <div className="host-bio">
+                <div className="host-bio__photo">
                   <Image
                     src={hostPhoto(show.slug ?? "", null, show.host)}
                     alt={`${show.host} — host of The Colony OK`}
                     width={120}
                     height={120}
-                    style={{ borderRadius: "var(--radius-sm)", objectFit: "cover", border: "var(--rule-medium) solid var(--color-border-light)" }}
                   />
                 </div>
-                <div style={{ minWidth: 0 }}>
-                  <h3 style={{ fontFamily: "var(--font-display)", fontSize: "var(--text-3xl)", fontWeight: 900, letterSpacing: "var(--track-tight)", marginBottom: "var(--space-4)" }}>{show.host}</h3>
-                  <p style={{ color: "var(--color-text-secondary)", lineHeight: "var(--leading-relaxed)", marginBottom: "var(--space-4)" }}>{show.description}</p>
+                <div className="host-bio__content">
+                  <h3 className="host-bio__name">{show.host}</h3>
+                  <p className="host-bio__desc">{show.description}</p>
                 </div>
               </div>
-              <div style={{ padding: "var(--space-6)", backgroundColor: "var(--color-ink-soft)" }}>
-                <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", letterSpacing: "var(--track-wider)", textTransform: "uppercase", color: "var(--color-alarm)", marginBottom: "var(--space-3)" }}>▼ CONTACT</div>
-                <p style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-sm)", color: "var(--color-paper)", lineHeight: "var(--leading-relaxed)" }}>
+              <div className="host-contact">
+                <div className="host-contact__label">▼ CONTACT</div>
+                <p className="host-contact__info">
                   {show.host.toLowerCase().split(" ")[0]}@thecolonyok.com<br />
                   P.O. Box 12, OKC OK 73101
                 </p>

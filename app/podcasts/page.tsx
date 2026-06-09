@@ -76,6 +76,16 @@ export default async function PodcastsIndexPage() {
               </SectionBlock>
             </section>
           )}
+
+          {/* Community clips elevation — per plan ideas. Teaser for member content on hub. */}
+          <section className="section section--tight">
+            <SectionBlock number="N°01b" title="Member Clips from the Field" dateline="COMMUNITY VOICES">
+              <div className="clips-teaser">
+                <p>Ranch reports, faith moments, local updates — 30s clips from members, featured across live and network.</p>
+                <Link href="/pricing" className="btn btn--outline btn--sm">Become a member to upload</Link>
+              </div>
+            </SectionBlock>
+          </section>
         </div>
       </section>
 

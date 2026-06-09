@@ -2,21 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import HeaderNav from "./HeaderNav";
 import { getArticles } from "@/lib/articles";
-
-function formatTimeCT(iso?: string | null): string {
-  if (!iso) return "";
-  const d = new Date(iso);
-  if (Number.isNaN(d.valueOf())) return "";
-  return (
-    d
-      .toLocaleTimeString("en-US", {
-        hour: "numeric",
-        minute: "2-digit",
-        timeZone: "America/Chicago",
-      })
-      .toUpperCase() + " CT"
-  );
-}
+import { formatTimeCT } from "@/lib/format";
 
 function TickerItems({ items }: { items: { href: string; title: string; filed: string }[] }) {
   if (!items.length) return null;

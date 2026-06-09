@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import InnerPageShell from "../_components/InnerPageShell";
 import SectionBlock from "../_components/SectionBlock";
 import ContributorCard from "../_components/ContributorCard";
+import AuthorityBadge from "../_components/AuthorityBadge";
 import { CONTRIBUTOR_PLANS } from "@/lib/contributor-plans";
 import { getContributors, getContributorsByTier } from "@/lib/contributors";
 import type { TierId } from "@/lib/contributor-tiers";
@@ -74,6 +75,7 @@ export default async function JournalistsPage() {
                     <h2 className="journalist-card__name">
                       <Link href={`/contributors/${c.slug}`}>{c.name}</Link>
                     </h2>
+                    <AuthorityBadge verified />
                     {c.bio && <p className="journalist-card__bio">{c.bio}</p>}
                     <p className="journalist-card__contact">{contactLine(c)}</p>
                   </div>
@@ -87,8 +89,8 @@ export default async function JournalistsPage() {
 
         {hasExamples && (
           <div className="tier-examples">
-            <p className="page-header__eyebrow" style={{ marginBottom: "var(--space-6)" }}>
-              ▼ TIER PLACEMENT EXAMPLES
+            <p className="page-header__eyebrow" style={{ marginBottom: "var(--space-4)" }}>
+              ▼ TIER PLACEMENT EXAMPLES (SEE DEDICATED MASTHEAD)
             </p>
             <div className="contrib-directory__grid">
               {tierExamples.map(
@@ -102,57 +104,21 @@ export default async function JournalistsPage() {
                   ),
               )}
             </div>
+            <p className="text-center text-sm mt-4">
+              Full tiers, exposure details, and application on the dedicated <Link href="/contributors/join">Masthead Join</Link> page.
+            </p>
           </div>
         )}
       </section>
 
-      <section className="section section--paper">
-        <SectionBlock
-          number="N°02"
-          title="Join the Masthead"
-          dateline="CONTRIBUTOR · FEATURED · HEADLINER"
-          linkHref="/contributors/join"
-          linkLabel="Apply Now →"
-        >
-          <div className="prose-block" style={{ fontSize: "var(--text-lg)", marginBottom: "var(--space-6)" }}>
-            <p>
-              Put your name on Oklahoma&apos;s independent press. Each tier buys more exposure — directory listing,
-              featured placement, or headliner hero treatment across the network.
-            </p>
-          </div>
-
-          <div className="contrib-plan-grid" aria-label="Contributor pricing tiers">
-            {CONTRIBUTOR_PLANS.map((plan) => (
-              <article
-                key={plan.id}
-                className={`contrib-plan-card${plan.highlight ? " contrib-plan-card--highlight" : ""}`}
-              >
-                <p className="contrib-plan-card__eyebrow">
-                  {plan.highlight ? "▼ MOST POPULAR" : `▼ ${plan.tier.toUpperCase()}`}
-                </p>
-                <h3 className="contrib-plan-card__name">{plan.name}</h3>
-                <div>
-                  <span className="contrib-plan-card__price">${plan.price}</span>{" "}
-                  <span className="contrib-plan-card__period">/ month</span>
-                </div>
-                <p className="contrib-plan-card__summary">{plan.exposureSummary}</p>
-                <Link
-                  className={`btn ${plan.highlight ? "btn--primary" : "btn--ink"} btn--full`}
-                  href={`/contributors/join?plan=${plan.id}`}
-                >
-                  Apply — {plan.name}
-                </Link>
-              </article>
-            ))}
-          </div>
-        </SectionBlock>
-      </section>
-
-      <section className="section section--alarm section--tight">
-        <div style={{ textAlign: "center" }}>
-          <Link className="btn btn--ink btn--lg" href="/contributors/join">
+      {/* Dedicated masthead apply lives on /contributors/join and /contributors (per hub model — journalists page focuses on authority & bylines, not repeated full plans grid). */}
+      <section className="section section--paper section--tight">
+        <div className="text-center">
+          <p className="mono-eyebrow">▼ NAMED JOURNALISM • VERIFIED WORK</p>
+          <Link className="btn btn--primary btn--lg" href="/contributors/join">
             Join the Masthead — from $14.99/mo
           </Link>
+          <p className="text-sm mt-3 text-muted">Directory + bios here. Full application and tiers on the Masthead page.</p>
         </div>
       </section>
     </InnerPageShell>

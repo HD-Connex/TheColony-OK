@@ -13,6 +13,8 @@ import SectionBlock from "@/app/_components/SectionBlock";
 import EpisodePlayer from "@/app/_components/EpisodePlayer";
 import EpisodeShare from "@/app/_components/EpisodeShare";
 import JsonLd from "@/app/_components/JsonLd";
+import AuthorityBadge from "@/app/_components/AuthorityBadge";
+import ClipsTeaser from "@/app/_components/ClipsTeaser";
 import ChapterSidebar from "../../_components/ChapterSidebar";
 import { formatDate, formatDurationLabel } from "@/lib/format";
 
@@ -139,11 +141,14 @@ export default async function PerEpisodePage({ params }: { params: Promise<Param
                   {episode.host_name}
                   {contributor ? " → full profile" : ""}
                 </Link>
+                <AuthorityBadge verified />
                 <p style={{ marginBottom: 0, marginTop: "var(--space-3)", color: "var(--color-text-secondary)" }}>
                   Explore their body of work across stories, podcasts &amp; video.
                 </p>
               </aside>
             )}
+
+            <ClipsTeaser count={8} />
 
             <nav className="ep-nav" aria-label="Episode navigation">
               {prev && (

@@ -11,13 +11,15 @@ export default function NewsletterForm() {
 
   return (
     <form className="newsletter__form" onSubmit={handleSubmit}>
+      <label className="sr-only" htmlFor="newsletter-email">Email address for The Briefing</label>
       <input
+        id="newsletter-email"
         type="email"
         name="email"
         className="newsletter__input"
         placeholder="YOUR@EMAIL.COM"
         required
-        aria-label="Email address"
+        aria-label="Email address for The Briefing"
       />
       <button type="submit" className="btn btn--primary">
         Join Free

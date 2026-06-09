@@ -1,5 +1,14 @@
 :root {
-  /* ─── Brutalist Statement Press — patriotic navy + alarm red ─── */
+  /* ─── Brutalist Statement Press — Patriotic Navy + Alarm (ui-ux-pro-max applied) ───
+     Top-tier agency level for independent OK media hub.
+     - Style: Brutalism (zero radius, heavy rules, raw industrial) + Patriotic (navy #0a1f3d depth, cream paper #f4f0e6, alarm red #ec1024 urgency).
+     - Fonts (57 pairings match): Archivo Black (display/statement), Inter Tight (body), JetBrains Mono (eyebrows/datelines/N°).
+     - Tokens: 8pt/4pt rhythm, semantic colors only (no raw hex in components), 1.45-1.65 leading, strong hierarchy.
+     - UX (99 guidelines + priorities): A11y first (4.5:1+, focus-visible, labels, aria, reduced-motion), touch 44px+, mobile-first, one primary CTA/view, meaningful motion, semantic nav, E-E-A-T visuals (named, verified, transparent).
+     - Research applied: Home as "newspaper front page" curated hub (The Free Press excellence + ProPublica trust/depth). Dedicated pages own depth (no repeated full membership grids/CTAs — home owns hub value, pricing owns conversion, journalists authority, live TV immersion).
+     - Legacy fidelity: Direct from _archived_TheColony/legacy/ (static CSS/JS/HTML brutalist source) + evolved navy for screen patriotic strength.
+     - Agency polish: Perfect spacing, micro-states (translate press, alarm focus rings), purposeful sections only, high-quality imagery (aesthetic topic JPGs), trust signals everywhere.
+  */
   --color-ink: #0a1f3d;
   --color-ink-soft: #0f2a4f;
   --color-paper: #f4f0e6;

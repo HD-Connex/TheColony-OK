@@ -1,20 +1,21 @@
 # thecolony-app
 
-Production app for **The Colony OK** — Oklahoma's reader-funded conservative press (stories, podcasts, live, $4.99 membership). Deployed at [thecolonyok.com](https://thecolonyok.com) / [thecolony-sand.vercel.app](https://thecolony-sand.vercel.app).
+Production app for **The Colony OK** — Oklahoma's reader-funded conservative press (stories, podcasts, live, $4.99 membership). Deployed at [thecolonyok.com](https://thecolonyok.com) / [thecolony-app.vercel.app](https://thecolony-app.vercel.app) (Vercel project thecolony-app only).
 
-**Design source:** `_archived_TheColony/legacy/` (patriotic brutalist HTML/CSS). **Specs archive:** `hizzy-made-it/thecolony-ok` (planning docs only — not the UI repo).
+**Design source / Legacy:** `_archived_TheColony/legacy/` (patriotic brutalist HTML/CSS + full prior Next.js impl; kept as historical reference only).
 
-The Colony App - TWA/Mobile client + enhancements for https://thecolony.cc (AI agent forums, marketplace, social network).
+**Production project only:** thecolony-app (GitHub hizzy-made-it/thecolony-app + Vercel thecolony-app project). No other "thecolony" or "thecolony-ok" roots active (thecolony-ok archived as planning-only; Vercel "thecolony" project removed after consolidation verification).
 
-Phase 7 multi-agent build artifacts:
-- ARCHITECTURE_LAYERS.md (updated with Layers 10-15+ audit)
-- COMPETITIVE_MATRIX.md (new, global + agentic + competitive vs Blaze/Daily Wire/Newsmax)
+Phase 7 multi-agent build artifacts (with D+15+ extensions ported from prior tracks):
+- ARCHITECTURE_LAYERS.md (Layers 10-15+)
+- COMPETITIVE_MATRIX.md (vs Blaze/DW/Newsmax + local OK moat)
+- docs/ (LOCAL_OK_CONTENT_STRATEGY.md, MOBILE_TWA_PWA_STRATEGY.md, RICH_COMMENTS_MEMBER_CLIPS.md, AGENT_SWARM_TEMPLATES.md, MONITORING.md — ported for completeness)
 
 See docs in root for TRACK D+15 AUDITOR/VERIFIER COMPLETE report.
 
-**Key Extensions Tracked:** full CI + Sentry, exhaustive MCP per layer, formal swarm templates + best-of-n (agentic), rich comments + member clips, local OK/rural content strategy + partnerships, TWA/mobile, "The Colony vs Blaze" page.
+**Key Extensions:** full CI + Sentry (proposed), formal swarm templates + best-of-n (agentic), rich comments + member clips, local OK/rural content strategy + partnerships, TWA/PWA/mobile, "The Colony vs Blaze" page, PWA sw + paywall + enhanced stripe/monetization.
 
-Created via Phase 7 Auditor/Verifier process (2026-06-08).
+Created via Phase 7 Auditor/Verifier process (2026-06-08). Consolidated to thecolony-app only.
 
 
 ## D: DRIVE MALFUNCTION — PROGRESS SAVED (added commit)

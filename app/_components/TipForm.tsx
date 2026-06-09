@@ -17,11 +17,14 @@ export default function TipForm() {
 
   return (
     <form className="tip-form" onSubmit={handleSubmit}>
-      <textarea name="tip" rows={6} placeholder="Your tip..." required />
-      <input type="email" name="contact" placeholder="OPTIONAL CONTACT EMAIL" />
+      <label htmlFor="tip" className="sr-only">Your anonymous tip or story lead</label>
+      <textarea id="tip" name="tip" rows={6} placeholder="Your tip..." required aria-label="Your anonymous tip or story lead" />
+      <label htmlFor="contact" className="sr-only">Optional contact email (we will never publish it)</label>
+      <input id="contact" type="email" name="contact" placeholder="OPTIONAL CONTACT EMAIL" aria-label="Optional contact email (we will never publish it)" />
       <button type="submit" className="btn btn--primary">
         Submit Tip
       </button>
+      <p className="tip-form__note">Secure mailto submission. We protect sources.</p>
     </form>
   );
 }

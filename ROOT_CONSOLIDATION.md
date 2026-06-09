@@ -25,9 +25,10 @@ Date: 2026-06-08
 - **Docs**:
   Updated TESTING_DEPLOY.md with "Root Consolidation Complete" section documenting all (framer, images, video player, live 24/7 + realtime) as "in the root".
   Added this ROOT_CONSOLIDATION.md summarizing the swarm.
+  (D+15+ strategy docs from thecolony-ok planning archive ported to docs/ for completeness: LOCAL_OK_CONTENT_STRATEGY, MOBILE_TWA_PWA, RICH_COMMENTS_MEMBER_CLIPS, AGENT_SWARM_TEMPLATES, MONITORING.)
 
 ## Target
-TARGET thecolony-app ONLY (hizzy-made-it/thecolony-app). No other repos. Branch: latest-for-testing. Root now complete for the implemented features (personality images, framer motion, video/live/realtime players, package for deploy).
+TARGET thecolony-app ONLY (hizzy-made-it/thecolony-app). No other repos (thecolony-ok GH archived as planning-only after porting key pieces; legacy _archived_TheColony kept as design/historical ref). Branch: latest-for-testing. Root now complete for the implemented features (personality images, framer motion, video/live/realtime players, package for deploy) + D+15+ extensions.
 
 See TESTING_DEPLOY.md for test/deploy steps. All in one repo for Vercel + Supabase.
 

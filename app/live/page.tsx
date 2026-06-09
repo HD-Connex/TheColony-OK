@@ -7,6 +7,7 @@ import Countdown from "../_components/Countdown";
 import LiveStageMount from "../_components/LiveStageMount";
 import { type StageItem } from "../_components/LiveStage";
 import LivePlatformTabs from "../_components/LivePlatformTabs";
+import ClipsTeaser from "../_components/ClipsTeaser";
 import { getLiveEvents, eventsToStageItems, tierLocked, tierLabel, type LiveEvent } from "@/lib/live-events";
 import { whenLabel, formatLiveWhen } from "@/lib/format";
 
@@ -54,14 +55,14 @@ export default async function LivePage({
         <div className="container">
           <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Watch Live" }]} />
           <PageHeader
-            eyebrow="▼ SECTION N°03 · ON AIR"
+            eyebrow="▼ SECTION N°03 · LIVE TV HUB"
             title="Watch Live"
-            lede="Live broadcasts Monday, Wednesday, and Friday at 7PM CT. Replays land here the morning after each broadcast. Tune in from any platform — we mirror the stream across YouTube, Rumble, and our site."
+            lede="Oklahoma's independent broadcast. Mon/Wed/Fri 7PM CT live + full archive. Multi-platform mirror (YouTube, Rumble, site). TV-guide schedule, real-time community, and seamless replays — built for the hub."
           />
 
           <LivePlatformTabs />
 
-          <section className="live-section" aria-label="Current broadcast" style={{ marginBottom: "var(--space-12)" }}>
+          <section className="live-section section--tight" aria-label="Current broadcast">
             <div className="live-player">
               <LiveStageMount
                 items={items}
@@ -74,7 +75,7 @@ export default async function LivePage({
               <div className="live-status">
                 <span className="badge badge--new">{isOnAir ? "ON AIR" : "TONIGHT"}</span>
                 {nextLive && (
-                  <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", letterSpacing: "var(--track-wide)" }}>
+                  <span className="text-mono text-upper" style={{ fontSize: "var(--text-xs)" }}>
                     {nextLive.title.slice(0, 24).toUpperCase()}
                   </span>
                 )}
@@ -115,6 +116,8 @@ export default async function LivePage({
               <Link className="btn btn--ink btn--full" href="/shows">
                 Browse All Shows
               </Link>
+
+              <ClipsTeaser count={15} />
             </div>
           </section>
 
@@ -123,7 +126,7 @@ export default async function LivePage({
               <header className="section-header">
                 <span className="section-header__number">N°01</span>
                 <div className="section-header__group">
-                  <h2 className="section-title">Upcoming</h2>
+                  <h2 className="section-title">Channel Guide — Upcoming</h2>
                   <span className="section-header__dateline">{upcoming.length} SCHEDULED</span>
                 </div>
               </header>

@@ -581,3 +581,37 @@ main:not(.page--inner) { padding-bottom: 0; }
   border: var(--rule-hairline) solid var(--color-border);
   color: var(--color-text-muted);
 }
+
+/* New agency components per plan (ui-ux-pro-max + ideas) */
+.authority-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--track-wide);
+  text-transform: uppercase;
+  color: var(--color-alarm);
+  margin-left: var(--space-2);
+}
+.authority-badge__icon { font-size: 0.8em; }
+.authority-badge__tier { color: var(--color-text-muted); }
+
+.clips-teaser {
+  border: var(--rule-hairline) solid var(--color-border);
+  padding: var(--space-4);
+  background: var(--color-paper);
+  color: var(--color-ink);
+}
+.clips-teaser__header { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-2); }
+.clips-teaser__count { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--color-alarm); }
+.clips-teaser__desc { font-size: var(--text-sm); line-height: var(--leading-relaxed); margin: 0 0 var(--space-3); }
+
+.host-bio { display: flex; gap: var(--space-6); align-items: flex-start; padding: var(--space-6); border-right: var(--rule-hairline) solid var(--color-border); }
+.host-bio__photo img { border-radius: var(--radius-sm); object-fit: cover; border: var(--rule-medium) solid var(--color-border-light); }
+.host-bio__name { font-family: var(--font-display); font-size: var(--text-3xl); font-weight: 900; letter-spacing: var(--track-tight); margin-bottom: var(--space-4); }
+.host-bio__desc { color: var(--color-text-secondary); line-height: var(--leading-relaxed); margin-bottom: var(--space-4); }
+
+.host-contact { padding: var(--space-6); background-color: var(--color-ink-soft); color: var(--color-paper); }
+.host-contact__label { font-family: var(--font-mono); font-size: var(--text-xs); letter-spacing: var(--track-wider); text-transform: uppercase; color: var(--color-alarm); margin-bottom: var(--space-3); }
+.host-contact__info { font-family: var(--font-mono); font-size: var(--text-sm); line-height: var(--leading-relaxed); }

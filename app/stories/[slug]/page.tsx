@@ -4,10 +4,12 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Breadcrumbs from "../../_components/Breadcrumbs";
 import JsonLd from "../../_components/JsonLd";
+import AuthorityBadge from "../../_components/AuthorityBadge";
 import { getArticleBySlug, getRelatedArticles } from "@/lib/articles";
 import { formatDate } from "@/lib/format";
 import { tierLocked } from "@/lib/tiers";
 import { storyHero, hostPhoto } from "@/lib/media-map";
+import { Paywall } from "../../_components/Paywall";
 
 export const revalidate = 120;
 
@@ -123,7 +125,6 @@ export default async function StoryPage({ params }: PageProps) {
                         alt={avatarAlt}
                         width={48}
                         height={48}
-                        style={{ objectFit: "cover" }}
                       />
                     );
                   })()}
@@ -135,6 +136,7 @@ export default async function StoryPage({ params }: PageProps) {
                     ) : (
                       <span className="article__author-name">{author}</span>
                     )}
+                    <AuthorityBadge verified tier={article.contributor?.tier} />
                   </div>
                   <div className="article__date-read">
                     <time className="article__date" dateTime={article.published_at}>
@@ -152,7 +154,6 @@ export default async function StoryPage({ params }: PageProps) {
                   width={1200}
                   height={630}
                   sizes="100vw"
-                  style={{ width: "100%", height: "auto", display: "block" }}
                   priority
                 />
                 {(article.hero_alt || article.title) && (
@@ -160,28 +161,18 @@ export default async function StoryPage({ params }: PageProps) {
                 )}
               </figure>
 
-              <div className={locked ? "paywall" : undefined}>
-                <div className="article__body">
-                  {paragraphs.map((p, i) => (
-                    <p key={i}>{p}</p>
-                  ))}
-                </div>
-                {locked && (
-                  <>
-                    <div className="paywall__fade" aria-hidden />
-                    <div className="paywall__gate">
-                      <h2 className="paywall__gate-title">Members Only</h2>
-                      <p className="paywall__gate-copy">
-                        This story is reserved for Colony members. Join for full access to investigative reporting —
-                        starting at $4.99/mo.
-                      </p>
-                      <Link href="/pricing" className="btn btn--primary">
-                        View Membership
-                      </Link>
-                    </div>
-                  </>
-                )}
+              <div className="article__body">
+                {paragraphs.map((p, i) => (
+                  <p key={i}>{p}</p>
+                ))}
               </div>
+              {locked && (
+                <Paywall
+                  perk="STORY_EXCLUSIVE"
+                  episodeTitle={article.title}
+                  returnUrl={`/stories/${article.slug}`}
+                />
+              )}
 
               <div className="article__share">
                 <span className="article__share-label">Share</span>
