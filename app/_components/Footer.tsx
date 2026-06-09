@@ -80,6 +80,9 @@ export default function Footer() {
               <Link className="footer__link" href="/journalists">
                 Journalists
               </Link>
+              <Link className="footer__link" href="/contributors/join">
+                Join the Masthead
+              </Link>
             </div>
           </div>
           <div>

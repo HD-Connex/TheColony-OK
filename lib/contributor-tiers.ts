@@ -20,3 +20,10 @@ export function tierLabel(tier: string): string {
 export function tierBadgeClass(tier: string): string {
   return TIER_BADGE_CLASSES[tier as TierId] ?? TIER_BADGE_CLASSES.contributor;
 }
+
+export function tierFromPlanId(planId: string): TierId | null {
+  if (planId === "headliner" || planId === "featured" || planId === "contributor") {
+    return planId;
+  }
+  return null;
+}

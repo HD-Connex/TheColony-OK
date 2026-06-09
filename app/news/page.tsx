@@ -143,15 +143,15 @@ export default async function NewsPage() {
           )}
 
           {visibleGroups.map((group, index) => (
-            <section key={group} className="section" aria-label={GROUP_LABELS[group]}>
-              <SectionBlock
-                number={`N°${String(index + 1).padStart(2, "0")}`}
-                title={GROUP_LABELS[group]}
-                dateline={sectionDateline(group, groups[group])}
-              >
-                <NewsList items={groups[group]} showDate={group !== "today"} />
-              </SectionBlock>
-            </section>
+            <SectionBlock
+              key={group}
+              number={`N°${String(index + 1).padStart(2, "0")}`}
+              title={GROUP_LABELS[group]}
+              dateline={sectionDateline(group, groups[group])}
+              tone={index % 2 === 0 ? "paper" : "ink"}
+            >
+              <NewsList items={groups[group]} showDate={group !== "today"} />
+            </SectionBlock>
           ))}
         </>
       )}

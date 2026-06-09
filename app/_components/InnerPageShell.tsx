@@ -8,6 +8,7 @@ interface Props {
   lede?: React.ReactNode;
   children: React.ReactNode;
   section?: boolean;
+  tone?: "ink" | "paper";
 }
 
 export default function InnerPageShell({
@@ -17,14 +18,18 @@ export default function InnerPageShell({
   lede,
   children,
   section = true,
+  tone = "ink",
 }: Props) {
+  const toneClass = tone === "paper" ? " section--paper" : "";
   return (
-    <main id="main">
-      <div className="container">
-        <Breadcrumbs items={breadcrumbs} />
-        <PageHeader eyebrow={eyebrow} title={title} lede={lede} />
-        {section ? <section className="section section--tight">{children}</section> : children}
-      </div>
+    <main id="main" className="page--inner">
+      <section className={`section section--tight section--flush${toneClass}`}>
+        <div className="container">
+          <Breadcrumbs items={breadcrumbs} />
+          <PageHeader eyebrow={eyebrow} title={title} lede={lede} />
+          {section ? <section className="section section--tight">{children}</section> : children}
+        </div>
+      </section>
     </main>
   );
 }

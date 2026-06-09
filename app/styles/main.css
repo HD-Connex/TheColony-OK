@@ -10,6 +10,7 @@
 @import "./components/badges.css";
 @import "./components/podcast.css";
 @import "./components/live.css";
+@import "./components/contributors.css";
 @import "./components/articles.css";
 @import "./components/newsletter.css";
 @import "./components/breadcrumbs.css";
@@ -33,6 +34,33 @@
 .section--tight { padding-block: var(--space-10); }
 .section--paper { background-color: var(--color-paper); color: var(--color-ink); border-top-color: var(--color-ink); }
 .section--paper a { color: var(--color-ink); }
+
+.section--ink {
+  background-color: var(--color-ink);
+  color: var(--color-paper);
+  border-top-color: var(--color-border);
+}
+
+.section--alarm {
+  background-color: var(--color-alarm);
+  color: var(--color-ink);
+  border-top-color: var(--color-ink);
+}
+
+.section--alarm .section-title,
+.section--alarm .section-header__number,
+.section--alarm .section-header__dateline {
+  color: var(--color-ink);
+}
+
+.section--alarm .section-header {
+  border-bottom-color: var(--color-ink);
+}
+
+.section--alarm .section-link {
+  color: var(--color-ink);
+  border-bottom-color: var(--color-ink);
+}
 
 .section-header {
   display: grid;

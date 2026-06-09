@@ -33,56 +33,60 @@ export default async function PodcastsIndexPage() {
   ]);
 
   return (
-    <main id="main">
-      <div className="container">
-        <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Podcast Network" }]} />
+    <main id="main" className="page--inner">
+      <section className="section section--paper section--flush section--tight">
+        <div className="container">
+          <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Podcast Network" }]} />
 
-        <PageHeader
-          eyebrow="▼ SECTION N°02 · PODCAST NETWORK"
-          title="Podcast Network"
-          lede={`${podcast.totalShows} shows. ${podcast.totalEpisodes} episodes. Investigative reporting, faith, freedom, and Oklahoma stories — each show led by a host who lives the beat.`}
-        />
+          <PageHeader
+            eyebrow="▼ SECTION N°02 · PODCAST NETWORK"
+            title="Podcast Network"
+            lede={`${podcast.totalShows} shows. ${podcast.totalEpisodes} episodes. Investigative reporting, faith, freedom, and Oklahoma stories — each show led by a host who lives the beat.`}
+          />
 
-        {recent.length > 0 && (
-          <section className="section section--tight" aria-label="Latest across network">
-            <SectionBlock
-              number="N°01"
-              title="Latest Across Network"
-              dateline={`${recent.length} RECENT EPISODES`}
-            >
-              <div className="episode-rail">
-                {recent.map((ep) => {
-                  const thumb =
-                    ep.thumbnail_url ??
-                    ep.cover_url ??
-                    PODCAST_ART[ep.show_slug] ??
-                    "/assets/images/podcast-colony-report.svg";
-                  return (
-                    <Link
-                      key={ep.id}
-                      href={`/podcasts/${ep.show_slug}/${ep.slug || ep.id}`}
-                      className="episode-rail__card"
-                    >
-                      <div className="episode-rail__thumb">
-                        <img src={thumb} alt="" loading="lazy" />
-                      </div>
-                      <div className="episode-rail__body">
-                        <span className="episode-rail__show">{ep.show_title}</span>
-                        <h3 className="episode-rail__title">{ep.title}</h3>
-                        <span className="episode-rail__meta">
-                          {formatDate(ep.pub_date)}
-                          {ep.duration_s ? ` · ${formatDurationLabel(ep.duration_s)}` : ""}
-                        </span>
-                      </div>
-                    </Link>
-                  );
-                })}
-              </div>
-            </SectionBlock>
-          </section>
-        )}
+          {recent.length > 0 && (
+            <section className="section section--tight" aria-label="Latest across network">
+              <SectionBlock
+                number="N°01"
+                title="Latest Across Network"
+                dateline={`${recent.length} RECENT EPISODES`}
+              >
+                <div className="episode-rail">
+                  {recent.map((ep) => {
+                    const thumb =
+                      ep.thumbnail_url ??
+                      ep.cover_url ??
+                      PODCAST_ART[ep.show_slug] ??
+                      "/assets/images/podcast-colony-report.svg";
+                    return (
+                      <Link
+                        key={ep.id}
+                        href={`/podcasts/${ep.show_slug}/${ep.slug || ep.id}`}
+                        className="episode-rail__card"
+                      >
+                        <div className="episode-rail__thumb">
+                          <img src={thumb} alt="" loading="lazy" />
+                        </div>
+                        <div className="episode-rail__body">
+                          <span className="episode-rail__show">{ep.show_title}</span>
+                          <h3 className="episode-rail__title">{ep.title}</h3>
+                          <span className="episode-rail__meta">
+                            {formatDate(ep.pub_date)}
+                            {ep.duration_s ? ` · ${formatDurationLabel(ep.duration_s)}` : ""}
+                          </span>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </SectionBlock>
+            </section>
+          )}
+        </div>
+      </section>
 
-        <section className="section" aria-label="Podcast Network">
+      <section className="section section--ink" aria-label="Podcast Network">
+        <div className="container">
           <header className="section-header">
             <span className="section-header__number">N°02</span>
             <div className="section-header__group">
@@ -98,8 +102,8 @@ export default async function PodcastsIndexPage() {
           ) : (
             <PodcastSearchGrid shows={podcast.shows} />
           )}
-        </section>
-      </div>
+        </div>
+      </section>
     </main>
   );
 }

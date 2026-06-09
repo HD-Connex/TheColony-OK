@@ -82,6 +82,22 @@ export interface ContributorVideo {
   published_at: string | null;
 }
 
+interface ContributorEpisodeRow {
+  id: string;
+  show_slug: string;
+  title: string;
+  pub_date: string;
+  duration_s: number | null;
+  shows?: { slug?: string; title?: string; host?: string } | null;
+}
+
+interface ContributorVideoRow {
+  id: string;
+  title: string;
+  published_at: string | null;
+  series?: { slug?: string; title?: string } | null;
+}
+
 export interface ContributorLive {
   id: string;
   title: string;
@@ -99,7 +115,7 @@ export async function getContributorEpisodes(contributorName: string, limit = 6)
     .ilike("shows.host", `%${contributorName}%`)
     .order("pub_date", { ascending: false })
     .limit(limit);
-  return (data ?? []).map((e: any) => ({
+  return ((data ?? []) as ContributorEpisodeRow[]).map((e) => ({
     id: e.id,
     show_slug: e.show_slug,
     show_title: e.shows?.title ?? "",
@@ -119,7 +135,7 @@ export async function getContributorVideos(contributorName: string, limit = 6): 
     .eq("status", "published")
     .order("published_at", { ascending: false })
     .limit(limit);
-  return (data ?? []).map((e: any) => ({
+  return ((data ?? []) as ContributorVideoRow[]).map((e) => ({
     id: e.id,
     series_slug: e.series?.slug ?? "",
     series_title: e.series?.title ?? "",

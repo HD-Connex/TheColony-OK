@@ -10,6 +10,7 @@ import { getArticles, type Article } from "@/lib/articles";
 import { getShowsWithEpisodeCounts } from "@/lib/podcasts";
 import { getLiveEvents, eventsToStageItems, type LiveEvent } from "@/lib/live-events";
 import { formatDate } from "@/lib/format";
+import { CONTRIBUTOR_PLANS } from "@/lib/contributor-plans";
 
 export const revalidate = 60;
 
@@ -184,7 +185,7 @@ export default async function HomePage() {
           </div>
         )}
 
-        <section className="section">
+        <section className="section section--paper">
           <div className="container">
             <header className="section-header">
               <span className="section-header__number">N°01</span>
@@ -353,7 +354,7 @@ export default async function HomePage() {
           </div>
         </section>
 
-        <section className="section">
+        <section className="section section--paper">
           <div className="container">
             <header className="section-header">
               <span className="section-header__number">N°04</span>
@@ -387,10 +388,50 @@ export default async function HomePage() {
           </div>
         </section>
 
+        <section className="section section--alarm">
+          <div className="container">
+            <header className="section-header">
+              <span className="section-header__number">N°06</span>
+              <div className="section-header__group">
+                <h2 className="section-title">Join the Masthead</h2>
+                <span className="section-header__dateline">CONTRIBUTOR · FEATURED · HEADLINER</span>
+              </div>
+              <Link className="section-link" href="/contributors/join">
+                Apply Now →
+              </Link>
+            </header>
+
+            <div className="contrib-plan-grid" aria-label="Contributor pricing tiers">
+              {CONTRIBUTOR_PLANS.map((plan) => (
+                <article
+                  key={plan.id}
+                  className={`contrib-plan-card${plan.highlight ? " contrib-plan-card--highlight" : ""}`}
+                >
+                  <p className="contrib-plan-card__eyebrow">
+                    {plan.highlight ? "▼ MOST POPULAR" : `▼ ${plan.tier.toUpperCase()}`}
+                  </p>
+                  <h3 className="contrib-plan-card__name">{plan.name}</h3>
+                  <div>
+                    <span className="contrib-plan-card__price">${plan.price}</span>{" "}
+                    <span className="contrib-plan-card__period">/ month</span>
+                  </div>
+                  <p className="contrib-plan-card__summary">{plan.exposureSummary}</p>
+                  <Link
+                    className={`btn ${plan.highlight ? "btn--primary" : "btn--ink"} btn--full`}
+                    href={`/contributors/join?plan=${plan.id}`}
+                  >
+                    Apply — {plan.name}
+                  </Link>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
         <section className="membership-cta" aria-label="Membership">
           <div className="membership-cta__inner">
             <div className="membership-cta__lead">
-              <p className="membership-cta__eyebrow">▼ JOIN THE COLONY · N°05</p>
+              <p className="membership-cta__eyebrow">▼ JOIN THE COLONY · N°07</p>
               <h2 className="membership-cta__title">Independent press costs less than a cup of coffee.</h2>
               <p className="membership-cta__subtitle">
                 Full access to every article, every podcast, every live broadcast — from journalists who answer to

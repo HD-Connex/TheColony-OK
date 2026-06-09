@@ -48,6 +48,7 @@ export default async function StoriesPage({
       title="Top Stories"
       lede="Investigative reporting from Oklahoma. Politics, culture, the economy, and the stories the legacy press won't touch — funded by readers, not advertisers."
       section={false}
+      tone="paper"
     >
       <FilterBar options={filterOptions} activeKey={activeKey} />
 

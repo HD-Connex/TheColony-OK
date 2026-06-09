@@ -6,6 +6,7 @@ interface Props {
   dateline?: string;
   linkHref?: string;
   linkLabel?: string;
+  tone?: "ink" | "paper" | "alarm";
   children: React.ReactNode;
 }
 
@@ -15,9 +16,10 @@ export default function SectionBlock({
   dateline,
   linkHref,
   linkLabel,
+  tone,
   children,
 }: Props) {
-  return (
+  const content = (
     <>
       <header className="section-header">
         <span className="section-header__number">{number}</span>
@@ -34,4 +36,8 @@ export default function SectionBlock({
       {children}
     </>
   );
+
+  if (!tone) return content;
+
+  return <section className={`section section--${tone}`}>{content}</section>;
 }

@@ -25,6 +25,12 @@ export default function HeaderNav() {
         <Link className="nav__link" href="/news">
           News
         </Link>
+        <Link className="nav__link" href="/journalists">
+          Journalists
+        </Link>
+        <Link className="nav__link" href="/contributors/join">
+          Masthead
+        </Link>
       </div>
 
       <div className="nav__actions">
@@ -64,6 +70,12 @@ export default function HeaderNav() {
         </Link>
         <Link className="nav__link" href="/news" onClick={() => setOpen(false)}>
           Daily News
+        </Link>
+        <Link className="nav__link" href="/journalists" onClick={() => setOpen(false)}>
+          Journalists
+        </Link>
+        <Link className="nav__link" href="/contributors/join" onClick={() => setOpen(false)}>
+          Masthead
         </Link>
         <Link className="btn btn--primary btn--full" href="/pricing" onClick={() => setOpen(false)}>
           Join — $4.99/month
