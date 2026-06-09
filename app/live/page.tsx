@@ -4,7 +4,8 @@ import Breadcrumbs from "../_components/Breadcrumbs";
 import PageHeader from "../_components/PageHeader";
 import JsonLd from "../_components/JsonLd";
 import Countdown from "../_components/Countdown";
-import LiveStage, { type StageItem } from "../_components/LiveStage";
+import LiveStageMount from "../_components/LiveStageMount";
+import { type StageItem } from "../_components/LiveStage";
 import LivePlatformTabs from "../_components/LivePlatformTabs";
 import { getLiveEvents, eventsToStageItems, tierLocked, tierLabel, type LiveEvent } from "@/lib/live-events";
 
@@ -35,7 +36,14 @@ function formatLiveWhen(e: LiveEvent): string {
   return `${time} CT`;
 }
 
-export default async function LivePage() {
+export default async function LivePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ "247"?: string }>;
+}) {
+  const { "247": q247 } = await searchParams;
+  const prefer247 = q247 === "1";
+
   const { live, upcoming, replays } = await getLiveEvents();
 
   const items: StageItem[] = eventsToStageItems([...live, ...replays], whenLabel);
@@ -43,7 +51,6 @@ export default async function LivePage() {
   const nextLive = live[0] ?? upcoming[0];
   const schedule = [...live, ...upcoming].slice(0, 3);
   const isOnAir = live.length > 0;
-  const hasStream = items.length > 0;
   const countdownTarget =
     nextLive?.scheduled_start ?? new Date(Date.now() + 4 * 3_600_000).toISOString();
 
@@ -74,18 +81,11 @@ export default async function LivePage() {
 
           <section className="live-section" aria-label="Current broadcast" style={{ marginBottom: "var(--space-12)" }}>
             <div className="live-player">
-              {hasStream ? (
-                <LiveStage items={items} initialActiveId={live[0]?.id ?? null} />
-              ) : (
-                <div className="live-player__offline">
-                  <div className="live-player__offline-icon">
-                    <svg width="32" height="32" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
-                      <polygon points="6,4 20,12 6,20" fill="currentColor" />
-                    </svg>
-                  </div>
-                  <span className="live-player__status">▼ OFF AIR · NEXT BROADCAST 7PM CT</span>
-                </div>
-              )}
+              <LiveStageMount
+                items={items}
+                initialActiveId={live[0]?.id ?? null}
+                prefer247={prefer247}
+              />
             </div>
 
             <div className="live-sidebar">

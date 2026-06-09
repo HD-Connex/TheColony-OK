@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" role="img" aria-label="The Colony 24/7">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0f2a4f"/>
+      <stop offset="1" stop-color="#0a1f3d"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="720" fill="url(#bg)"/>
+  <text x="640" y="300" fill="#ec1024" font-family="Arial Black, sans-serif" font-size="96" font-weight="900" text-anchor="middle">THE COLONY</text>
+  <text x="640" y="380" fill="#f4f0e6" font-family="monospace" font-size="36" letter-spacing="8" text-anchor="middle">24/7 · REPLAY LOOP</text>
+  <text x="640" y="460" fill="#b8b1a0" font-family="monospace" font-size="24" letter-spacing="4" text-anchor="middle">TAP TO WATCH · OKLAHOMA CITY</text>
+  <rect x="540" y="500" width="200" height="8" fill="#ec1024"/>
+</svg>

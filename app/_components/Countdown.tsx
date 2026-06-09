@@ -1,15 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { motion, useReducedMotion } from "framer-motion";
 
 interface Props {
-  target: string;       // ISO date string
-  label?: string;       // e.g. "▼ COUNTDOWN" or "STARTS IN"
-  variant?: "ink" | "alarm" | "block"; // styling hint
+  target: string;
+  label?: string;
+  variant?: "ink" | "alarm" | "block";
 }
 
 export default function Countdown({ target, label }: Props) {
   const [parts, setParts] = useState({ h: "--", m: "--", s: "--" });
+  const reduced = useReducedMotion();
 
   useEffect(() => {
     const targetMs = new Date(target).getTime();
@@ -32,12 +34,27 @@ export default function Countdown({ target, label }: Props) {
     return () => clearInterval(id);
   }, [target]);
 
+  const Unit = ({ value, unit }: { value: string; unit: string }) => (
+    <div className="countdown__unit">
+      <motion.span
+        className="countdown__value"
+        key={value + unit}
+        initial={reduced ? false : { scale: 1.08, opacity: 0.7 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 0.2 }}
+      >
+        {value}
+      </motion.span>
+      <span className="countdown__unit-label">{unit}</span>
+    </div>
+  );
+
   return (
     <div className="countdown">
       {label && <span className="countdown__label">{label}</span>}
-      <div className="countdown__unit"><span className="countdown__value">{parts.h}</span><span className="countdown__unit-label">HRS</span></div>
-      <div className="countdown__unit"><span className="countdown__value">{parts.m}</span><span className="countdown__unit-label">MIN</span></div>
-      <div className="countdown__unit"><span className="countdown__value">{parts.s}</span><span className="countdown__unit-label">SEC</span></div>
+      <Unit value={parts.h} unit="HRS" />
+      <Unit value={parts.m} unit="MIN" />
+      <Unit value={parts.s} unit="SEC" />
     </div>
   );
 }

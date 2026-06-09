@@ -1,9 +1,24 @@
 import Link from "next/link";
+import NewsletterForm from "./NewsletterForm";
 
 export default function Footer() {
   return (
     <footer className="site-footer">
       <div className="container">
+        <div className="newsletter">
+          <div className="newsletter__heading">
+            <span className="newsletter__eyebrow">▼ The Briefing</span>
+            <h3 className="newsletter__title">A Letter From Oklahoma. Every Morning.</h3>
+          </div>
+          <div>
+            <p className="newsletter__copy">
+              The day&apos;s investigations, podcasts, and live drops — delivered to your inbox before the first cup of
+              coffee. Free.
+            </p>
+            <NewsletterForm />
+          </div>
+        </div>
+
         <div className="footer__masthead">
           <div className="footer__mark">
             THE<span>COLONY</span>OK

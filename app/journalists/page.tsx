@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import InnerPageShell from "../_components/InnerPageShell";
 import SectionBlock from "../_components/SectionBlock";
 import { getContributors } from "@/lib/contributors";
+import { hostPhoto } from "@/lib/media-map";
 
 export const metadata: Metadata = {
   title: "Our Journalists",
@@ -13,15 +14,6 @@ export const metadata: Metadata = {
 };
 
 export const revalidate = 300;
-
-function photoFor(slug: string, headshot: string | null): string {
-  if (headshot) return headshot;
-  if (slug.includes("marcus") || slug.includes("webb")) return "/assets/images/hosts/marcus-webb.jpg";
-  if (slug.includes("rachel") || slug.includes("torres")) return "/assets/images/hosts/rachel-torres.jpg";
-  if (slug.includes("dan") || slug.includes("hollis")) return "/assets/images/hosts/dan-hollis.jpg";
-  if (slug.includes("jake") || slug.includes("merrick")) return "/assets/images/hosts/jake-merrick.jpg";
-  return "/assets/images/author-1.svg";
-}
 
 function contactLine(c: { email: string | null; x_handle: string | null }) {
   const parts: string[] = [];
@@ -58,7 +50,7 @@ export default async function JournalistsPage() {
               <div className="journalist-card__inner">
                 <Image
                   className="journalist-card__photo"
-                  src={photoFor(c.slug, c.headshot_url)}
+                  src={hostPhoto(c.slug, c.headshot_url, c.name)}
                   alt={c.name}
                   width={80}
                   height={80}
@@ -110,7 +102,7 @@ export default async function JournalistsPage() {
                 <div className="journalist-card__inner">
                   <Image
                     className="journalist-card__photo"
-                    src={photoFor(j.slug, null)}
+                    src={hostPhoto(j.slug, null, j.name)}
                     alt={j.name}
                     width={80}
                     height={80}

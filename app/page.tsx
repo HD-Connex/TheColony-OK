@@ -2,7 +2,10 @@ import Link from "next/link";
 import JsonLd from "./_components/JsonLd";
 import Countdown from "./_components/Countdown";
 import StoryCard from "./_components/StoryCard";
-import LiveStage, { type StageItem } from "./_components/LiveStage";
+import LiveStageMount from "./_components/LiveStageMount";
+import { type StageItem } from "./_components/LiveStage";
+import MotionStagger, { MotionStaggerItem } from "./_components/motion/MotionStagger";
+import { PODCAST_ART, storyHero } from "@/lib/media-map";
 import { getArticles, type Article } from "@/lib/articles";
 import { getShowsWithEpisodeCounts } from "@/lib/podcasts";
 import { getLiveEvents, eventsToStageItems, type LiveEvent } from "@/lib/live-events";
@@ -11,19 +14,6 @@ import { formatDate } from "@/lib/format";
 export const revalidate = 60;
 
 const SITE_URL = "https://thecolonyok.com";
-
-const PODCAST_ART: Record<string, string> = {
-  "colony-report": "/assets/images/podcast-colony-report.svg",
-  "patriot-hour": "/assets/images/podcast-patriot-hour.svg",
-  "oklahoma-underground": "/assets/images/podcast-ok-underground.svg",
-  "faith-and-freedom": "/assets/images/podcast-faith-freedom.svg",
-};
-
-const STORY_FALLBACKS = [
-  "/assets/images/story-2.svg",
-  "/assets/images/story-3.svg",
-  "/assets/images/story-4.svg",
-];
 
 function formatHeroDateline(iso?: string | null): string {
   const d = iso ? new Date(iso) : new Date();
@@ -216,7 +206,7 @@ export default async function HomePage() {
                   <article className="card card--horizontal" key={a.id}>
                     <div className="card__image">
                       <img
-                        src={a.hero_url ?? STORY_FALLBACKS[i % STORY_FALLBACKS.length]}
+                        src={storyHero(a.slug, a.hero_url)}
                         alt={a.hero_alt ?? a.title}
                         loading="lazy"
                       />
@@ -253,9 +243,10 @@ export default async function HomePage() {
               </Link>
             </header>
 
-            <div className="podcast-grid">
+            <MotionStagger className="podcast-grid">
               {podcast.shows.map((show, i) => (
-                <Link className="podcast-card" href={`/podcasts/${show.slug}`} key={show.slug}>
+                <MotionStaggerItem key={show.slug}>
+                <Link className="podcast-card" href={`/podcasts/${show.slug}`}>
                   <span className="podcast-card__number">SHOW N°{String(i + 1).padStart(2, "0")}</span>
                   <div className="podcast-card__art">
                     <img
@@ -279,8 +270,9 @@ export default async function HomePage() {
                     </div>
                   </div>
                 </Link>
+                </MotionStaggerItem>
               ))}
-            </div>
+            </MotionStagger>
           </div>
         </section>
 
@@ -299,18 +291,10 @@ export default async function HomePage() {
 
             <div className="live-section">
               <div className="live-player">
-                {isOnAir && liveItems.length > 0 ? (
-                  <LiveStage items={liveItems} initialActiveId={live.live[0]?.id ?? null} />
-                ) : (
-                  <div className="live-player__offline">
-                    <div className="live-player__offline-icon">
-                      <svg width="32" height="32" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
-                        <polygon points="6,4 20,12 6,20" fill="currentColor" />
-                      </svg>
-                    </div>
-                    <span className="live-player__status">▼ OFF AIR · NEXT BROADCAST 7PM CT</span>
-                  </div>
-                )}
+                <LiveStageMount
+                  items={liveItems}
+                  initialActiveId={live.live[0]?.id ?? null}
+                />
               </div>
 
               <div className="live-sidebar">

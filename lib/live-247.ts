@@ -5,6 +5,10 @@
 
 import { getLiveEvents } from "./live-events";
 
+/** Demo replay loop until Mux 247 ingest is wired. */
+export const DEMO_247_MP4 =
+  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
+
 export interface Live247Channel {
   id: "colony-247";
   title: string;
@@ -27,12 +31,15 @@ function resolve247StreamUrl(): string {
   if (process.env.NEXT_PUBLIC_MUX_247_PLAYBACK_ID) {
     return `https://stream.mux.com/${process.env.NEXT_PUBLIC_MUX_247_PLAYBACK_ID}.m3u8`;
   }
-  return "https://stream.mux.com/247-placeholder.m3u8";
+  if (process.env.NEXT_PUBLIC_247_MP4_URL) {
+    return process.env.NEXT_PUBLIC_247_MP4_URL;
+  }
+  return DEMO_247_MP4;
 }
 
 export const COLONY_247: Live247Channel = {
   id: "colony-247",
-  title: "The Colony 24/7",
+  title: "Colony 24/7 · Replay Loop",
   streamUrl: resolve247StreamUrl(),
   isLive: true,
   schedule: [
@@ -40,7 +47,7 @@ export const COLONY_247: Live247Channel = {
     { time: "06:00", title: "Morning Brief — OKC & Rural", durationMin: 60 },
     { time: "07:00", title: "The Colony Report Replay", durationMin: 120 },
   ],
-  fallbackSlate: "/assets/images/off-air.png",
+  fallbackSlate: "/assets/images/live/colony-247-slate.svg",
 };
 
 export async function getCurrentLiveChannel(): Promise<Live247Channel> {

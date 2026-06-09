@@ -1,10 +1,10 @@
 :root {
-  /* ─── Brutalist Statement Press — pure ink (legacy canonical) ─── */
-  --color-ink: #0a0a0a;
-  --color-ink-soft: #1a1a1a;
+  /* ─── Brutalist Statement Press — patriotic navy + alarm red ─── */
+  --color-ink: #0a1f3d;
+  --color-ink-soft: #0f2a4f;
   --color-paper: #f4f0e6;
   --color-paper-soft: #e9e3d2;
-  --color-rule: #2a2624;
+  --color-rule: #1a3358;
   --color-rule-soft: #d6cfbf;
   --color-alarm: #ec1024;
   --color-alarm-hover: #ff1d31;

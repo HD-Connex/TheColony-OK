@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { motion, useReducedMotion } from "framer-motion";
 
 export interface FilterOption {
   key: string;
@@ -13,6 +16,8 @@ export default function FilterBar({
   options: FilterOption[];
   activeKey?: string;
 }) {
+  const reduced = useReducedMotion();
+
   return (
     <nav className="filter-bar" aria-label="Filter">
       {options.map((o) => (
@@ -23,6 +28,20 @@ export default function FilterBar({
           aria-pressed={activeKey === o.key}
         >
           {o.label}
+          {activeKey === o.key && !reduced && (
+            <motion.span
+              layoutId="filter-active"
+              className="filter-bar__indicator"
+              style={{
+                position: "absolute",
+                bottom: 0,
+                left: 0,
+                right: 0,
+                height: 2,
+                background: "var(--color-alarm)",
+              }}
+            />
+          )}
         </Link>
       ))}
     </nav>

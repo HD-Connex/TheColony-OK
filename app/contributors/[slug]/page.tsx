@@ -15,22 +15,12 @@ import {
 } from "@/lib/contributors";
 import { tierBadgeClass, tierLabel } from "@/lib/contributor-tiers";
 import { formatDate, formatDurationLabel } from "@/lib/format";
+import { hostPhoto } from "@/lib/media-map";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://thecolonyok.com";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
-}
-
-function photoFor(slug: string, headshot: string | null, name: string): string {
-  if (headshot) return headshot;
-  const lower = `${slug} ${name}`.toLowerCase();
-  if (lower.includes("marcus") || lower.includes("webb")) return "/assets/images/hosts/marcus-webb.jpg";
-  if (lower.includes("rachel") || lower.includes("torres")) return "/assets/images/hosts/rachel-torres.jpg";
-  if (lower.includes("dan") || lower.includes("hollis") || lower.includes("pastor"))
-    return "/assets/images/hosts/dan-hollis.jpg";
-  if (lower.includes("jake") || lower.includes("merrick")) return "/assets/images/hosts/jake-merrick.jpg";
-  return "/assets/images/author-1.svg";
 }
 
 export async function generateStaticParams() {
@@ -68,7 +58,7 @@ export default async function ContributorPage({ params }: PageProps) {
     getContributorLives(contributor.name).catch(() => []),
   ]);
 
-  const photo = photoFor(contributor.slug, contributor.headshot_url, contributor.name);
+  const photo = hostPhoto(contributor.slug, contributor.headshot_url, contributor.name);
   const canonicalUrl = `${SITE_URL}/contributors/${contributor.slug}`;
 
   return (

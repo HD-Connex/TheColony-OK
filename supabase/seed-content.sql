@@ -187,6 +187,50 @@ WHERE NOT EXISTS (
   SELECT 1 FROM public.live_events WHERE id = 'b2222222-2222-4222-8222-222222222222'::uuid
 );
 
+-- ON AIR demo for board walkthrough (replace with Mux playback before go-live)
+INSERT INTO public.live_events (
+  id, series_id, title, description, status,
+  scheduled_start, actual_start, ended_at,
+  mux_playback_id, video_url, tier_required
+)
+SELECT
+  'b3333333-3333-4333-8333-333333333333'::uuid,
+  NULL,
+  'The Colony Report — Live with Jake Merrick',
+  'Board demo broadcast. Whistleblower segment, governor race update, and live Q&A.',
+  'live',
+  now() - interval '30 minutes',
+  now() - interval '25 minutes',
+  NULL,
+  NULL,
+  'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+  'free'
+WHERE NOT EXISTS (
+  SELECT 1 FROM public.live_events WHERE id = 'b3333333-3333-4333-8333-333333333333'::uuid
+);
+
+-- Ended replay for queue realism
+INSERT INTO public.live_events (
+  id, series_id, title, description, status,
+  scheduled_start, actual_start, ended_at,
+  mux_playback_id, video_url, tier_required
+)
+SELECT
+  'b4444444-4444-4444-8444-444444444444'::uuid,
+  NULL,
+  'Patriot Hour — Friday Replay',
+  'Marcus Webb on federal overreach and Oklahoma sovereignty.',
+  'ended',
+  now() - interval '2 days',
+  now() - interval '2 days',
+  now() - interval '1 day',
+  NULL,
+  'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+  'free'
+WHERE NOT EXISTS (
+  SELECT 1 FROM public.live_events WHERE id = 'b4444444-4444-4444-8444-444444444444'::uuid
+);
+
 -- ─── 5. Optional video catalog (requires 0007_video_catalog.sql) ───
 -- Uncomment if series / video_episodes tables exist:
 --
@@ -318,6 +362,34 @@ SELECT
 WHERE NOT EXISTS (
   SELECT 1 FROM public.articles WHERE slug = 'tulsa-dei-defund-vote'
 );
+
+-- Topic hero images (navy brutalist art)
+UPDATE public.articles SET hero_url = '/assets/images/stories/oklahoma-budget-crisis.svg' WHERE slug = 'oklahoma-budget-crisis';
+UPDATE public.articles SET hero_url = '/assets/images/stories/lobbyist-network.svg' WHERE slug = 'lobbyist-network-silence';
+UPDATE public.articles SET hero_url = '/assets/images/stories/parents-curriculum.svg' WHERE slug = 'parents-curriculum-pushback';
+UPDATE public.articles SET hero_url = '/assets/images/stories/energy-pipeline.svg' WHERE slug = 'energy-sector-green-mandates';
+UPDATE public.articles SET hero_url = '/assets/images/stories/sheriffs-race.svg' WHERE slug = 'sheriffs-race-investigation';
+UPDATE public.articles SET hero_url = '/assets/images/stories/tulsa-dei-vote.svg' WHERE slug = 'tulsa-dei-defund-vote';
+
+-- Contributor bylines (requires 0010_articles_contributors.sql + contributors seeded)
+UPDATE public.articles a SET contributor_id = c.id
+FROM public.contributors c
+WHERE a.slug = 'oklahoma-budget-crisis' AND c.slug = 'sarah-mitchell';
+UPDATE public.articles a SET contributor_id = c.id
+FROM public.contributors c
+WHERE a.slug = 'lobbyist-network-silence' AND c.slug = 'sarah-mitchell';
+UPDATE public.articles a SET contributor_id = c.id
+FROM public.contributors c
+WHERE a.slug = 'parents-curriculum-pushback' AND c.slug = 'rachel-torres';
+UPDATE public.articles a SET contributor_id = c.id
+FROM public.contributors c
+WHERE a.slug = 'energy-sector-green-mandates' AND c.slug = 'marcus-webb';
+UPDATE public.articles a SET contributor_id = c.id
+FROM public.contributors c
+WHERE a.slug = 'sheriffs-race-investigation' AND c.slug = 'sarah-mitchell';
+UPDATE public.articles a SET contributor_id = c.id
+FROM public.contributors c
+WHERE a.slug = 'tulsa-dei-defund-vote' AND c.slug = 'rachel-torres';
 
 COMMIT;
 
