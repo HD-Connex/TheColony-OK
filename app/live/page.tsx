@@ -1,9 +1,11 @@
+import Link from "next/link";
 import type { Metadata } from "next";
 import Breadcrumbs from "../_components/Breadcrumbs";
 import PageHeader from "../_components/PageHeader";
 import JsonLd from "../_components/JsonLd";
 import Countdown from "../_components/Countdown";
 import LiveStage, { type StageItem } from "../_components/LiveStage";
+import LivePlatformTabs from "../_components/LivePlatformTabs";
 import { getLiveEvents, eventsToStageItems, tierLocked, tierLabel, type LiveEvent } from "@/lib/live-events";
 
 export const revalidate = 60;
@@ -21,12 +23,29 @@ function whenLabel(e: LiveEvent): string {
   return e.status === "live" ? `LIVE NOW · ${d}` : e.status === "ended" ? `REPLAY · ${d}` : d;
 }
 
+function formatLiveWhen(e: LiveEvent): string {
+  if (e.status === "live") return "LIVE NOW";
+  if (!e.scheduled_start) return "UPCOMING";
+  const d = new Date(e.scheduled_start);
+  const time = d.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    timeZone: "America/Chicago",
+  });
+  return `${time} CT`;
+}
+
 export default async function LivePage() {
   const { live, upcoming, replays } = await getLiveEvents();
 
   const items: StageItem[] = eventsToStageItems([...live, ...replays], whenLabel);
 
-  const nextUp = upcoming[0];
+  const nextLive = live[0] ?? upcoming[0];
+  const schedule = [...live, ...upcoming].slice(0, 3);
+  const isOnAir = live.length > 0;
+  const hasStream = items.length > 0;
+  const countdownTarget =
+    nextLive?.scheduled_start ?? new Date(Date.now() + 4 * 3_600_000).toISOString();
 
   return (
     <>
@@ -48,29 +67,74 @@ export default async function LivePage() {
           <PageHeader
             eyebrow="▼ SECTION N°03 · ON AIR"
             title="Watch Live"
-            lede="Live broadcasts and the full replay archive. Tune in free, or join for members-only events. We mirror the stream across YouTube, Rumble, and Locals."
+            lede="Live broadcasts Monday, Wednesday, and Friday at 7PM CT. Replays land here the morning after each broadcast. Tune in from any platform — we mirror the stream across YouTube, Rumble, and our site."
           />
 
-          <LiveStage items={items} initialActiveId={live[0]?.id ?? null} />
+          <LivePlatformTabs />
 
-          {items.length === 0 && (
-            <section className="live-section" style={{ marginBottom: "var(--space-12)" }}>
-              <div className="live-player">
+          <section className="live-section" aria-label="Current broadcast" style={{ marginBottom: "var(--space-12)" }}>
+            <div className="live-player">
+              {hasStream ? (
+                <LiveStage items={items} initialActiveId={live[0]?.id ?? null} />
+              ) : (
                 <div className="live-player__offline">
                   <div className="live-player__offline-icon">
-                    <svg width="32" height="32" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><polygon points="6,4 20,12 6,20" fill="currentColor" /></svg>
+                    <svg width="32" height="32" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+                      <polygon points="6,4 20,12 6,20" fill="currentColor" />
+                    </svg>
                   </div>
-                  <span className="live-player__status">▼ OFF AIR · CHECK THE SCHEDULE</span>
+                  <span className="live-player__status">▼ OFF AIR · NEXT BROADCAST 7PM CT</span>
                 </div>
+              )}
+            </div>
+
+            <div className="live-sidebar">
+              <div className="live-status">
+                <span className="badge badge--new">{isOnAir ? "ON AIR" : "TONIGHT"}</span>
+                {nextLive && (
+                  <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", letterSpacing: "var(--track-wide)" }}>
+                    {nextLive.title.slice(0, 24).toUpperCase()}
+                  </span>
+                )}
               </div>
-              <div className="live-sidebar">
-                <div className="live-status"><span className="badge badge--new">NEXT UP</span></div>
-                <h2 className="live-status__title">{nextUp?.title ?? "Schedule coming soon"}</h2>
-                {nextUp?.description && <p className="live-status__description">{nextUp.description}</p>}
-                {nextUp?.scheduled_start && <Countdown target={nextUp.scheduled_start} label="▼ COUNTDOWN" />}
+              <h2 className="live-status__title">{nextLive?.title ?? "Schedule coming soon"}</h2>
+              {nextLive?.description && <p className="live-status__description">{nextLive.description}</p>}
+              <Countdown target={countdownTarget} label="▼ COUNTDOWN" />
+
+              <div className="schedule-list">
+                {schedule.length > 0 ? (
+                  schedule.map((e, i) => (
+                    <div
+                      className={`schedule-item${i === 0 ? " schedule-item--current" : ""}`}
+                      key={e.id}
+                    >
+                      <span className="schedule-item__time">{formatLiveWhen(e).toUpperCase()}</span>
+                      <span className="schedule-item__show">{e.title}</span>
+                    </div>
+                  ))
+                ) : (
+                  <>
+                    <div className="schedule-item schedule-item--current">
+                      <span className="schedule-item__time">TONIGHT 7PM</span>
+                      <span className="schedule-item__show">Colony Report</span>
+                    </div>
+                    <div className="schedule-item">
+                      <span className="schedule-item__time">THU 6PM</span>
+                      <span className="schedule-item__show">Patriot Hour Q&A</span>
+                    </div>
+                    <div className="schedule-item">
+                      <span className="schedule-item__time">SAT 10AM</span>
+                      <span className="schedule-item__show">OK Underground Field Report</span>
+                    </div>
+                  </>
+                )}
               </div>
-            </section>
-          )}
+
+              <Link className="btn btn--ink btn--full" href="/live">
+                Full Schedule
+              </Link>
+            </div>
+          </section>
 
           {upcoming.length > 0 && (
             <section className="section" aria-label="Upcoming broadcasts">
@@ -88,6 +152,35 @@ export default async function LivePage() {
                     <h3 className="schedule-tile__title">{e.title}</h3>
                     {tierLocked(e.tier_required) && <span className="badge badge--members">{tierLabel(e.tier_required)}</span>}
                   </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {replays.length > 0 && (
+            <section className="section" aria-label="Replays">
+              <header className="section-header">
+                <span className="section-header__number">N°02</span>
+                <div className="section-header__group">
+                  <h2 className="section-title">Replays</h2>
+                  <span className="section-header__dateline">{replays.length} BROADCASTS</span>
+                </div>
+                <Link className="section-link" href="/shows">
+                  All Shows →
+                </Link>
+              </header>
+              <div className="grid-3">
+                {replays.slice(0, 3).map((e) => (
+                  <article className="card card--article" key={e.id}>
+                    <div className="card__body">
+                      <div className="card__meta">
+                        <span className="card__category">REPLAY</span>
+                        <span className="card__date">{whenLabel(e)}</span>
+                      </div>
+                      <h3 className="card__title">{e.title}</h3>
+                      {e.description && <p className="card__excerpt">{e.description}</p>}
+                    </div>
+                  </article>
                 ))}
               </div>
             </section>

@@ -1,7 +1,11 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import Breadcrumbs from "../_components/Breadcrumbs";
-import { getShowsWithEpisodeCounts } from "@/lib/podcasts";
+import PageHeader from "../_components/PageHeader";
+import SectionBlock from "../_components/SectionBlock";
+import PodcastSearchGrid from "./_components/PodcastSearchGrid";
+import { getShowsWithEpisodeCounts, getRecentEpisodes } from "@/lib/podcasts";
+import { formatDate, formatDurationLabel } from "@/lib/format";
 
 export const metadata: Metadata = {
   title: "Podcast Network",
@@ -19,22 +23,70 @@ const PODCAST_ART: Record<string, string> = {
 };
 
 export default async function PodcastsIndexPage() {
-  const podcast = await getShowsWithEpisodeCounts(100).catch(() => ({
-    shows: [],
-    totalShows: 0,
-    totalEpisodes: 0,
-  }));
+  const [podcast, recent] = await Promise.all([
+    getShowsWithEpisodeCounts(100).catch(() => ({
+      shows: [],
+      totalShows: 0,
+      totalEpisodes: 0,
+    })),
+    getRecentEpisodes(8).catch(() => []),
+  ]);
 
   return (
     <main id="main">
       <div className="container">
         <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Podcast Network" }]} />
 
+        <PageHeader
+          eyebrow="▼ SECTION N°02 · PODCAST NETWORK"
+          title="Podcast Network"
+          lede={`${podcast.totalShows} shows. ${podcast.totalEpisodes} episodes. Investigative reporting, faith, freedom, and Oklahoma stories — each show led by a host who lives the beat.`}
+        />
+
+        {recent.length > 0 && (
+          <section className="section section--tight" aria-label="Latest across network">
+            <SectionBlock
+              number="N°01"
+              title="Latest Across Network"
+              dateline={`${recent.length} RECENT EPISODES`}
+            >
+              <div className="episode-rail">
+                {recent.map((ep) => {
+                  const thumb =
+                    ep.thumbnail_url ??
+                    ep.cover_url ??
+                    PODCAST_ART[ep.show_slug] ??
+                    "/assets/images/podcast-colony-report.svg";
+                  return (
+                    <Link
+                      key={ep.id}
+                      href={`/podcasts/${ep.show_slug}/${ep.slug || ep.id}`}
+                      className="episode-rail__card"
+                    >
+                      <div className="episode-rail__thumb">
+                        <img src={thumb} alt="" loading="lazy" />
+                      </div>
+                      <div className="episode-rail__body">
+                        <span className="episode-rail__show">{ep.show_title}</span>
+                        <h3 className="episode-rail__title">{ep.title}</h3>
+                        <span className="episode-rail__meta">
+                          {formatDate(ep.pub_date)}
+                          {ep.duration_s ? ` · ${formatDurationLabel(ep.duration_s)}` : ""}
+                        </span>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            </SectionBlock>
+          </section>
+        )}
+
         <section className="section" aria-label="Podcast Network">
           <header className="section-header">
             <span className="section-header__number">N°02</span>
             <div className="section-header__group">
-              <h1 className="section-title">Podcast Network</h1>
+              <h2 className="section-title">All Shows</h2>
               <span className="section-header__dateline">
                 {podcast.totalShows} SHOWS · {podcast.totalEpisodes} EPISODES
               </span>
@@ -44,35 +96,7 @@ export default async function PodcastsIndexPage() {
           {podcast.shows.length === 0 ? (
             <p className="empty-state">No shows here yet. Check back after the catalog is seeded.</p>
           ) : (
-            <div className="podcast-grid">
-              {podcast.shows.map((show, i) => (
-                <Link className="podcast-card" href={`/podcasts/${show.slug}`} key={show.slug}>
-                  <span className="podcast-card__number">SHOW N°{String(i + 1).padStart(2, "0")}</span>
-                  <div className="podcast-card__art">
-                    <img
-                      src={show.cover_url ?? PODCAST_ART[show.slug] ?? "/assets/images/podcast-colony-report.svg"}
-                      alt={`${show.title} cover art`}
-                      loading="lazy"
-                    />
-                    <div className="podcast-card__play">
-                      <div className="podcast-card__play-icon">
-                        <svg width="22" height="22" fill="currentColor" viewBox="0 0 24 24">
-                          <polygon points="5,3 19,12 5,21" />
-                        </svg>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="podcast-card__body">
-                    <div className="podcast-card__show-name">{show.title}</div>
-                    <div className="podcast-card__host">{show.host}</div>
-                    <div className="podcast-card__meta">
-                      <span className="podcast-card__episodes">{show.episodes} Episodes</span>
-                      {i === 0 && <span className="badge badge--live">NEW</span>}
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
+            <PodcastSearchGrid shows={podcast.shows} />
           )}
         </section>
       </div>

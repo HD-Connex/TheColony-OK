@@ -84,6 +84,47 @@ export async function getPublishedSeriesSlugs(): Promise<string[]> {
   return (data ?? []).map((r: { slug: string }) => r.slug);
 }
 
+export async function getVideoEpisodeBySeriesAndSlug(
+  seriesSlug: string,
+  epSlug: string,
+): Promise<{ series: VideoSeries; episode: VideoEpisode } | null> {
+  const series = await getVideoSeriesBySlug(seriesSlug);
+  if (!series) return null;
+
+  const sb = supabasePublic();
+  let { data } = await sb
+    .from("video_episodes")
+    .select("*")
+    .eq("series_id", series.id)
+    .eq("slug", epSlug)
+    .eq("status", "published")
+    .maybeSingle();
+
+  if (!data) {
+    ({ data } = await sb
+      .from("video_episodes")
+      .select("*")
+      .eq("series_id", series.id)
+      .eq("id", epSlug)
+      .eq("status", "published")
+      .maybeSingle());
+  }
+
+  if (!data) return null;
+  return { series, episode: data as VideoEpisode };
+}
+
+/** Previous and next published episodes in series order. */
+export async function getSiblingVideoEpisodes(
+  seriesId: string,
+  currentId: string,
+): Promise<[VideoEpisode | null, VideoEpisode | null]> {
+  const all = await getSeriesEpisodes(seriesId);
+  const idx = all.findIndex((e) => e.id === currentId);
+  if (idx < 0) return [null, null];
+  return [idx > 0 ? all[idx - 1] : null, idx < all.length - 1 ? all[idx + 1] : null];
+}
+
 // ─── Playback + gating helpers ───
 export interface Playback {
   kind: "embed" | "hls" | "none";

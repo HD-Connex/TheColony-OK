@@ -1,9 +1,15 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import Breadcrumbs from "../_components/Breadcrumbs";
-import PageHeader from "../_components/PageHeader";
-import { getArticles } from "@/lib/articles";
-import { formatDate } from "@/lib/format";
+import InnerPageShell from "../_components/InnerPageShell";
+import SectionBlock from "../_components/SectionBlock";
+import StoryCard from "../_components/StoryCard";
+import { getArticles, type Article } from "@/lib/articles";
+import {
+  formatDateShort,
+  formatNewsTime,
+  newsDateGroup,
+  type NewsDateGroup,
+} from "@/lib/format";
 import { tierLocked } from "@/lib/tiers";
 
 export const metadata: Metadata = {
@@ -13,43 +19,142 @@ export const metadata: Metadata = {
 
 export const revalidate = 120;
 
+const GROUP_ORDER: NewsDateGroup[] = ["today", "yesterday", "earlier"];
+
+const GROUP_LABELS: Record<NewsDateGroup, string> = {
+  today: "Today",
+  yesterday: "Yesterday",
+  earlier: "Earlier",
+};
+
+function groupArticles(articles: Article[]): Record<NewsDateGroup, Article[]> {
+  const groups: Record<NewsDateGroup, Article[]> = {
+    today: [],
+    yesterday: [],
+    earlier: [],
+  };
+
+  for (const article of articles) {
+    groups[newsDateGroup(article.published_at)].push(article);
+  }
+
+  return groups;
+}
+
+function sectionDateline(group: NewsDateGroup, items: Article[], now = new Date()): string {
+  const count = String(items.length).padStart(2, "0");
+
+  if (group === "today") {
+    const day = now
+      .toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })
+      .toUpperCase();
+    return `${day} · ${count} FILED`;
+  }
+
+  if (group === "yesterday") {
+    const yesterday = new Date(now);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const day = yesterday
+      .toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })
+      .toUpperCase();
+    return `${day} · ${count} FILED`;
+  }
+
+  if (items.length === 0) return `${count} FILED`;
+
+  const dates = items
+    .map((a) => new Date(a.published_at))
+    .filter((d) => !Number.isNaN(d.valueOf()));
+  const oldest = dates.length ? new Date(Math.min(...dates.map((d) => d.valueOf()))) : now;
+  const newest = dates.length ? new Date(Math.max(...dates.map((d) => d.valueOf()))) : now;
+
+  return `${formatDateShort(oldest.toISOString())} — ${formatDateShort(newest.toISOString())} · ${count} FILED`;
+}
+
+function NewsList({ items, showDate }: { items: Article[]; showDate: boolean }) {
+  return (
+    <ol className="news-list">
+      {items.map((a) => (
+        <li key={a.id}>
+          <Link href={`/stories/${a.slug}`} className="news-item">
+            <time className="news-item__time" dateTime={a.published_at}>
+              {formatNewsTime(a.published_at, showDate)}
+            </time>
+            <div>
+              <div style={{ display: "flex", gap: ".5rem", marginBottom: ".25rem" }}>
+                {a.category && <span className="badge badge--category">{a.category}</span>}
+                {tierLocked(a.tier_required) && <span className="badge badge--members">Members</span>}
+              </div>
+              <h2 className="news-item__title">{a.title}</h2>
+              {a.description && <p className="news-item__desc">{a.description}</p>}
+            </div>
+          </Link>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
 export default async function NewsPage() {
-  let items = await getArticles({ limit: 30 }).catch(() => []);
+  const items = await getArticles({ limit: 30 }).catch(() => []);
+  const [pinned, ...rest] = items;
+  const groups = groupArticles(rest);
+  const visibleGroups = GROUP_ORDER.filter((g) => groups[g].length > 0);
 
   return (
-    <main id="main">
-      <div className="container">
-        <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "News" }]} />
-        <PageHeader
-          eyebrow="▼ DAILY"
-          title="The News Feed"
-          lede="Headlines and stories from The Colony — updated throughout the day."
-        />
+    <InnerPageShell
+      breadcrumbs={[{ label: "Home", href: "/" }, { label: "Daily News" }]}
+      eyebrow="▼ DAILY"
+      title="Daily News"
+      lede="The day's headlines from Oklahoma — state, national, and local. Filed throughout the day."
+      section={false}
+    >
+      {items.length === 0 ? (
+        <p className="empty-state">No headlines yet.</p>
+      ) : (
+        <>
+          {pinned && (
+            <section className="section section--tight">
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "var(--space-3)",
+                  paddingBlock: "var(--space-4)",
+                  borderBottom: "var(--rule-medium) solid var(--color-alarm)",
+                }}
+              >
+                <span
+                  style={{
+                    fontFamily: "var(--font-mono)",
+                    fontSize: "var(--text-xs)",
+                    letterSpacing: "var(--track-wider)",
+                    textTransform: "uppercase",
+                    color: "var(--color-alarm)",
+                  }}
+                >
+                  ▼ PINNED · TOP OF FOLD
+                </span>
+              </div>
+              <div style={{ paddingTop: "var(--space-6)" }}>
+                <StoryCard a={pinned} variant="lead" />
+              </div>
+            </section>
+          )}
 
-        {items.length === 0 ? (
-          <p className="empty-state">No headlines yet.</p>
-        ) : (
-          <ol className="news-list">
-            {items.map((a) => (
-              <li key={a.id}>
-                <Link href={`/stories/${a.slug}`} className="news-item">
-                  <time className="news-item__time" dateTime={a.published_at}>
-                    {formatDate(a.published_at)}
-                  </time>
-                  <div>
-                    <div style={{ display: "flex", gap: ".5rem", marginBottom: ".25rem" }}>
-                      {a.category && <span className="badge">{a.category}</span>}
-                      {tierLocked(a.tier_required) && <span className="badge badge--members">Members</span>}
-                    </div>
-                    <h2 className="news-item__title">{a.title}</h2>
-                    {a.description && <p className="news-item__desc">{a.description}</p>}
-                  </div>
-                </Link>
-              </li>
-            ))}
-          </ol>
-        )}
-      </div>
-    </main>
+          {visibleGroups.map((group, index) => (
+            <section key={group} className="section" aria-label={GROUP_LABELS[group]}>
+              <SectionBlock
+                number={`N°${String(index + 1).padStart(2, "0")}`}
+                title={GROUP_LABELS[group]}
+                dateline={sectionDateline(group, groups[group])}
+              >
+                <NewsList items={groups[group]} showDate={group !== "today"} />
+              </SectionBlock>
+            </section>
+          ))}
+        </>
+      )}
+    </InnerPageShell>
   );
 }

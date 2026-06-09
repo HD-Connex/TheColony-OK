@@ -4,7 +4,12 @@ import { useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-client";
 
-export default function MembershipSignIn() {
+interface MembershipSignInProps {
+  /** When true, drops centered panel chrome for split-column layouts. */
+  embedded?: boolean;
+}
+
+export default function MembershipSignIn({ embedded = false }: MembershipSignInProps) {
   const { user, loading, signInWithEmail } = useAuth();
   const [email, setEmail] = useState("");
   const [pending, setPending] = useState(false);
@@ -24,9 +29,11 @@ export default function MembershipSignIn() {
     setSent(true);
   }
 
+  const panelClass = embedded ? "membership-panel membership-panel--embedded" : "membership-panel";
+
   if (loading) {
     return (
-      <div className="membership-panel">
+      <div className={panelClass}>
         <p className="membership-panel__status">Loading…</p>
       </div>
     );
@@ -34,7 +41,7 @@ export default function MembershipSignIn() {
 
   if (user) {
     return (
-      <div className="membership-panel">
+      <div className={panelClass}>
         <p className="membership-panel__status">
           Signed in as <strong>{user.email}</strong>
         </p>
@@ -51,22 +58,24 @@ export default function MembershipSignIn() {
   }
 
   return (
-    <div className="membership-panel">
-      <form onSubmit={handleSubmit}>
-        <label htmlFor="membership-email">Email address</label>
+    <div className={panelClass}>
+      <form className={embedded ? "newsletter__form membership-signin__form" : undefined} onSubmit={handleSubmit}>
+        {!embedded && <label htmlFor="membership-email">Email address</label>}
         <input
           id="membership-email"
           type="email"
           name="email"
+          className={embedded ? "newsletter__input" : undefined}
           required
           autoComplete="email"
-          placeholder="you@example.com"
+          placeholder={embedded ? "YOUR@EMAIL.COM" : "you@example.com"}
+          aria-label={embedded ? "Account email" : undefined}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           disabled={pending || sent}
         />
-        <button className="btn btn--primary btn--full" type="submit" disabled={pending || sent}>
-          {pending ? "Sending…" : sent ? "Check your email" : "Send magic link"}
+        <button className={`btn btn--primary${embedded ? "" : " btn--full"}`} type="submit" disabled={pending || sent}>
+          {pending ? "Sending…" : sent ? "Check your email" : embedded ? "Send Link" : "Send magic link"}
         </button>
       </form>
       {sent && (
@@ -75,10 +84,12 @@ export default function MembershipSignIn() {
         </p>
       )}
       {error && <p className="membership-panel__error">{error}</p>}
-      <p className="membership-panel__status" style={{ marginTop: "1.5rem" }}>
-        New here?{" "}
-        <Link href="/pricing">See membership plans</Link> — the founding price is $4.99/mo.
-      </p>
+      {!embedded && (
+        <p className="membership-panel__status" style={{ marginTop: "1.5rem" }}>
+          New here?{" "}
+          <Link href="/pricing">See membership plans</Link> — the founding price is $4.99/mo.
+        </p>
+      )}
     </div>
   );
 }

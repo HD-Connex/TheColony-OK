@@ -1,1 +1,69 @@
-import Link from 'next/link'; export default function NotFound() { return <main>Not found. <Link href="/">Home</Link></main>; }
+import Link from "next/link";
+
+export default function NotFound() {
+  return (
+    <main id="main">
+      <div className="container">
+        <section className="system-page" aria-labelledby="not-found-title">
+          <p
+            className="page-header__eyebrow"
+            style={{ marginBottom: "var(--space-4)" }}
+          >
+            ▼ FILED · WRONG DRAWER
+          </p>
+
+          <div className="system-page__code" aria-hidden="true">
+            404
+          </div>
+
+          <h1 id="not-found-title" className="system-page__title">
+            The Page You Were Looking For Isn&apos;t Here.
+          </h1>
+
+          <p className="system-page__lede">
+            It may have been moved, renamed, or never existed in the first place.
+            The reporting on this site is filed by section — try the links below, or
+            head back to the front page.
+          </p>
+
+          <div
+            style={{
+              display: "flex",
+              gap: "var(--space-4)",
+              flexWrap: "wrap",
+              marginBottom: "var(--space-8)",
+            }}
+          >
+            <Link className="btn btn--primary btn--lg" href="/">
+              Back to Front Page
+            </Link>
+            <Link className="btn btn--outline btn--lg" href="/stories">
+              Browse Stories
+            </Link>
+          </div>
+
+          <div>
+            <h2
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: "var(--text-xs)",
+                letterSpacing: "var(--track-wider)",
+                textTransform: "uppercase",
+                color: "var(--color-alarm)",
+                marginBottom: "var(--space-4)",
+              }}
+            >
+              ▼ SECTIONS
+            </h2>
+            <nav className="system-page__links" aria-label="Site sections">
+              <Link href="/">Home</Link>
+              <Link href="/stories">Stories</Link>
+              <Link href="/live">Live</Link>
+              <Link href="/podcasts">Podcasts</Link>
+            </nav>
+          </div>
+        </section>
+      </div>
+    </main>
+  );
+}

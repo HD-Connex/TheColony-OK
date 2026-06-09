@@ -9,16 +9,43 @@ export const metadata: Metadata = {
   title: "Membership",
   description:
     "Join The Colony. Ad-free, private, uncensored conservative & Christian media starting at the founding price of $4.99/mo.",
+  alternates: { canonical: "/pricing" },
 };
+
+const FEATURES = [
+  "All investigative articles — no paywall",
+  "Full podcast library across every show",
+  "Live streams + full replay archives",
+  "Members-only weekday briefings",
+  "Bonus podcast episodes, members-only feed",
+  "Cancel anytime — no contracts",
+];
 
 const FAQ = [
   {
-    q: "What do I get with a membership?",
-    a: "The full ad-free library of shows, documentaries, and the Oklahoma-rooted podcasts that started it all — plus live broadcasts, accurate cross-device resume, and faith-aligned summaries.",
+    q: "What's included in membership?",
+    a: "Everything we publish: investigative articles, full podcast library across all shows, live broadcasts and replays, members-only weekday briefings, and bonus podcast episodes in your members-only feed.",
   },
   {
     q: "Can I cancel anytime?",
-    a: "Yes. Manage or cancel your subscription from your account billing portal. No phone calls, no retention mazes.",
+    a: "Yes. Sign into your account and open the billing portal to cancel. No contracts, no penalties. Your access continues to the end of the current billing period.",
+  },
+  {
+    q: "Do you offer refunds?",
+    a: "Yes — full refund within the first 14 days, no questions asked. After that, you can cancel any time and avoid future billing.",
+  },
+  {
+    q: "How do I sign in?",
+    a: (
+      <>
+        Enter your email on the <Link href="/membership">Account page</Link>. We send a one-time login link — no
+        passwords to remember.
+      </>
+    ),
+  },
+  {
+    q: "Is my payment secure?",
+    a: "Yes. Checkout runs on Stripe's hosted infrastructure. We never see or store your card details.",
   },
   {
     q: "Do you sell or track my data?",
@@ -30,62 +57,102 @@ const FAQ = [
   },
 ];
 
+const memberPlan = MEMBERSHIP_PLANS.find((p) => p.id === "member") ?? MEMBERSHIP_PLANS[1];
+
 export default function PricingPage() {
   return (
     <main id="main">
       <div className="container">
-        <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Pricing" }]} />
+        <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Join" }]} />
         <PageHeader
-          eyebrow="▼ MEMBERSHIP"
+          eyebrow="▼ SECTION N°05 · MEMBERSHIP"
           title="Join The Colony"
-          lede="Uncensored, ad-free, and private — built on the Truth. Faith. Freedom. foundation. Cancel anytime."
+          lede={
+            <>
+              Independent journalism that answers to readers, not advertisers.{" "}
+              <strong>$4.99 / month.</strong> Cancel anytime. Secure checkout via Stripe.
+            </>
+          }
         />
 
-        <div className="pricing-grid">
-          {MEMBERSHIP_PLANS.map((plan) => (
-            <div
-              key={plan.id}
-              className={`pricing-card${plan.highlight ? " pricing-card--highlight" : ""}`}
-            >
-              {plan.highlight && <span className="pricing-card__badge">Most popular</span>}
-              <h2 style={{ fontFamily: "var(--font-display)", fontSize: "1.5rem", margin: 0 }}>{plan.name}</h2>
-              <div className="pricing-card__price">
-                ${plan.price}
-                {plan.price > 0 && (
-                  <span style={{ fontSize: ".875rem", color: "var(--muted-foreground)", fontWeight: 400 }}>/mo</span>
-                )}
-              </div>
-              <p style={{ fontSize: ".875rem", color: "var(--color-text-secondary)", margin: 0 }}>{plan.blurb}</p>
-              <div style={{ margin: "1.25rem 0" }}>
-                {plan.id === "free" ? (
-                  <Link className="btn btn--outline btn--full" href="/shows">
-                    Start free
-                  </Link>
-                ) : (
-                  <CheckoutButton planId={plan.id} className="btn btn--primary btn--full">
-                    Subscribe
-                  </CheckoutButton>
-                )}
-              </div>
-              <ul className="pricing-card__perks">
-                {plan.perks.map((perk) => (
-                  <li key={perk}>{perk}</li>
+        <section className="membership-cta" id="benefits" style={{ borderTop: "none", paddingTop: "var(--space-12)" }}>
+          <div className="membership-cta__inner">
+            <div className="membership-cta__lead">
+              <p className="membership-cta__eyebrow">▼ EVERYTHING / NO PAYWALL</p>
+              <h2 className="membership-cta__title">Press that costs less than a cup of coffee.</h2>
+              <p className="membership-cta__subtitle">
+                Full access to every article, every podcast episode, every live broadcast — plus member-only briefings and
+                bonus episodes — for less than $5 a month.
+              </p>
+              <ul className="membership-cta__features">
+                {FEATURES.map((feature) => (
+                  <li className="membership-cta__feature" key={feature}>
+                    {feature}
+                  </li>
                 ))}
               </ul>
             </div>
-          ))}
-        </div>
 
-        <section className="faq-list" aria-label="Frequently asked questions">
-          <h2 style={{ fontFamily: "var(--font-display)", fontSize: "1.75rem", textAlign: "center", marginBottom: "1.5rem" }}>
-            Questions, answered
-          </h2>
-          {FAQ.map((item) => (
-            <details key={item.q} className="faq-item">
-              <summary>{item.q}</summary>
-              <p>{item.a}</p>
-            </details>
-          ))}
+            <div className="membership-cta__price-card">
+              <div className="membership-cta__price">
+                <span className="membership-cta__amount">${memberPlan.price}</span>
+                <span className="membership-cta__period">/MONTH</span>
+              </div>
+              <div className="membership-cta__actions">
+                <CheckoutButton planId={memberPlan.id} className="btn btn--primary btn--lg btn--full">
+                  Join Now — Stripe Checkout
+                </CheckoutButton>
+                <Link className="btn btn--outline btn--full" href="/membership">
+                  Already a Member? Sign In
+                </Link>
+              </div>
+              <p className="membership-cta__disclaimer">Secure checkout via Stripe · 100% money-back in first 14 days</p>
+            </div>
+          </div>
+          <div className="membership-cta__footer-band">▼ 1,200+ OKLAHOMANS JOINED THIS MONTH</div>
+        </section>
+
+        <section className="section" id="faq" aria-label="Frequently asked questions">
+          <header className="section-header">
+            <span className="section-header__number">N°01</span>
+            <div className="section-header__group">
+              <h2 className="section-title">FAQ</h2>
+              <span className="section-header__dateline">CANCELATION · ACCESS · BILLING</span>
+            </div>
+          </header>
+
+          <div className="faq">
+            {FAQ.map((item, i) => (
+              <details className="faq__item" key={item.q} open={i === 0}>
+                <summary className="faq__question">{item.q}</summary>
+                <div className="faq__answer">{item.a}</div>
+              </details>
+            ))}
+          </div>
+        </section>
+
+        <section className="membership-cta">
+          <div className="membership-cta__inner">
+            <div className="membership-cta__lead">
+              <p className="membership-cta__eyebrow">▼ READY?</p>
+              <h2 className="membership-cta__title">Independent press takes independent readers.</h2>
+              <p className="membership-cta__subtitle">
+                Every member is one more reason this newsroom exists. Cancel anytime — but most don&apos;t.
+              </p>
+            </div>
+            <div className="membership-cta__price-card">
+              <div className="membership-cta__price">
+                <span className="membership-cta__amount">${memberPlan.price}</span>
+                <span className="membership-cta__period">/MONTH</span>
+              </div>
+              <div className="membership-cta__actions">
+                <CheckoutButton planId={memberPlan.id} className="btn btn--primary btn--lg btn--full">
+                  Join Now
+                </CheckoutButton>
+              </div>
+              <p className="membership-cta__disclaimer">Secure checkout via Stripe</p>
+            </div>
+          </div>
         </section>
       </div>
     </main>

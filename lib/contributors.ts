@@ -139,3 +139,31 @@ export async function getContributorLives(contributorName: string, limit = 6): P
     .limit(limit);
   return ((data ?? []) as ContributorLive[]);
 }
+
+export interface ContributorArticle {
+  id: string;
+  slug: string;
+  title: string;
+  dek: string | null;
+  published_at: string;
+  category: string | null;
+}
+
+export async function getContributorArticles(contributorSlug: string, limit = 12): Promise<ContributorArticle[]> {
+  const sb = supabasePublic();
+  try {
+    const { data } = await sb
+      .from("articles")
+      .select("id,slug,title,dek,published_at,category, contributors!inner(slug)")
+      .eq("status", "published")
+      .eq("contributors.slug", contributorSlug)
+      .order("published_at", { ascending: false })
+      .limit(limit);
+    if (data?.length) {
+      return (data as Array<ContributorArticle & { contributors?: unknown }>).map(({ contributors: _, ...row }) => row);
+    }
+  } catch {
+    // contributor_id FK may not exist yet — fall through to empty
+  }
+  return [];
+}

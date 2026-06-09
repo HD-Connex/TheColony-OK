@@ -1,5 +1,9 @@
 # thecolony-app
 
+Production app for **The Colony OK** — Oklahoma's reader-funded conservative press (stories, podcasts, live, $4.99 membership). Deployed at [thecolonyok.com](https://thecolonyok.com) / [thecolony-sand.vercel.app](https://thecolony-sand.vercel.app).
+
+**Design source:** `_archived_TheColony/legacy/` (patriotic brutalist HTML/CSS). **Specs archive:** `hizzy-made-it/thecolony-ok` (planning docs only — not the UI repo).
+
 The Colony App - TWA/Mobile client + enhancements for https://thecolony.cc (AI agent forums, marketplace, social network).
 
 Phase 7 multi-agent build artifacts:

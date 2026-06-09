@@ -2,11 +2,48 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import Breadcrumbs from "../../_components/Breadcrumbs";
 import PageHeader from "../../_components/PageHeader";
+import JsonLd from "../../_components/JsonLd";
 
 export const metadata: Metadata = {
-  title: "The Colony vs BlazeTV",
+  title: "The Colony vs BlazeTV | Oklahoma Roots + Local Depth",
   description:
-    "Compare The Colony OK and BlazeTV: pricing, privacy, Oklahoma roots, and independent conservative media without corporate gatekeepers.",
+    "Why The Colony is the better fit for Oklahoma and rural America: hyper-local ag/energy/faith shows, reader-funded independence, ad-free privacy, and full hub integration vs BlazeTV national cable-style commentary.",
+  alternates: { canonical: "/vs/blaze" },
+  openGraph: {
+    title: "The Colony vs BlazeTV: Local OK Wins",
+    description:
+      "National caliber with Oklahoma authenticity. Compare pricing, privacy, local depth, and community vs BlazeTV.",
+    images: [
+      {
+        url: "/assets/images/hosts/dan-hollis.jpg",
+        width: 1200,
+        height: 630,
+        alt: "The Colony vs BlazeTV — Dan Hollis on Oklahoma editorial",
+      },
+    ],
+  },
+};
+
+const vsBlazeSchema = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "VideoObject",
+      name: "The Colony vs BlazeTV — Why Local Wins",
+      description:
+        "Side-by-side comparison: Colony rural OK depth, member community, and reader-funded journalism vs BlazeTV national personalities.",
+      thumbnailUrl: ["https://thecolonyok.com/assets/images/hosts/emily-thorne.jpg"],
+      uploadDate: "2026-06-08",
+      contentUrl: "https://thecolonyok.com/podcasts/children-of-the-state",
+    },
+    {
+      "@type": "Person",
+      name: "Dan Hollis",
+      image: "https://thecolonyok.com/assets/images/hosts/dan-hollis.jpg",
+      jobTitle: "Host",
+      worksFor: { "@type": "Organization", name: "The Colony OK" },
+    },
+  ],
 };
 
 const COMPARISON = [
@@ -42,136 +79,386 @@ const COMPARISON = [
   },
 ];
 
+const WINS_MATRIX = [
+  {
+    dimension: "Local / rural depth",
+    blaze: "National personalities only",
+    colony: "OK ag/energy/faith shows + Farm Bureau partnerships + member clips",
+    edge: "10 vs 2",
+  },
+  {
+    dimension: "Community",
+    blaze: "Weekly Off the Record chats",
+    colony: "Threaded comments + continuous member clips featured on hub and live",
+    edge: "9.5 vs 6",
+  },
+  {
+    dimension: "Integration / hub",
+    blaze: "Siloed apps and shows",
+    colony: "Seamless live ↔ pods ↔ clips ↔ stories in one place",
+    edge: "9.5 vs 4",
+  },
+  {
+    dimension: "Funding / perks",
+    blaze: "$15 subs, opaque corporate backing",
+    colony: "Transparent reader-funded + OK rural event access",
+    edge: "9 vs 5",
+  },
+  {
+    dimension: "Mobile / offline",
+    blaze: "App + TV platforms",
+    colony: "PWA + TWA with rural low-bandwidth smart packs",
+    edge: "9 vs 7",
+  },
+];
+
 export default function VsBlazePage() {
   return (
-    <main id="main">
-      <div className="container">
-        <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "The Colony vs BlazeTV" }]} />
-        <PageHeader
-          eyebrow="▼ COMPARE"
-          title="The Colony vs BlazeTV"
-          lede="Both serve audiences who want conservative and faith-aligned media. The Colony is built lean, Oklahoma-rooted, and private — with a founding membership price that honors where we started."
-        />
+    <>
+      <JsonLd data={vsBlazeSchema} />
 
-        <section aria-label="Feature comparison" style={{ margin: "var(--space-8) 0" }}>
-          <div
-            style={{
-              display: "grid",
-              gap: "1px",
-              background: "var(--color-border)",
-              border: "1px solid var(--color-border)",
-              borderRadius: "var(--radius-md)",
-              overflow: "hidden",
-            }}
-          >
+      <main id="main">
+        <div className="container">
+          <Breadcrumbs
+            items={[
+              { label: "Home", href: "/" },
+              { label: "The Colony vs BlazeTV" },
+            ]}
+          />
+          <PageHeader
+            eyebrow="▼ COMPARE"
+            title="The Colony vs BlazeTV"
+            lede="National reach meets Oklahoma roots. Both serve audiences who want conservative and faith-aligned media — The Colony is built lean, local, and private, with a founding membership price that honors where we started."
+          />
+
+          <section className="section" aria-label="Platform overview" style={{ margin: "var(--space-8) 0" }}>
+            <div className="grid-2">
+              <div className="bio-card">
+                <h2 className="bio-card__name">BlazeTV (National)</h2>
+                <p className="bio-card__role">Cable-style commentary network</p>
+                <ul className="prose-block" style={{ margin: 0, paddingLeft: "1.25rem" }}>
+                  <li>$15/mo or annual (~$10/mo) — bonus eps, docs, and movies</li>
+                  <li>24/7 live + national personalities (Beck, Deace, Levin, and more)</li>
+                  <li>Weekly &quot;Off the Record&quot; private live chats</li>
+                  <li>Mobile app + TV apps (Roku, Apple TV, Fire, Chromecast)</li>
+                  <li>National focus: entertainment and talk heavy; no OK/rural depth</li>
+                  <li>Opaque funding; siloed experiences across app, site, and shows</li>
+                </ul>
+              </div>
+
+              <div className="bio-card">
+                <h2 className="bio-card__name">The Colony (OK + Local)</h2>
+                <p className="bio-card__role">Reader-funded Oklahoma press</p>
+                <ul className="prose-block" style={{ margin: 0, paddingLeft: "1.25rem" }}>
+                  <li>Founding tiers from $4.99/mo with transparent reader funding</li>
+                  <li>Local rural shows: Ag Report, Energy OK, Small Town Faith, and more</li>
+                  <li>Member clips and county forums — continuous community vs weekly chats</li>
+                  <li>Full hub integration + PWA/TWA mobile with offline smart packs</li>
+                  <li>
+                    <strong>Hyper-local OK moat:</strong> ag/energy/faith partnerships with Farm Bureau, co-ops, and 4H
+                  </li>
+                  <li>Ad-free, uncensored journalism funded by readers — not advertisers</li>
+                </ul>
+              </div>
+            </div>
+          </section>
+
+          <section aria-label="Feature comparison" style={{ margin: "var(--space-8) 0" }}>
+            <header className="section-header">
+              <span className="section-header__number">N°01</span>
+              <div className="section-header__group">
+                <h2 className="section-title">Head-to-Head</h2>
+                <span className="section-header__dateline">PRICING · PRIVACY · EDITORIAL</span>
+              </div>
+            </header>
+
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "1.2fr 1fr 1fr",
                 gap: "1px",
                 background: "var(--color-border)",
-                fontFamily: "var(--font-mono)",
-                fontSize: ".75rem",
-                letterSpacing: ".1em",
-                textTransform: "uppercase",
+                border: "1px solid var(--color-border)",
+                borderRadius: "var(--radius-md)",
+                overflow: "hidden",
               }}
             >
-              <div style={{ padding: "1rem", background: "var(--color-surface)" }} />
-              <div style={{ padding: "1rem", background: "var(--color-surface)", color: "var(--honey)" }}>
-                The Colony
-              </div>
-              <div style={{ padding: "1rem", background: "var(--color-surface)", color: "var(--muted-foreground)" }}>
-                BlazeTV
-              </div>
-            </div>
-            {COMPARISON.map((row) => (
               <div
-                key={row.label}
                 style={{
                   display: "grid",
                   gridTemplateColumns: "1.2fr 1fr 1fr",
                   gap: "1px",
                   background: "var(--color-border)",
+                  fontFamily: "var(--font-mono)",
+                  fontSize: ".75rem",
+                  letterSpacing: ".1em",
+                  textTransform: "uppercase",
                 }}
               >
-                <div
-                  style={{
-                    padding: "1rem 1.25rem",
-                    background: "var(--color-surface)",
-                    fontWeight: 600,
-                    fontSize: ".9rem",
-                  }}
-                >
-                  {row.label}
+                <div style={{ padding: "1rem", background: "var(--color-surface)" }} />
+                <div style={{ padding: "1rem", background: "var(--color-surface)", color: "var(--honey)" }}>
+                  The Colony
                 </div>
-                <div
-                  style={{
-                    padding: "1rem 1.25rem",
-                    background: "var(--color-surface)",
-                    fontSize: ".9rem",
-                    lineHeight: 1.5,
-                  }}
-                >
-                  {row.colony}
-                </div>
-                <div
-                  style={{
-                    padding: "1rem 1.25rem",
-                    background: "var(--color-surface)",
-                    fontSize: ".9rem",
-                    color: "var(--color-text-secondary)",
-                    lineHeight: 1.5,
-                  }}
-                >
-                  {row.blaze}
+                <div style={{ padding: "1rem", background: "var(--color-surface)", color: "var(--muted-foreground)" }}>
+                  BlazeTV
                 </div>
               </div>
-            ))}
-          </div>
-        </section>
+              {COMPARISON.map((row) => (
+                <div
+                  key={row.label}
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "1.2fr 1fr 1fr",
+                    gap: "1px",
+                    background: "var(--color-border)",
+                  }}
+                >
+                  <div
+                    style={{
+                      padding: "1rem 1.25rem",
+                      background: "var(--color-surface)",
+                      fontWeight: 600,
+                      fontSize: ".9rem",
+                    }}
+                  >
+                    {row.label}
+                  </div>
+                  <div
+                    style={{
+                      padding: "1rem 1.25rem",
+                      background: "var(--color-surface)",
+                      fontSize: ".9rem",
+                      lineHeight: 1.5,
+                    }}
+                  >
+                    {row.colony}
+                  </div>
+                  <div
+                    style={{
+                      padding: "1rem 1.25rem",
+                      background: "var(--color-surface)",
+                      fontSize: ".9rem",
+                      color: "var(--color-text-secondary)",
+                      lineHeight: 1.5,
+                    }}
+                  >
+                    {row.blaze}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
 
-        <section style={{ margin: "var(--space-8) 0", maxWidth: "42rem" }}>
-          <h2 style={{ fontFamily: "var(--font-display)", fontSize: "1.5rem", margin: "0 0 1rem" }}>
-            Why members choose The Colony
-          </h2>
-          <p style={{ color: "var(--color-text-secondary)", lineHeight: 1.6, margin: "0 0 1rem" }}>
-            BlazeTV is a well-known national platform. The Colony is different by design: independent press funded by
-            readers, rooted in Oklahoma, and built without the overhead of a cable network. You get investigative
-            journalism, documentaries, podcasts, and live programming — ad-free and uncensored — at a price that
-            reflects community-first values.
-          </p>
-          <p style={{ color: "var(--color-text-secondary)", lineHeight: 1.6, margin: 0 }}>
-            If you want national punditry at scale, BlazeTV may fit. If you want private, faith-aligned media with
-            local accountability and a founding $4.99/mo tier, The Colony is built for you.
-          </p>
-        </section>
+          <section aria-label="Key wins" style={{ margin: "var(--space-8) 0" }}>
+            <header className="section-header">
+              <span className="section-header__number">N°02</span>
+              <div className="section-header__group">
+                <h2 className="section-title">Key Wins</h2>
+                <span className="section-header__dateline">LOCAL DEPTH · INTEGRATION · COMMUNITY</span>
+              </div>
+            </header>
 
-        <section
-          style={{
-            margin: "var(--space-8) 0 var(--space-12)",
-            padding: "1.5rem",
-            border: "1px solid var(--color-border)",
-            borderRadius: "var(--radius-md)",
-            background: "var(--color-surface)",
-            textAlign: "center",
-          }}
-        >
-          <h2 style={{ fontFamily: "var(--font-display)", fontSize: "1.35rem", margin: "0 0 .5rem" }}>
-            Try The Colony
-          </h2>
-          <p style={{ color: "var(--color-text-secondary)", margin: "0 0 1.25rem", fontSize: ".9rem" }}>
-            Start free with our public library, or join as a Settler from $4.99/mo.
-          </p>
-          <div style={{ display: "flex", gap: ".75rem", justifyContent: "center", flexWrap: "wrap" }}>
-            <Link className="btn btn--primary" href="/pricing">
-              View membership
+            <div
+              style={{
+                display: "grid",
+                gap: "1px",
+                background: "var(--color-border)",
+                border: "1px solid var(--color-border)",
+                borderRadius: "var(--radius-md)",
+                overflow: "hidden",
+              }}
+            >
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1.1fr 1fr 1.2fr 0.6fr",
+                  gap: "1px",
+                  background: "var(--color-border)",
+                  fontFamily: "var(--font-mono)",
+                  fontSize: ".7rem",
+                  letterSpacing: ".08em",
+                  textTransform: "uppercase",
+                }}
+              >
+                {["Dimension", "BlazeTV", "The Colony", "Edge"].map((heading) => (
+                  <div
+                    key={heading}
+                    style={{
+                      padding: "1rem",
+                      background: heading === "The Colony" ? "var(--color-paper)" : "var(--color-surface)",
+                      color: heading === "The Colony" ? "var(--color-ink)" : undefined,
+                      fontWeight: heading === "Dimension" ? 600 : undefined,
+                    }}
+                  >
+                    {heading}
+                  </div>
+                ))}
+              </div>
+              {WINS_MATRIX.map((row) => (
+                <div
+                  key={row.dimension}
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "1.1fr 1fr 1.2fr 0.6fr",
+                    gap: "1px",
+                    background: "var(--color-border)",
+                  }}
+                >
+                  <div
+                    style={{
+                      padding: "1rem 1.25rem",
+                      background: "var(--color-surface)",
+                      fontWeight: 600,
+                      fontSize: ".85rem",
+                    }}
+                  >
+                    {row.dimension}
+                  </div>
+                  <div
+                    style={{
+                      padding: "1rem 1.25rem",
+                      background: "var(--color-surface)",
+                      fontSize: ".85rem",
+                      color: "var(--color-text-secondary)",
+                      lineHeight: 1.5,
+                    }}
+                  >
+                    {row.blaze}
+                  </div>
+                  <div
+                    style={{
+                      padding: "1rem 1.25rem",
+                      background: "var(--color-surface)",
+                      fontSize: ".85rem",
+                      lineHeight: 1.5,
+                      fontWeight: 600,
+                    }}
+                  >
+                    {row.colony}
+                  </div>
+                  <div
+                    style={{
+                      padding: "1rem 1.25rem",
+                      background: "var(--color-surface)",
+                      fontFamily: "var(--font-mono)",
+                      fontSize: ".75rem",
+                      color: "var(--color-alarm)",
+                    }}
+                  >
+                    {row.edge}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section className="prose-block" style={{ margin: "var(--space-8) 0" }}>
+            <h2>Why members choose The Colony</h2>
+            <p>
+              BlazeTV is a well-known national platform. The Colony is different by design: independent press funded by
+              readers, rooted in Oklahoma, and built without the overhead of a cable network. You get investigative
+              journalism, documentaries, podcasts, and live programming — ad-free and uncensored — at a price that
+              reflects community-first values.
+            </p>
+            <p>
+              If you want national punditry at scale, BlazeTV may fit. If you want private, faith-aligned media with
+              local accountability and a founding $4.99/mo tier, The Colony is built for you.
+            </p>
+          </section>
+
+          <section
+            aria-label="Community demo"
+            style={{
+              margin: "var(--space-8) 0",
+              padding: "var(--space-6)",
+              border: "1px solid var(--color-border)",
+              borderRadius: "var(--radius-md)",
+              background: "var(--color-surface)",
+            }}
+          >
+            <header className="section-header" style={{ marginBottom: "var(--space-4)" }}>
+              <span className="section-header__number">N°03</span>
+              <div className="section-header__group">
+                <h2 className="section-title">Community in Action</h2>
+                <span className="section-header__dateline">MEMBER CLIPS · THREADED DISCUSSION</span>
+              </div>
+            </header>
+            <p className="prose-block" style={{ marginBottom: "var(--space-4)" }}>
+              Subscribers upload short clips — ranch reports, faith moments, local ag updates. Reviewed, transcribed,
+              and featured on the hub and live queue. Continuous community, not a weekly invite-only chat.
+            </p>
+            <div
+              style={{
+                background: "var(--color-paper)",
+                color: "var(--color-ink)",
+                padding: "var(--space-4)",
+                borderRadius: "var(--radius-sm)",
+                marginBottom: "var(--space-4)",
+              }}
+            >
+              <p
+                style={{
+                  fontFamily: "var(--font-mono)",
+                  fontSize: "var(--text-xs)",
+                  letterSpacing: "var(--track-wide)",
+                  margin: 0,
+                }}
+              >
+                [Member Clip: OK Ag — &quot;Drought report from Jackson County&quot; by @ruralok — 28s]
+              </p>
+              <p
+                style={{
+                  margin: "var(--space-2) 0 0 var(--space-4)",
+                  paddingLeft: "var(--space-3)",
+                  borderLeft: "2px solid var(--color-alarm)",
+                  fontSize: "var(--text-xs)",
+                  color: "var(--color-text-ink-soft)",
+                }}
+              >
+                Thread: &quot;This matches our Farm Bureau update…&quot; Reply with your clip.
+              </p>
+            </div>
+            <Link className="btn btn--outline" href="/pricing">
+              Upload Clips (Members)
             </Link>
-            <Link className="btn btn--outline" href="/shows">
-              Browse shows
-            </Link>
-          </div>
-        </section>
-      </div>
-    </main>
+          </section>
+
+          <section className="membership-cta" aria-label="Join The Colony">
+            <div className="membership-cta__inner">
+              <div className="membership-cta__lead">
+                <p className="membership-cta__eyebrow">▼ JOIN THE BETTER VERSION</p>
+                <h2 className="membership-cta__title">Reader-funded independence. Oklahoma voice amplified.</h2>
+                <p className="membership-cta__subtitle">
+                  Transparent impact, full hub access, local shows, member clips, and ad-free journalism — from $4.99/mo.
+                </p>
+                <ul className="membership-cta__features">
+                  <li className="membership-cta__feature">All investigative articles — no paywall</li>
+                  <li className="membership-cta__feature">Full podcast library across every show</li>
+                  <li className="membership-cta__feature">Live streams + replay archives</li>
+                  <li className="membership-cta__feature">OK rural event access and member perks</li>
+                  <li className="membership-cta__feature">Cancel anytime — no contracts</li>
+                </ul>
+              </div>
+
+              <div className="membership-cta__price-card">
+                <div className="membership-cta__price">
+                  <span className="membership-cta__amount">$4.99</span>
+                  <span className="membership-cta__period">/MONTH</span>
+                </div>
+                <div className="membership-cta__actions">
+                  <Link className="btn btn--primary btn--lg btn--full" href="/pricing">
+                    View Membership
+                  </Link>
+                  <Link className="btn btn--outline btn--full" href="/live">
+                    Watch Live Now
+                  </Link>
+                </div>
+                <p className="membership-cta__disclaimer">PWA install · TWA on Android · Secure checkout via Stripe</p>
+              </div>
+            </div>
+            <div className="membership-cta__footer-band">▼ BETTER THAN BLAZE FOR OKLAHOMA AND RURAL PATRIOTS</div>
+          </section>
+        </div>
+      </main>
+    </>
   );
 }

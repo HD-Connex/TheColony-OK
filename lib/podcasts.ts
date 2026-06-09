@@ -81,6 +81,45 @@ export async function getSiblingEpisodes(slug: string, currentId: string): Promi
   return siblings;
 }
 
+export interface RecentEpisode {
+  id: string;
+  slug: string;
+  title: string;
+  show_slug: string;
+  show_title: string;
+  host: string;
+  pub_date: string;
+  duration_s: number | null;
+  thumbnail_url: string | null;
+  cover_url: string | null;
+}
+
+/** Latest published episodes across the podcast network (for index rails). */
+export async function getRecentEpisodes(limit = 6): Promise<RecentEpisode[]> {
+  const sb = supabasePublic();
+  const [{ data: episodes }, { data: shows }] = await Promise.all([
+    sb
+      .from("episodes")
+      .select("id,slug,title,show_slug,pub_date,duration_s,thumbnail_url,cover_url")
+      .order("pub_date", { ascending: false })
+      .limit(limit),
+    sb.from("shows").select("slug,title,host").eq("active", true),
+  ]);
+
+  const showMap = new Map(
+    ((shows ?? []) as { slug: string; title: string; host: string }[]).map((s) => [s.slug, s]),
+  );
+
+  return ((episodes ?? []) as Omit<RecentEpisode, "show_title" | "host">[]).map((e) => {
+    const show = showMap.get(e.show_slug);
+    return {
+      ...e,
+      show_title: show?.title ?? e.show_slug,
+      host: show?.host ?? "",
+    };
+  });
+}
+
 export function episodeToPlayable(ep: Episode): PlayableEpisode {
   return {
     id: ep.id,

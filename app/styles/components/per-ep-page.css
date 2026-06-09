@@ -1,0 +1,99 @@
+.per-ep-page {
+  padding-block: var(--space-8) var(--space-16);
+}
+
+.per-ep-page__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: var(--space-10);
+  border-top: var(--rule-medium) solid var(--color-text-primary);
+  padding-top: var(--space-8);
+}
+
+.per-ep-page__main { min-width: 0; }
+
+.per-ep-page__sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  border-left: var(--rule-hairline) solid var(--color-border);
+  padding-left: var(--space-6);
+}
+
+.per-ep-page__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--track-wide);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-6);
+  padding-bottom: var(--space-4);
+  border-bottom: var(--rule-hairline) solid var(--color-border);
+}
+
+.per-ep-page__title {
+  font-family: var(--font-display);
+  font-size: clamp(var(--text-2xl), 4vw, var(--text-4xl));
+  font-weight: var(--weight-black);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--track-tight);
+  margin-bottom: var(--space-6);
+}
+
+.per-ep-page__player {
+  border: var(--rule-medium) solid var(--color-text-primary);
+  margin-bottom: var(--space-8);
+}
+
+.per-ep-page__player .podcast-player,
+.per-ep-page__player .live-stage {
+  border: none;
+  margin: 0;
+  padding: 0;
+}
+
+.chapter-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  border-top: var(--rule-hairline) solid var(--color-border);
+}
+
+.chapter-list li {
+  border-bottom: var(--rule-hairline) solid var(--color-border);
+}
+
+.chapter-btn {
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--track-wide);
+  text-transform: uppercase;
+  text-align: left;
+  background: transparent;
+  color: var(--color-text-secondary);
+  border: none;
+  cursor: pointer;
+}
+
+.chapter-btn:hover,
+.chapter-btn.active {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--color-alarm);
+}
+
+@media (max-width: 1024px) {
+  .per-ep-page__grid {
+    grid-template-columns: 1fr;
+  }
+  .per-ep-page__sidebar {
+    border-left: none;
+    padding-left: 0;
+    border-top: var(--rule-hairline) solid var(--color-border);
+    padding-top: var(--space-8);
+  }
+}

@@ -1,8 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
-import Breadcrumbs from "../_components/Breadcrumbs";
-import PageHeader from "../_components/PageHeader";
+import InnerPageShell from "../_components/InnerPageShell";
 import {
   mergeSearchResults,
   resolveEmbeddingHits,
@@ -85,71 +84,68 @@ export default async function SearchPage({
   }
 
   return (
-    <main id="main">
-      <div className="container">
-        <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Search" }]} />
-        <PageHeader
-          eyebrow="▼ SEARCH"
-          title="Find it"
-          lede="Search podcasts, shows, episodes, and articles. Transcript-aware when embeddings are indexed."
+    <InnerPageShell
+      breadcrumbs={[{ label: "Home", href: "/" }, { label: "Search" }]}
+      eyebrow="▼ SEARCH"
+      title="Find Stories & Shows"
+      lede="Search podcasts, shows, episodes, and articles. Transcript-aware when embeddings are indexed."
+      section={false}
+    >
+      <form action="/search" method="GET" className="search-form">
+        <input
+          name="q"
+          defaultValue={query}
+          placeholder="e.g. election integrity, faith and freedom, Oklahoma…"
+          aria-label="Search query"
+          autoFocus
         />
+        <button className="btn btn--primary btn--sm" type="submit">
+          Search
+        </button>
+      </form>
 
-        <form action="/search" method="GET" className="search-form">
-          <input
-            name="q"
-            defaultValue={query}
-            placeholder="e.g. election integrity, faith and freedom, Oklahoma…"
-            aria-label="Search query"
-            autoFocus
-          />
-          <button className="btn btn--primary btn--sm" type="submit">
-            Search
-          </button>
-        </form>
+      {query && statusNote && (
+        <p style={{ fontSize: ".8125rem", color: "var(--muted-foreground)", marginBottom: ".75rem" }}>
+          {statusNote}
+        </p>
+      )}
 
-        {query && statusNote && (
-          <p style={{ fontSize: ".8125rem", color: "var(--muted-foreground)", marginBottom: ".75rem" }}>
-            {statusNote}
-          </p>
-        )}
+      {query && (
+        <p style={{ fontSize: ".875rem", color: "var(--muted-foreground)", marginBottom: "1rem" }}>
+          {results.length} result{results.length === 1 ? "" : "s"} for &ldquo;{query}&rdquo;
+        </p>
+      )}
 
-        {query && (
-          <p style={{ fontSize: ".875rem", color: "var(--muted-foreground)", marginBottom: "1rem" }}>
-            {results.length} result{results.length === 1 ? "" : "s"} for &ldquo;{query}&rdquo;
-          </p>
-        )}
+      {query && results.length === 0 && (
+        <p className="empty-state">No matches found. Try different keywords.</p>
+      )}
 
-        {query && results.length === 0 && (
-          <p className="empty-state">No matches found. Try different keywords.</p>
-        )}
-
-        <div className="search-results">
-          {results.map((r) => (
-            <Link key={r.id} href={r.href} className="search-result">
-              <div className="search-result__thumb">
-                {r.thumbnail && (
-                  <Image
-                    src={r.thumbnail}
-                    alt=""
-                    width={320}
-                    height={180}
-                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                  />
-                )}
-              </div>
-              <div className="search-result__body">
-                <p className="search-result__series">{r.subtitle}</p>
-                <h3 className="search-result__title">{r.title}</h3>
-                {r.excerpt && (
-                  <p style={{ fontSize: ".8125rem", color: "var(--muted-foreground)", margin: ".35rem 0 0" }}>
-                    {r.excerpt}
-                  </p>
-                )}
-              </div>
-            </Link>
-          ))}
-        </div>
+      <div className="search-results">
+        {results.map((r) => (
+          <Link key={r.id} href={r.href} className="search-result">
+            <div className="search-result__thumb">
+              {r.thumbnail && (
+                <Image
+                  src={r.thumbnail}
+                  alt=""
+                  width={320}
+                  height={180}
+                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                />
+              )}
+            </div>
+            <div className="search-result__body">
+              <p className="search-result__series">{r.subtitle}</p>
+              <h3 className="search-result__title">{r.title}</h3>
+              {r.excerpt && (
+                <p style={{ fontSize: ".8125rem", color: "var(--muted-foreground)", margin: ".35rem 0 0" }}>
+                  {r.excerpt}
+                </p>
+              )}
+            </div>
+          </Link>
+        ))}
       </div>
-    </main>
+    </InnerPageShell>
   );
 }

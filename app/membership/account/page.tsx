@@ -6,6 +6,7 @@ import MembershipAccount from "../../_components/MembershipAccount";
 export const metadata: Metadata = {
   title: "Account",
   description: "Manage your Colony membership and account settings.",
+  robots: { index: false, follow: false },
 };
 
 export default function MembershipAccountPage() {
@@ -15,12 +16,18 @@ export default function MembershipAccountPage() {
         <Breadcrumbs
           items={[
             { label: "Home", href: "/" },
-            { label: "Membership", href: "/membership" },
+            { label: "Join", href: "/pricing" },
             { label: "Account" },
           ]}
         />
-        <PageHeader eyebrow="▼ ACCOUNT" title="Your account" lede="Membership status, billing, and privacy settings." />
-        <MembershipAccount />
+        <PageHeader
+          eyebrow="▼ ACCOUNT"
+          title="Your account"
+          lede="Membership status, billing, and privacy settings."
+        />
+        <div className="account-layout">
+          <MembershipAccount />
+        </div>
       </div>
     </main>
   );

@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import Breadcrumbs from "../_components/Breadcrumbs";
-import PageHeader from "../_components/PageHeader";
+import FilterBar from "../_components/FilterBar";
+import InnerPageShell from "../_components/InnerPageShell";
 import StoryCard from "../_components/StoryCard";
-import { getArticles } from "@/lib/articles";
+import { getArticles, type Article } from "@/lib/articles";
 
 export const metadata: Metadata = {
   title: "Stories",
@@ -11,45 +11,55 @@ export const metadata: Metadata = {
 
 export const revalidate = 120;
 
-export default async function StoriesPage() {
-  const articles = await getArticles({ limit: 24 }).catch(() => []);
+const CATEGORIES = [
+  { key: "all", label: "All" },
+  { key: "politics", label: "Politics" },
+  { key: "investigations", label: "Investigations" },
+  { key: "culture", label: "Culture" },
+  { key: "economy", label: "Economy" },
+] as const;
 
-  const todayLabel = new Date()
-    .toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })
-    .toUpperCase();
+function matchesCategory(article: Article, cat: string | undefined): boolean {
+  if (!cat || cat === "all") return true;
+  return (article.category ?? "").toLowerCase() === cat.toLowerCase();
+}
+
+export default async function StoriesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ cat?: string }>;
+}) {
+  const { cat } = await searchParams;
+  const activeKey = CATEGORIES.some((c) => c.key === cat) ? cat! : "all";
+
+  const articles = await getArticles({ limit: 24 }).catch(() => []);
+  const filtered = articles.filter((a) => matchesCategory(a, activeKey));
+
+  const filterOptions = CATEGORIES.map((c) => ({
+    key: c.key,
+    label: c.label,
+    href: c.key === "all" ? "/stories" : `/stories?cat=${c.key}`,
+  }));
 
   return (
-    <main id="main">
-      <div className="container">
-        <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Stories" }]} />
-        <PageHeader
-          eyebrow="▼ REPORTING"
-          title="Stories"
-          lede="Investigative reporting, analysis, and long-form journalism from The Colony."
-        />
+    <InnerPageShell
+      breadcrumbs={[{ label: "Home", href: "/" }, { label: "Stories" }]}
+      eyebrow="▼ INVESTIGATIONS"
+      title="Top Stories"
+      lede="Investigative reporting from Oklahoma. Politics, culture, the economy, and the stories the legacy press won't touch — funded by readers, not advertisers."
+      section={false}
+    >
+      <FilterBar options={filterOptions} activeKey={activeKey} />
 
-        <section className="section section--tight section--flush">
-          <header className="section-header">
-            <span className="section-header__number">N°01</span>
-            <div className="section-header__group">
-              <h2 className="section-title">Top Stories</h2>
-              <span className="section-header__dateline">
-                {todayLabel} · {String(articles.length).padStart(2, "0")} FILED
-              </span>
-            </div>
-          </header>
-
-          {articles.length === 0 ? (
-            <p className="empty-state">No stories published yet.</p>
-          ) : (
-            <div className="grid-4">
-              {articles.map((a) => (
-                <StoryCard key={a.id} a={a} />
-              ))}
-            </div>
-          )}
-        </section>
-      </div>
-    </main>
+      {filtered.length === 0 ? (
+        <p className="empty-state">No stories published yet.</p>
+      ) : (
+        <div className="grid-3">
+          {filtered.map((a) => (
+            <StoryCard key={a.id} a={a} />
+          ))}
+        </div>
+      )}
+    </InnerPageShell>
   );
 }

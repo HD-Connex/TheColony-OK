@@ -62,6 +62,23 @@ export default function Footer() {
               <Link className="footer__link" href="/search">
                 Search
               </Link>
+              <Link className="footer__link" href="/journalists">
+                Journalists
+              </Link>
+            </div>
+          </div>
+          <div>
+            <div className="footer__col-title">Imprint</div>
+            <div className="footer__links">
+              <Link className="footer__link" href="/about">
+                About
+              </Link>
+              <Link className="footer__link" href="/advertise">
+                Advertise
+              </Link>
+              <Link className="footer__link" href="/submit-a-tip">
+                Submit a Tip
+              </Link>
             </div>
           </div>
         </div>
@@ -69,11 +86,14 @@ export default function Footer() {
         <div className="footer__bottom">
           <span className="footer__copyright">© 2026 The Colony OK. All rights reserved.</span>
           <div className="footer__legal">
-            <Link className="footer__legal-link" href="/pricing">
+            <Link className="footer__legal-link" href="/legal/privacy">
+              Privacy
+            </Link>
+            <Link className="footer__legal-link" href="/legal/terms">
               Terms
             </Link>
-            <Link className="footer__legal-link" href="/pricing">
-              Privacy
+            <Link className="footer__legal-link" href="/legal/cookies">
+              Cookies
             </Link>
           </div>
         </div>

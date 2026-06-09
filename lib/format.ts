@@ -34,3 +34,40 @@ export function formatDate(iso?: string | null): string {
     .toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
     .toUpperCase();
 }
+
+/** "MAY 28" (uppercase, no year) from an ISO string. */
+export function formatDateShort(iso?: string | null): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.valueOf())) return "";
+  return d
+    .toLocaleDateString("en-US", { month: "short", day: "numeric" })
+    .toUpperCase();
+}
+
+/** "11:42 CT" or "MAY 27 · 17:20 CT" for news list datelines. */
+export function formatNewsTime(iso?: string | null, includeDate = false): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.valueOf())) return "";
+  const time = `${d.getHours()}:${String(d.getMinutes()).padStart(2, "0")} CT`;
+  if (!includeDate) return time;
+  return `${formatDateShort(iso)} · ${time}`;
+}
+
+export type NewsDateGroup = "today" | "yesterday" | "earlier";
+
+/** Bucket articles by calendar day relative to now. */
+export function newsDateGroup(iso?: string | null, now = new Date()): NewsDateGroup {
+  if (!iso) return "earlier";
+  const d = new Date(iso);
+  if (Number.isNaN(d.valueOf())) return "earlier";
+
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const startOfYesterday = new Date(startOfToday);
+  startOfYesterday.setDate(startOfYesterday.getDate() - 1);
+
+  if (d >= startOfToday) return "today";
+  if (d >= startOfYesterday) return "yesterday";
+  return "earlier";
+}

@@ -1,8 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
-import Breadcrumbs from "../_components/Breadcrumbs";
-import PageHeader from "../_components/PageHeader";
+import InnerPageShell from "../_components/InnerPageShell";
 import { getVideoSeries, type VideoSeries } from "@/lib/series";
 
 export const metadata: Metadata = {
@@ -42,47 +41,43 @@ export default async function ShowsPage({
   }
 
   return (
-    <main id="main">
-      <div className="container">
-        <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Shows" }]} />
-        <PageHeader
-          eyebrow="▼ THE LIBRARY"
-          title={oklahomaOnly ? "Oklahoma Originals" : "All Shows"}
-          lede="Premium shows and documentaries — Truth. Faith. Freedom."
-        />
+    <InnerPageShell
+      breadcrumbs={[{ label: "Home", href: "/" }, { label: "Shows" }]}
+      eyebrow="▼ THE LIBRARY"
+      title={oklahomaOnly ? "Oklahoma Originals" : "All Shows"}
+      lede="Premium shows and documentaries — Truth. Faith. Freedom."
+    >
+      <nav aria-label="Filter by pillar" className="filter-nav">
+        {PILLARS.map((p) => {
+          const params = new URLSearchParams();
+          if (p.key) params.set("pillar", p.key);
+          if (oklahomaOnly) params.set("region", "oklahoma");
+          const href = params.toString() ? `/shows?${params}` : "/shows";
+          const active = (p.key || undefined) === pillar && !oklahomaOnly;
+          return (
+            <Link key={p.label} href={href} className={`filter-pill${active ? " is-active" : ""}`}>
+              {p.label}
+            </Link>
+          );
+        })}
+        <Link
+          href={pillar ? `/shows?pillar=${pillar}&region=oklahoma` : "/shows?region=oklahoma"}
+          className={`filter-pill${oklahomaOnly ? " is-active" : ""}`}
+        >
+          Oklahoma
+        </Link>
+      </nav>
 
-        <nav aria-label="Filter by pillar" className="filter-nav">
-          {PILLARS.map((p) => {
-            const params = new URLSearchParams();
-            if (p.key) params.set("pillar", p.key);
-            if (oklahomaOnly) params.set("region", "oklahoma");
-            const href = params.toString() ? `/shows?${params}` : "/shows";
-            const active = (p.key || undefined) === pillar && !oklahomaOnly;
-            return (
-              <Link key={p.label} href={href} className={`filter-pill${active ? " is-active" : ""}`}>
-                {p.label}
-              </Link>
-            );
-          })}
-          <Link
-            href={pillar ? `/shows?pillar=${pillar}&region=oklahoma` : "/shows?region=oklahoma"}
-            className={`filter-pill${oklahomaOnly ? " is-active" : ""}`}
-          >
-            Oklahoma
-          </Link>
-        </nav>
-
-        {items.length === 0 ? (
-          <p className="empty-state">No shows here yet. Check back after the catalog is seeded.</p>
-        ) : (
-          <div className="series-grid">
-            {items.map((s) => (
-              <SeriesCard key={s.id} series={s} />
-            ))}
-          </div>
-        )}
-      </div>
-    </main>
+      {items.length === 0 ? (
+        <p className="empty-state">No shows here yet. Check back after the catalog is seeded.</p>
+      ) : (
+        <div className="series-grid">
+          {items.map((s) => (
+            <SeriesCard key={s.id} series={s} />
+          ))}
+        </div>
+      )}
+    </InnerPageShell>
   );
 }
 
