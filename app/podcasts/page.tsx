@@ -6,6 +6,7 @@ import SectionBlock from "../_components/SectionBlock";
 import PodcastSearchGrid from "./_components/PodcastSearchGrid";
 import { getShowsWithEpisodeCounts, getRecentEpisodes } from "@/lib/podcasts";
 import { formatDate, formatDurationLabel } from "@/lib/format";
+import { PODCAST_ART } from "@/lib/media-map";
 
 export const metadata: Metadata = {
   title: "Podcast Network",
@@ -14,13 +15,6 @@ export const metadata: Metadata = {
 };
 
 export const revalidate = 60;
-
-const PODCAST_ART: Record<string, string> = {
-  "colony-report": "/assets/images/podcast-colony-report.svg",
-  "patriot-hour": "/assets/images/podcast-patriot-hour.svg",
-  "oklahoma-underground": "/assets/images/podcast-ok-underground.svg",
-  "faith-and-freedom": "/assets/images/podcast-faith-freedom.svg",
-};
 
 export default async function PodcastsIndexPage() {
   const [podcast, recent] = await Promise.all([
@@ -57,7 +51,7 @@ export default async function PodcastsIndexPage() {
                       ep.thumbnail_url ??
                       ep.cover_url ??
                       PODCAST_ART[ep.show_slug] ??
-                      "/assets/images/podcast-colony-report.svg";
+                      "/assets/images/podcasts/colony-report.jpg";
                     return (
                       <Link
                         key={ep.id}
@@ -65,7 +59,7 @@ export default async function PodcastsIndexPage() {
                         className="episode-rail__card"
                       >
                         <div className="episode-rail__thumb">
-                          <img src={thumb} alt="" loading="lazy" />
+                          <img src={thumb} alt={`${ep.show_title} — episode thumbnail for ${ep.title}`} loading="lazy" />
                         </div>
                         <div className="episode-rail__body">
                           <span className="episode-rail__show">{ep.show_title}</span>

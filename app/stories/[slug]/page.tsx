@@ -1,11 +1,13 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import Image from "next/image";
 import Breadcrumbs from "../../_components/Breadcrumbs";
 import JsonLd from "../../_components/JsonLd";
 import { getArticleBySlug, getRelatedArticles } from "@/lib/articles";
 import { formatDate } from "@/lib/format";
 import { tierLocked } from "@/lib/tiers";
+import { storyHero, hostPhoto } from "@/lib/media-map";
 
 export const revalidate = 120;
 
@@ -32,7 +34,7 @@ function estimateReadTime(text: string | null | undefined): string {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const article = await getArticleBySlug(slug).catch(() => null);
+  const article = await getArticleBySlug(slug).catch((e) => { console.error(e); return null; });
   if (!article) return { title: "Story Not Found" };
 
   const description = article.dek ?? article.description?.slice(0, 160) ?? undefined;
@@ -53,10 +55,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function StoryPage({ params }: PageProps) {
   const { slug } = await params;
-  const article = await getArticleBySlug(slug).catch(() => null);
+  const article = await getArticleBySlug(slug).catch((e) => { console.error(e); return null; });
   if (!article) notFound();
 
-  const related = await getRelatedArticles(slug, 3).catch(() => []);
+  const related = await getRelatedArticles(slug, 3).catch((e) => { console.error(e); return []; });
   const locked = tierLocked(article.tier_required);
   const paragraphs = bodyParagraphs(article.description);
   const author = (article.contributor?.name ?? "The Colony Staff").toUpperCase();
@@ -109,19 +111,22 @@ export default async function StoryPage({ params }: PageProps) {
                 <h1 className="article__title">{article.title}</h1>
                 {article.dek && <p className="article__dek">{article.dek}</p>}
                 <div className="article__byline">
-                  {article.contributor?.headshot_url ? (
-                    <img
-                      className="article__author-avatar"
-                      src={article.contributor.headshot_url}
-                      alt={article.contributor.name}
-                    />
-                  ) : (
-                    <div
-                      className="article__author-avatar"
-                      style={{ background: "var(--color-border)" }}
-                      aria-hidden
-                    />
-                  )}
+                  {(() => {
+                    const avatarSrc = article.contributor
+                      ? hostPhoto(article.contributor.slug, article.contributor.headshot_url, article.contributor.name)
+                      : "/assets/images/author-1.svg";
+                    const avatarAlt = article.contributor?.name ?? "The Colony Staff";
+                    return (
+                      <Image
+                        className="article__author-avatar"
+                        src={avatarSrc}
+                        alt={avatarAlt}
+                        width={48}
+                        height={48}
+                        style={{ objectFit: "cover" }}
+                      />
+                    );
+                  })()}
                   <div className="article__author-info">
                     {article.contributor ? (
                       <Link href={`/contributors/${article.contributor.slug}`} className="article__author-name">
@@ -140,12 +145,20 @@ export default async function StoryPage({ params }: PageProps) {
                 </div>
               </header>
 
-              {article.hero_url && (
-                <figure className="article__hero-image">
-                  <img src={article.hero_url} alt={article.hero_alt ?? article.title} />
-                  {article.hero_alt && <figcaption className="article__caption">{article.hero_alt}</figcaption>}
-                </figure>
-              )}
+              <figure className="article__hero-image">
+                <Image
+                  src={storyHero(article.slug, article.hero_url)}
+                  alt={article.hero_alt ?? `${article.title} — full investigative report visual`}
+                  width={1200}
+                  height={630}
+                  sizes="100vw"
+                  style={{ width: "100%", height: "auto", display: "block" }}
+                  priority
+                />
+                {(article.hero_alt || article.title) && (
+                  <figcaption className="article__caption">{article.hero_alt ?? article.title}</figcaption>
+                )}
+              </figure>
 
               <div className={locked ? "paywall" : undefined}>
                 <div className="article__body">
@@ -198,47 +211,13 @@ export default async function StoryPage({ params }: PageProps) {
                 {related.length === 0 ? (
                   <p style={{ fontSize: "var(--text-sm)", color: "var(--color-text-muted)" }}>No related stories yet.</p>
                 ) : (
-                  <ul style={{ display: "flex", flexDirection: "column", gap: "var(--space-4)", listStyle: "none" }}>
+                  <ul className="related-list">
                     {related.map((r) => (
                       <li key={r.id}>
-                        <Link href={`/stories/${r.slug}`} style={{ display: "block" }}>
-                          {r.category && (
-                            <span
-                              style={{
-                                display: "block",
-                                fontFamily: "var(--font-mono)",
-                                fontSize: "var(--text-xs)",
-                                letterSpacing: "var(--track-wide)",
-                                textTransform: "uppercase",
-                                color: "var(--color-alarm)",
-                                marginBottom: "var(--space-1)",
-                              }}
-                            >
-                              {r.category}
-                            </span>
-                          )}
-                          <span
-                            style={{
-                              fontFamily: "var(--font-display)",
-                              fontWeight: "var(--weight-bold)",
-                              lineHeight: "var(--leading-snug)",
-                              color: "var(--color-paper)",
-                            }}
-                          >
-                            {r.title}
-                          </span>
-                          <time
-                            dateTime={r.published_at}
-                            style={{
-                              display: "block",
-                              marginTop: "var(--space-1)",
-                              fontFamily: "var(--font-mono)",
-                              fontSize: "var(--text-xs)",
-                              color: "var(--color-text-muted)",
-                            }}
-                          >
-                            {formatDate(r.published_at)}
-                          </time>
+                        <Link href={`/stories/${r.slug}`} className="related-link">
+                          {r.category && <span className="related-kicker">{r.category}</span>}
+                          <span className="related-title">{r.title}</span>
+                          <time dateTime={r.published_at} className="related-date">{formatDate(r.published_at)}</time>
                         </Link>
                       </li>
                     ))}

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import NewsletterForm from "./NewsletterForm";
 
 export default function Footer() {
@@ -21,7 +22,13 @@ export default function Footer() {
 
         <div className="footer__masthead">
           <div className="footer__mark">
-            THE<span>COLONY</span>OK
+            <Image
+              src="/assets/images/logo-dark.jpg"
+              alt="The Colony"
+              width={280}
+              height={72}
+              style={{ width: "auto", height: "3rem", display: "block" }}
+            />
           </div>
           <div className="footer__imprint">
             <div>EST 2026 · VOL I</div>

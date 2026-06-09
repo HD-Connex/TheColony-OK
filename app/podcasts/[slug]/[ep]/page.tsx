@@ -60,7 +60,7 @@ export default async function PerEpisodePage({ params }: { params: Promise<Param
 
   let contributor = null;
   if (episode.host_name) {
-    contributor = await getContributorByName(episode.host_name).catch(() => null);
+    contributor = await getContributorByName(episode.host_name).catch((e) => { console.error(e); return null; });
   }
 
   const isVideo = !!(playable.video_url || playable.mux_playback_id);
@@ -145,22 +145,7 @@ export default async function PerEpisodePage({ params }: { params: Promise<Param
               </aside>
             )}
 
-            <nav
-              className="ep-nav"
-              style={{
-                display: "flex",
-                flexWrap: "wrap",
-                gap: "var(--space-4)",
-                marginTop: "var(--space-8)",
-                paddingTop: "var(--space-6)",
-                borderTop: "var(--rule-hairline) solid var(--color-border)",
-                fontFamily: "var(--font-mono)",
-                fontSize: "var(--text-xs)",
-                letterSpacing: "var(--track-wide)",
-                textTransform: "uppercase",
-              }}
-              aria-label="Episode navigation"
-            >
+            <nav className="ep-nav" aria-label="Episode navigation">
               {prev && (
                 <Link href={`/podcasts/${showSlug}/${prev.slug || prev.id}`}>
                   ← Prev: {prev.title}
@@ -193,11 +178,7 @@ export default async function PerEpisodePage({ params }: { params: Promise<Param
                 <ul className="chapter-list" style={{ marginTop: "var(--space-4)" }}>
                   {related.map((s) => (
                     <li key={s.id}>
-                      <Link
-                        href={`/podcasts/${showSlug}/${s.slug || s.id}`}
-                        className="chapter-btn"
-                        style={{ display: "block", textDecoration: "none" }}
-                      >
+                      <Link href={`/podcasts/${showSlug}/${s.slug || s.id}`} className="chapter-btn">
                         {s.title}
                       </Link>
                     </li>

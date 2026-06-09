@@ -32,7 +32,7 @@ const vsBlazeSchema = {
       name: "The Colony vs BlazeTV — Why Local Wins",
       description:
         "Side-by-side comparison: Colony rural OK depth, member community, and reader-funded journalism vs BlazeTV national personalities.",
-      thumbnailUrl: ["https://thecolonyok.com/assets/images/hosts/emily-thorne.jpg"],
+      thumbnailUrl: ["https://thecolonyok.com/assets/images/hosts/dan-hollis.jpg"],
       uploadDate: "2026-06-08",
       contentUrl: "https://thecolonyok.com/podcasts/children-of-the-state",
     },
@@ -172,80 +172,24 @@ export default function VsBlazePage() {
               </div>
             </header>
 
-            <div
-              style={{
-                display: "grid",
-                gap: "1px",
-                background: "var(--color-border)",
-                border: "1px solid var(--color-border)",
-                borderRadius: "var(--radius-md)",
-                overflow: "hidden",
-              }}
-            >
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1.2fr 1fr 1fr",
-                  gap: "1px",
-                  background: "var(--color-border)",
-                  fontFamily: "var(--font-mono)",
-                  fontSize: ".75rem",
-                  letterSpacing: ".1em",
-                  textTransform: "uppercase",
-                }}
-              >
-                <div style={{ padding: "1rem", background: "var(--color-surface)" }} />
-                <div style={{ padding: "1rem", background: "var(--color-surface)", color: "var(--honey)" }}>
-                  The Colony
-                </div>
-                <div style={{ padding: "1rem", background: "var(--color-surface)", color: "var(--muted-foreground)" }}>
-                  BlazeTV
-                </div>
-              </div>
-              {COMPARISON.map((row) => (
-                <div
-                  key={row.label}
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "1.2fr 1fr 1fr",
-                    gap: "1px",
-                    background: "var(--color-border)",
-                  }}
-                >
-                  <div
-                    style={{
-                      padding: "1rem 1.25rem",
-                      background: "var(--color-surface)",
-                      fontWeight: 600,
-                      fontSize: ".9rem",
-                    }}
-                  >
-                    {row.label}
-                  </div>
-                  <div
-                    style={{
-                      padding: "1rem 1.25rem",
-                      background: "var(--color-surface)",
-                      fontSize: ".9rem",
-                      lineHeight: 1.5,
-                    }}
-                  >
-                    {row.colony}
-                  </div>
-                  <div
-                    style={{
-                      padding: "1rem 1.25rem",
-                      background: "var(--color-surface)",
-                      fontSize: ".9rem",
-                      color: "var(--color-text-secondary)",
-                      lineHeight: 1.5,
-                    }}
-                  >
-                    {row.blaze}
-                  </div>
-                </div>
-              ))}
-            </div>
+            <table className="compare-table">
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>The Colony</th>
+                  <th>BlazeTV</th>
+                </tr>
+              </thead>
+              <tbody>
+                {COMPARISON.map((row) => (
+                  <tr key={row.label}>
+                    <th>{row.label}</th>
+                    <td>{row.colony}</td>
+                    <td className="compare--secondary">{row.blaze}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </section>
 
           <section aria-label="Key wins" style={{ margin: "var(--space-8) 0" }}>
@@ -257,98 +201,26 @@ export default function VsBlazePage() {
               </div>
             </header>
 
-            <div
-              style={{
-                display: "grid",
-                gap: "1px",
-                background: "var(--color-border)",
-                border: "1px solid var(--color-border)",
-                borderRadius: "var(--radius-md)",
-                overflow: "hidden",
-              }}
-            >
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1.1fr 1fr 1.2fr 0.6fr",
-                  gap: "1px",
-                  background: "var(--color-border)",
-                  fontFamily: "var(--font-mono)",
-                  fontSize: ".7rem",
-                  letterSpacing: ".08em",
-                  textTransform: "uppercase",
-                }}
-              >
-                {["Dimension", "BlazeTV", "The Colony", "Edge"].map((heading) => (
-                  <div
-                    key={heading}
-                    style={{
-                      padding: "1rem",
-                      background: heading === "The Colony" ? "var(--color-paper)" : "var(--color-surface)",
-                      color: heading === "The Colony" ? "var(--color-ink)" : undefined,
-                      fontWeight: heading === "Dimension" ? 600 : undefined,
-                    }}
-                  >
-                    {heading}
-                  </div>
+            <table className="compare-table compare-table--wins">
+              <thead>
+                <tr>
+                  <th>Dimension</th>
+                  <th>BlazeTV</th>
+                  <th>The Colony</th>
+                  <th>Edge</th>
+                </tr>
+              </thead>
+              <tbody>
+                {WINS_MATRIX.map((row) => (
+                  <tr key={row.dimension}>
+                    <th>{row.dimension}</th>
+                    <td>{row.blaze}</td>
+                    <td>{row.colony}</td>
+                    <td className="compare--edge">{row.edge}</td>
+                  </tr>
                 ))}
-              </div>
-              {WINS_MATRIX.map((row) => (
-                <div
-                  key={row.dimension}
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "1.1fr 1fr 1.2fr 0.6fr",
-                    gap: "1px",
-                    background: "var(--color-border)",
-                  }}
-                >
-                  <div
-                    style={{
-                      padding: "1rem 1.25rem",
-                      background: "var(--color-surface)",
-                      fontWeight: 600,
-                      fontSize: ".85rem",
-                    }}
-                  >
-                    {row.dimension}
-                  </div>
-                  <div
-                    style={{
-                      padding: "1rem 1.25rem",
-                      background: "var(--color-surface)",
-                      fontSize: ".85rem",
-                      color: "var(--color-text-secondary)",
-                      lineHeight: 1.5,
-                    }}
-                  >
-                    {row.blaze}
-                  </div>
-                  <div
-                    style={{
-                      padding: "1rem 1.25rem",
-                      background: "var(--color-surface)",
-                      fontSize: ".85rem",
-                      lineHeight: 1.5,
-                      fontWeight: 600,
-                    }}
-                  >
-                    {row.colony}
-                  </div>
-                  <div
-                    style={{
-                      padding: "1rem 1.25rem",
-                      background: "var(--color-surface)",
-                      fontFamily: "var(--font-mono)",
-                      fontSize: ".75rem",
-                      color: "var(--color-alarm)",
-                    }}
-                  >
-                    {row.edge}
-                  </div>
-                </div>
-              ))}
-            </div>
+              </tbody>
+            </table>
           </section>
 
           <section className="prose-block" style={{ margin: "var(--space-8) 0" }}>

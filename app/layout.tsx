@@ -22,14 +22,14 @@ export const metadata: Metadata = {
     siteName: "The Colony OK",
     url: SITE_URL,
     locale: "en_US",
-    images: [{ url: "/assets/images/og-home.svg", width: 1200, height: 630 }],
+    images: [{ url: "/assets/images/og-home.jpg", width: 1200, height: 630 }],
   },
   twitter: {
     card: "summary_large_image",
     site: "@thecolonyok",
-    images: ["/assets/images/og-home.svg"],
+    images: ["/assets/images/og-home.jpg"],
   },
-  icons: { icon: "/assets/icons/favicon.svg" },
+  icons: { icon: "/assets/images/logo-icon.jpg" },
   other: {
     referrer: "strict-origin-when-cross-origin",
     "X-Content-Type-Options": "nosniff",

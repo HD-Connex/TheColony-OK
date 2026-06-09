@@ -65,7 +65,7 @@ export default async function JournalistsPage() {
                   <Image
                     className="journalist-card__photo"
                     src={hostPhoto(c.slug, c.headshot_url, c.name)}
-                    alt={c.name}
+                    alt={`${c.name} — The Colony OK journalist`}
                     width={80}
                     height={80}
                   />
@@ -81,72 +81,13 @@ export default async function JournalistsPage() {
               </article>
             ))
           ) : (
-            <>
-              {[
-                {
-                  name: "Sarah Mitchell",
-                  role: "INVESTIGATIONS EDITOR",
-                  bio: "Twelve years on the politics beat. Focus: campaign finance, public records, statehouse accountability.",
-                  contact: "sarah@thecolonyok.com · @sarahm_ok",
-                  slug: "sarah-mitchell",
-                },
-                {
-                  name: "Marcus Webb",
-                  role: "HOST · PATRIOT HOUR",
-                  bio: "Former Marine officer. Talk radio veteran. Focus: federal/state tension, constitutional law, foreign policy.",
-                  contact: "marcus@thecolonyok.com · @marcuswebb",
-                  slug: "marcus-webb",
-                },
-                {
-                  name: "Rachel Torres",
-                  role: "HOST · OK UNDERGROUND",
-                  bio: "Field reporter, formerly with KFOR. Rural Oklahoma, local government, and on-the-ground reporting.",
-                  contact: "rachel@thecolonyok.com · @rachel_ok",
-                  slug: "rachel-torres",
-                },
-                {
-                  name: "Pastor Dan Hollis",
-                  role: "HOST · FAITH & FREEDOM",
-                  bio: "Pastor of First Baptist Lawton, 22 years. Focus: faith in public life, religious liberty, community institutions.",
-                  contact: "dan@thecolonyok.com",
-                  slug: "dan-hollis",
-                },
-              ].map((j) => (
-                <article className="journalist-card" key={j.slug}>
-                  <div className="journalist-card__inner">
-                    <Image
-                      className="journalist-card__photo"
-                      src={hostPhoto(j.slug, null, j.name)}
-                      alt={j.name}
-                      width={80}
-                      height={80}
-                    />
-                    <div>
-                      <p className="journalist-card__role">▼ {j.role}</p>
-                      <h2 className="journalist-card__name">
-                        <Link href={`/contributors/${j.slug}`}>{j.name}</Link>
-                      </h2>
-                      <p className="journalist-card__bio">{j.bio}</p>
-                      <p className="journalist-card__contact">{j.contact}</p>
-                    </div>
-                  </div>
-                </article>
-              ))}
-            </>
+            <p className="empty-state">No journalists listed yet.</p>
           )}
         </div>
 
         {hasExamples && (
-          <div style={{ marginTop: "var(--space-10)" }}>
-            <p
-              style={{
-                fontFamily: "var(--font-mono)",
-                fontSize: "var(--text-xs)",
-                letterSpacing: "var(--track-wider)",
-                textTransform: "uppercase",
-                marginBottom: "var(--space-6)",
-              }}
-            >
+          <div className="tier-examples">
+            <p className="page-header__eyebrow" style={{ marginBottom: "var(--space-6)" }}>
               ▼ TIER PLACEMENT EXAMPLES
             </p>
             <div className="contrib-directory__grid">

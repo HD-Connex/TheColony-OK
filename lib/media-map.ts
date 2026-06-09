@@ -1,28 +1,28 @@
 /** Central slug → hero image mapping for stories, shows, and fallbacks. */
 
 export const STORY_HERO: Record<string, string> = {
-  "oklahoma-budget-crisis": "/assets/images/stories/oklahoma-budget-crisis.svg",
-  "lobbyist-network-silence": "/assets/images/stories/lobbyist-network.svg",
-  "parents-curriculum-pushback": "/assets/images/stories/parents-curriculum.svg",
-  "energy-sector-green-mandates": "/assets/images/stories/energy-pipeline.svg",
-  "sheriffs-race-investigation": "/assets/images/stories/sheriffs-race.svg",
-  "tulsa-dei-defund-vote": "/assets/images/stories/tulsa-dei-vote.svg",
+  "oklahoma-budget-crisis": "/assets/images/stories/oklahoma-budget-crisis.jpg",
+  "lobbyist-network-silence": "/assets/images/stories/lobbyist-network.jpg",
+  "parents-curriculum-pushback": "/assets/images/stories/parents-curriculum.jpg",
+  "energy-sector-green-mandates": "/assets/images/stories/energy-pipeline.jpg",
+  "sheriffs-race-investigation": "/assets/images/stories/sheriffs-race.jpg",
+  "tulsa-dei-defund-vote": "/assets/images/stories/tulsa-dei-vote.jpg",
 };
 
 export const STORY_HERO_ALT: Record<string, string> = {
-  "oklahoma-budget-crisis": "Oklahoma state capitol at dusk — budget crisis investigation",
-  "lobbyist-network-silence": "Capitol corridor and lobbying documents — Oklahoma politics",
-  "parents-curriculum-pushback": "Parents at an Oklahoma school board meeting on curriculum",
-  "energy-sector-green-mandates": "Oklahoma oil field and pipeline infrastructure at sunset",
-  "sheriffs-race-investigation": "Oklahoma sheriff campaign rally — campaign finance investigation",
-  "tulsa-dei-defund-vote": "Tulsa City Council chamber during DEI budget vote",
+  "oklahoma-budget-crisis": "Oklahoma State Capitol at dusk with investigative budget documents and red stamps — budget crisis reporting",
+  "lobbyist-network-silence": "Shadowed Oklahoma Capitol corridor with redacted lobbyist contracts and documents — lobbyist influence investigation",
+  "parents-curriculum-pushback": "Oklahoma school board meeting with parents presenting curriculum documents and red parental rights materials — education investigation",
+  "energy-sector-green-mandates": "Oklahoma oil field and pipeline at dramatic sunset with official energy mandate papers and red highlights — energy policy investigation",
+  "sheriffs-race-investigation": "Rural Oklahoma courthouse with sheriff campaign materials, finance disclosure documents and red investigation stamps — sheriffs race reporting",
+  "tulsa-dei-defund-vote": "Tulsa City Council chamber during tense public vote on DEI funding with official documents and microphones — local government investigation",
 };
 
 export const PODCAST_ART: Record<string, string> = {
-  "colony-report": "/assets/images/podcast-colony-report.svg",
-  "patriot-hour": "/assets/images/podcast-patriot-hour.svg",
-  "oklahoma-underground": "/assets/images/podcast-ok-underground.svg",
-  "faith-and-freedom": "/assets/images/podcast-faith-freedom.svg",
+  "colony-report": "/assets/images/podcasts/colony-report.jpg",
+  "patriot-hour": "/assets/images/podcasts/patriot-hour.jpg",
+  "oklahoma-underground": "/assets/images/podcasts/oklahoma-underground.jpg",
+  "faith-and-freedom": "/assets/images/podcasts/faith-freedom.jpg",
 };
 
 export const HOST_PHOTO: Record<string, string> = {
@@ -30,12 +30,12 @@ export const HOST_PHOTO: Record<string, string> = {
   "marcus-webb": "/assets/images/hosts/marcus-webb.jpg",
   "rachel-torres": "/assets/images/hosts/rachel-torres.jpg",
   "dan-hollis": "/assets/images/hosts/dan-hollis.jpg",
-  "sarah-mitchell": "/assets/images/hosts/sarah-mitchell.svg",
-  "david-reyes": "/assets/images/hosts/david-reyes.svg",
+  "sarah-mitchell": "/assets/images/hosts/sarah-mitchell.jpg",
+  "david-reyes": "/assets/images/hosts/david-reyes.jpg",
 };
 
 export function storyHero(slug: string, dbUrl?: string | null): string {
-  return dbUrl || STORY_HERO[slug] || "/assets/images/story-lead.svg";
+  return dbUrl || STORY_HERO[slug] || "/assets/images/heroes/story-lead.jpg";
 }
 
 export function hostPhoto(slug: string, headshot?: string | null, name = ""): string {

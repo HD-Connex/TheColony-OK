@@ -89,7 +89,7 @@ export default async function ContributorPage({ params }: PageProps) {
           <Image
             className="contrib-profile__photo"
             src={photo}
-            alt={contributor.name}
+            alt={`${contributor.name} — The Colony OK ${contributor.role ?? "journalist"}`}
             width={160}
             height={160}
             priority

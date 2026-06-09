@@ -96,7 +96,7 @@ function NewsList({ items, showDate }: { items: Article[]; showDate: boolean }) 
 }
 
 export default async function NewsPage() {
-  const items = await getArticles({ limit: 30 }).catch(() => []);
+  const items = await getArticles({ limit: 30 }).catch((e) => { console.error(e); return []; });
   const [pinned, ...rest] = items;
   const groups = groupArticles(rest);
   const visibleGroups = GROUP_ORDER.filter((g) => groups[g].length > 0);
@@ -115,30 +115,8 @@ export default async function NewsPage() {
         <>
           {pinned && (
             <section className="section section--tight">
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "var(--space-3)",
-                  paddingBlock: "var(--space-4)",
-                  borderBottom: "var(--rule-medium) solid var(--color-alarm)",
-                }}
-              >
-                <span
-                  style={{
-                    fontFamily: "var(--font-mono)",
-                    fontSize: "var(--text-xs)",
-                    letterSpacing: "var(--track-wider)",
-                    textTransform: "uppercase",
-                    color: "var(--color-alarm)",
-                  }}
-                >
-                  ▼ PINNED · TOP OF FOLD
-                </span>
-              </div>
-              <div style={{ paddingTop: "var(--space-6)" }}>
-                <StoryCard a={pinned} variant="lead" />
-              </div>
+              <p className="page-header__eyebrow" style={{ marginBottom: "var(--space-4)" }}>▼ PINNED · TOP OF FOLD</p>
+              <StoryCard a={pinned} variant="lead" />
             </section>
           )}
 

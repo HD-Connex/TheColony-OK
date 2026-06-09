@@ -61,7 +61,7 @@ export default function ContributorApplyForm({ defaultPlanId = "featured" }: Pro
     return (
       <div className="contrib-apply__success" id="apply">
         <h2>Application received.</h2>
-        <p style={{ color: "var(--color-text-ink-soft)", maxWidth: "48ch", margin: "0 auto var(--space-6)" }}>
+        <p className="success-copy">
           Editorial review within 48 hours. We&apos;ll email you at the address you provided with next steps for your{" "}
           {CONTRIBUTOR_PLANS.find((p) => p.id === planId)?.name ?? "masthead"} tier.
         </p>
@@ -181,7 +181,7 @@ export default function ContributorApplyForm({ defaultPlanId = "featured" }: Pro
         </div>
       </div>
 
-      <div style={{ marginTop: "var(--space-8)" }}>
+      <div className="form-actions" style={{ marginTop: "var(--space-8)" }}>
         <button className="btn btn--ink btn--lg" type="submit" disabled={pending}>
           {pending ? "Submitting…" : "Submit application"}
         </button>

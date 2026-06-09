@@ -17,7 +17,7 @@
 
 .nav__logo {
   display: inline-flex;
-  align-items: baseline;
+  align-items: center;
   gap: var(--space-2);
   font-family: var(--font-display);
   font-size: var(--text-2xl);
@@ -26,6 +26,12 @@
   letter-spacing: var(--track-tight);
   color: var(--color-paper);
   line-height: 1;
+}
+
+.nav__logo img {
+  height: 2.5rem;
+  width: auto;
+  flex-shrink: 0;
 }
 
 .nav__logo-text { display: inline-flex; gap: 0.35ch; }

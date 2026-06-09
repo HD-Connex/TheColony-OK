@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import HeaderNav from "./HeaderNav";
 import { getArticles } from "@/lib/articles";
 
@@ -55,9 +56,14 @@ export default async function Header() {
       <div className="container">
         <nav className="nav" aria-label="Main navigation">
           <Link className="nav__logo" href="/">
-            <span className="nav__logo-text">
-              THE<span>COLONY</span>OK
-            </span>
+            <Image
+              src="/assets/images/logo-dark.jpg"
+              alt="The Colony"
+              width={210}
+              height={56}
+              style={{ width: "auto", height: "2.5rem", display: "block" }}
+              priority
+            />
             <span className="nav__logo-mark">EST 2026 / N°01</span>
           </Link>
           <HeaderNav />

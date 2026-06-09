@@ -27,7 +27,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background-image: url('/assets/images/hero-1.svg');
+  background-image: url('/assets/images/heroes/lead-hero.jpg');
   background-size: cover;
   background-position: center;
   opacity: 0.18;
@@ -175,6 +175,22 @@
   color: var(--color-paper);
   border-top: var(--rule-medium) solid var(--color-alarm);
 }
+
+/* ─── Paper variant for home (Colony Report sidebar on white/paper, high-contrast ink text + red accents) ─── */
+.hero__secondary--paper {
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+}
+
+.hero__secondary--paper .hero__secondary-block:not(.hero__secondary--ink) .hero__secondary-label {
+  color: var(--color-alarm);
+}
+.hero__secondary--paper .hero__secondary-block:not(.hero__secondary--ink) .hero__secondary-title,
+.hero__secondary--paper .hero__secondary-block:not(.hero__secondary--ink) .hero__secondary-meta {
+  color: var(--color-ink);
+}
+
+/* The .hero__secondary--ink block keeps its own styles (dark + alarm top border) even when parent is paper variant. */
 
 @media (max-width: 1024px) {
   .hero__grid { grid-template-columns: 1fr; min-height: 0; }

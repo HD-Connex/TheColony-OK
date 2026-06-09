@@ -18,7 +18,7 @@ interface PageProps {
 }
 
 export async function generateStaticParams() {
-  const slugs = await getPublishedSeriesSlugs().catch(() => []);
+  const slugs = await getPublishedSeriesSlugs().catch((e) => { console.error(e); return []; });
   return slugs.map((slug) => ({ slug }));
 }
 
@@ -36,10 +36,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function SeriesPage({ params }: PageProps) {
   const { slug } = await params;
-  const series = await getVideoSeriesBySlug(slug).catch(() => null);
+  const series = await getVideoSeriesBySlug(slug).catch((e) => { console.error(e); return null; });
   if (!series) notFound();
 
-  const episodes = await getSeriesEpisodes(series.id).catch(() => []);
+  const episodes = await getSeriesEpisodes(series.id).catch((e) => { console.error(e); return []; });
   const accent = series.accent_color ?? "#f0b429";
 
   return (
@@ -79,7 +79,7 @@ export default async function SeriesPage({ params }: PageProps) {
             <div style={{ position: "absolute", inset: 0, zIndex: 0 }}>
               <Image
                 src={series.hero_url}
-                alt=""
+                alt={series.title}
                 fill
                 priority
                 sizes="100vw"
@@ -142,7 +142,7 @@ export default async function SeriesPage({ params }: PageProps) {
                       <Link href={`/shows/${series.slug}/${ep.slug}`} className="episode-row">
                         <div className="episode-row__thumb">
                           {ep.thumbnail_url && (
-                            <Image src={ep.thumbnail_url} alt="" fill sizes="176px" style={{ objectFit: "cover" }} />
+                            <Image src={ep.thumbnail_url} alt={ep.title} fill sizes="176px" style={{ objectFit: "cover" }} />
                           )}
                           {ep.duration_seconds != null && (
                             <span className="episode-row__duration">{formatDuration(ep.duration_seconds)}</span>

@@ -130,30 +130,6 @@ export default function PricingPage() {
             ))}
           </div>
         </section>
-
-        <section className="membership-cta">
-          <div className="membership-cta__inner">
-            <div className="membership-cta__lead">
-              <p className="membership-cta__eyebrow">▼ READY?</p>
-              <h2 className="membership-cta__title">Independent press takes independent readers.</h2>
-              <p className="membership-cta__subtitle">
-                Every member is one more reason this newsroom exists. Cancel anytime — but most don&apos;t.
-              </p>
-            </div>
-            <div className="membership-cta__price-card">
-              <div className="membership-cta__price">
-                <span className="membership-cta__amount">${memberPlan.price}</span>
-                <span className="membership-cta__period">/MONTH</span>
-              </div>
-              <div className="membership-cta__actions">
-                <CheckoutButton planId={memberPlan.id} className="btn btn--primary btn--lg btn--full">
-                  Join Now
-                </CheckoutButton>
-              </div>
-              <p className="membership-cta__disclaimer">Secure checkout via Stripe</p>
-            </div>
-          </div>
-        </section>
       </div>
     </main>
   );

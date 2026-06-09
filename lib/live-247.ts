@@ -51,7 +51,7 @@ export const COLONY_247: Live247Channel = {
     { time: "06:00", title: "Morning Brief — OKC & Rural", durationMin: 60 },
     { time: "07:00", title: "The Colony Report Replay", durationMin: 120 },
   ],
-  fallbackSlate: "/assets/images/live/colony-247-slate.svg",
+  fallbackSlate: "/assets/images/slates/colony-247-slate.jpg",
 };
 
 export async function getCurrentLiveChannel(): Promise<Live247Channel> {

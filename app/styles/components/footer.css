@@ -27,6 +27,12 @@
   color: var(--color-paper);
 }
 
+.footer__mark img {
+  height: 3rem;
+  width: auto;
+  display: block;
+}
+
 .footer__mark span { color: var(--color-alarm); }
 
 .footer__imprint {

@@ -8,10 +8,11 @@ import JsonLd from "../../_components/JsonLd";
 import Countdown from "../../_components/Countdown";
 import { supabasePublic, type Show, type Episode } from "@/lib/supabase";
 import EpisodePlayer from "../../_components/EpisodePlayer";
+import { hostPhoto } from "@/lib/media-map";
+import { formatDate, formatDurationLabel } from "@/lib/format";
 
 export const revalidate = 60;
 
-const NEXT_BROADCAST = "2026-05-29T19:00:00-05:00";
 const SITE_URL = "https://thecolonyok.com";
 
 interface PageProps {
@@ -111,7 +112,7 @@ export default async function PodcastShowPage({ params }: PageProps) {
               <article className="live-section live-section--even">
                 <div style={{ backgroundColor: "var(--color-ink-soft)", padding: "var(--space-8)", display: "flex", flexDirection: "column", gap: "var(--space-4)", justifyContent: "center" }}>
                   <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", letterSpacing: "var(--track-wider)", textTransform: "uppercase", color: "var(--color-alarm)" }}>
-                    EPISODE {latest.episode_no ?? "—"} · {formatDuration(latest.duration_s)}
+                    EPISODE {latest.episode_no ?? "—"} · {formatDurationLabel(latest.duration_s)}
                   </div>
                   <h3 style={{ fontFamily: "var(--font-display)", fontSize: "var(--text-3xl)", fontWeight: 900, letterSpacing: "var(--track-tight)", lineHeight: 1 }}>{latest.title}</h3>
                   {latest.description && <p style={{ color: "var(--color-text-secondary)", lineHeight: "var(--leading-relaxed)" }}>{latest.description}</p>}
@@ -122,10 +123,9 @@ export default async function PodcastShowPage({ params }: PageProps) {
                 </div>
                 <div className="live-sidebar" style={{ backgroundColor: "var(--color-alarm)" }}>
                   <span className="badge badge--new">NEW</span>
-                  <h3 className="live-status__title">Next Broadcast</h3>
-                  <p className="live-status__description">Live tonight 7PM CT — Episode 43 with whistleblower interview and your questions.</p>
-                  <Countdown target={NEXT_BROADCAST} label="▼ COUNTDOWN" />
-                  <Link className="btn btn--ink btn--full" href="/live">Watch Live</Link>
+                  <h3 className="live-status__title">Latest Episode</h3>
+                  <p className="live-status__description">{latest.description ? latest.description.slice(0, 120) + "…" : "Full episode now available."}</p>
+                  <Link className="btn btn--ink btn--full" href="#library">Listen Now</Link>
                 </div>
               </article>
             </section>
@@ -154,30 +154,15 @@ export default async function PodcastShowPage({ params }: PageProps) {
 
             <div className="grid-feature">
               <div style={{ padding: "var(--space-6)", borderRight: "var(--rule-hairline) solid var(--color-border)", display: "flex", gap: "var(--space-6)", alignItems: "flex-start" }}>
-                {(() => {
-                  const hostLower = show.host.toLowerCase();
-                  const hostPhoto =
-                    hostLower.includes("jake") || hostLower.includes("merrick")
-                      ? "/assets/images/hosts/jake-merrick.jpg"
-                      : hostLower.includes("marcus") || hostLower.includes("webb")
-                        ? "/assets/images/hosts/marcus-webb.jpg"
-                        : hostLower.includes("rachel") || hostLower.includes("torres")
-                          ? "/assets/images/hosts/rachel-torres.jpg"
-                          : hostLower.includes("dan") || hostLower.includes("hollis") || hostLower.includes("pastor")
-                            ? "/assets/images/hosts/dan-hollis.jpg"
-                            : "/assets/images/author-1.svg";
-                  return (
-                    <div style={{ flexShrink: 0 }}>
-                      <Image
-                        src={hostPhoto}
-                        alt={show.host}
-                        width={120}
-                        height={120}
-                        style={{ borderRadius: "var(--radius-sm)", objectFit: "cover", border: "var(--rule-medium) solid var(--color-border-light)" }}
-                      />
-                    </div>
-                  );
-                })()}
+                <div style={{ flexShrink: 0 }}>
+                  <Image
+                    src={hostPhoto(show.slug ?? "", null, show.host)}
+                    alt={`${show.host} — host of The Colony OK`}
+                    width={120}
+                    height={120}
+                    style={{ borderRadius: "var(--radius-sm)", objectFit: "cover", border: "var(--rule-medium) solid var(--color-border-light)" }}
+                  />
+                </div>
                 <div style={{ minWidth: 0 }}>
                   <h3 style={{ fontFamily: "var(--font-display)", fontSize: "var(--text-3xl)", fontWeight: 900, letterSpacing: "var(--track-tight)", marginBottom: "var(--space-4)" }}>{show.host}</h3>
                   <p style={{ color: "var(--color-text-secondary)", lineHeight: "var(--leading-relaxed)", marginBottom: "var(--space-4)" }}>{show.description}</p>
@@ -197,17 +182,4 @@ export default async function PodcastShowPage({ params }: PageProps) {
       </main>
     </>
   );
-}
-
-function formatDate(iso: string): string {
-  const d = new Date(iso);
-  if (Number.isNaN(d.valueOf())) return "";
-  return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }).toUpperCase();
-}
-
-function formatDuration(s: number | null): string {
-  if (!s || s <= 0) return "";
-  const h = Math.floor(s / 3600);
-  const m = Math.floor((s % 3600) / 60);
-  return h > 0 ? `${h}H ${String(m).padStart(2, "0")}M` : `${m}M`;
 }

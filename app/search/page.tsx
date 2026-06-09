@@ -105,13 +105,11 @@ export default async function SearchPage({
       </form>
 
       {query && statusNote && (
-        <p style={{ fontSize: ".8125rem", color: "var(--muted-foreground)", marginBottom: ".75rem" }}>
-          {statusNote}
-        </p>
+        <p style={{ fontSize: "var(--text-xs)", color: "var(--color-text-muted)", marginBottom: "var(--space-3)" }}>{statusNote}</p>
       )}
 
       {query && (
-        <p style={{ fontSize: ".875rem", color: "var(--muted-foreground)", marginBottom: "1rem" }}>
+        <p style={{ fontSize: "var(--text-sm)", color: "var(--color-text-muted)", marginBottom: "var(--space-4)" }}>
           {results.length} result{results.length === 1 ? "" : "s"} for &ldquo;{query}&rdquo;
         </p>
       )}
@@ -127,7 +125,7 @@ export default async function SearchPage({
               {r.thumbnail && (
                 <Image
                   src={r.thumbnail}
-                  alt=""
+                  alt={r.title}
                   width={320}
                   height={180}
                   style={{ width: "100%", height: "100%", objectFit: "cover" }}
@@ -138,7 +136,7 @@ export default async function SearchPage({
               <p className="search-result__series">{r.subtitle}</p>
               <h3 className="search-result__title">{r.title}</h3>
               {r.excerpt && (
-                <p style={{ fontSize: ".8125rem", color: "var(--muted-foreground)", margin: ".35rem 0 0" }}>
+                <p style={{ fontSize: "var(--text-xs)", color: "var(--color-text-muted)", marginTop: "var(--space-1)" }}>
                   {r.excerpt}
                 </p>
               )}

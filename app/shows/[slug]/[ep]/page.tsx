@@ -52,8 +52,8 @@ export default async function VideoEpisodePage({ params }: { params: Promise<Par
 
   const { series, episode } = data;
   const playback = resolveVideo(episode);
-  const [prev, next] = await getSiblingVideoEpisodes(series.id, episode.id);
-  const related = (await getSeriesEpisodes(series.id))
+  const [prev, next] = await getSiblingVideoEpisodes(series.id, episode.id).catch(() => [null, null] as const);
+  const related = (await getSeriesEpisodes(series.id).catch(() => []))
     .filter((e) => e.id !== episode.id)
     .slice(0, 5);
 
@@ -135,22 +135,7 @@ export default async function VideoEpisodePage({ params }: { params: Promise<Par
               </section>
             )}
 
-            <nav
-              className="ep-nav"
-              style={{
-                display: "flex",
-                flexWrap: "wrap",
-                gap: "var(--space-4)",
-                marginTop: "var(--space-8)",
-                paddingTop: "var(--space-6)",
-                borderTop: "var(--rule-hairline) solid var(--color-border)",
-                fontFamily: "var(--font-mono)",
-                fontSize: "var(--text-xs)",
-                letterSpacing: "var(--track-wide)",
-                textTransform: "uppercase",
-              }}
-              aria-label="Episode navigation"
-            >
+            <nav className="ep-nav" aria-label="Episode navigation">
               {prev && (
                 <Link href={`/shows/${series.slug}/${prev.slug}`}>← Prev: {prev.title}</Link>
               )}
@@ -175,22 +160,10 @@ export default async function VideoEpisodePage({ params }: { params: Promise<Par
                 <ul className="chapter-list" style={{ marginTop: "var(--space-4)" }}>
                   {related.map((s) => (
                     <li key={s.id}>
-                      <Link
-                        href={`/shows/${series.slug}/${s.slug}`}
-                        className="chapter-btn"
-                        style={{ display: "grid", gridTemplateColumns: "72px 1fr", gap: "var(--space-3)", textDecoration: "none" }}
-                      >
-                        <span
-                          style={{
-                            position: "relative",
-                            aspectRatio: "16/9",
-                            overflow: "hidden",
-                            border: "var(--rule-hairline) solid var(--color-border)",
-                            background: "var(--color-ink-soft)",
-                          }}
-                        >
+                      <Link href={`/shows/${series.slug}/${s.slug}`} className="chapter-btn episode-related">
+                        <span className="episode-related__thumb">
                           {s.thumbnail_url && (
-                            <Image src={s.thumbnail_url} alt="" fill sizes="72px" style={{ objectFit: "cover" }} />
+                            <Image src={s.thumbnail_url} alt={s.title} fill sizes="72px" style={{ objectFit: "cover" }} />
                           )}
                         </span>
                         <span>

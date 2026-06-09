@@ -8,6 +8,7 @@ import LiveStageMount from "../_components/LiveStageMount";
 import { type StageItem } from "../_components/LiveStage";
 import LivePlatformTabs from "../_components/LivePlatformTabs";
 import { getLiveEvents, eventsToStageItems, tierLocked, tierLabel, type LiveEvent } from "@/lib/live-events";
+import { whenLabel, formatLiveWhen } from "@/lib/format";
 
 export const revalidate = 60;
 
@@ -16,25 +17,6 @@ export const metadata: Metadata = {
   description: "Live broadcasts and replays from The Colony — Oklahoma news, live events, and the full archive. Streamed free and members-only.",
   alternates: { canonical: "/live" },
 };
-
-function whenLabel(e: LiveEvent): string {
-  const iso = e.status === "ended" ? e.ended_at ?? e.scheduled_start : e.scheduled_start;
-  if (!iso) return e.status === "live" ? "LIVE NOW" : "";
-  const d = new Date(iso).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).toUpperCase();
-  return e.status === "live" ? `LIVE NOW · ${d}` : e.status === "ended" ? `REPLAY · ${d}` : d;
-}
-
-function formatLiveWhen(e: LiveEvent): string {
-  if (e.status === "live") return "LIVE NOW";
-  if (!e.scheduled_start) return "UPCOMING";
-  const d = new Date(e.scheduled_start);
-  const time = d.toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-    timeZone: "America/Chicago",
-  });
-  return `${time} CT`;
-}
 
 export default async function LivePage({
   searchParams,
@@ -130,8 +112,8 @@ export default async function LivePage({
                 )}
               </div>
 
-              <Link className="btn btn--ink btn--full" href="/live">
-                Full Schedule
+              <Link className="btn btn--ink btn--full" href="/shows">
+                Browse All Shows
               </Link>
             </div>
           </section>

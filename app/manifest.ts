@@ -14,21 +14,21 @@ export default function manifest(): MetadataRoute.Manifest {
     categories: ["news", "entertainment", "education"],
     icons: [
       {
-        src: "/icon-192.png",
+        src: "/assets/images/logo-icon.jpg",
         sizes: "192x192",
-        type: "image/png",
+        type: "image/jpeg",
         purpose: "any",
       },
       {
-        src: "/icon-512.png",
+        src: "/assets/images/logo-icon.jpg",
         sizes: "512x512",
-        type: "image/png",
+        type: "image/jpeg",
         purpose: "any",
       },
       {
-        src: "/icon-maskable.png",
+        src: "/assets/images/logo-icon.jpg",
         sizes: "512x512",
-        type: "image/png",
+        type: "image/jpeg",
         purpose: "maskable",
       },
     ],

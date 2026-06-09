@@ -59,7 +59,7 @@
   color: var(--color-text-muted);
 }
 
-/* ─── Sidebar (alarm block) ─── */
+/* ─── Sidebar (alarm block for live page full-bleed; paper variant scoped to home) ─── */
 .live-sidebar {
   padding: var(--space-6);
   display: flex;
@@ -84,6 +84,30 @@
   background-color: var(--color-ink);
   color: var(--color-paper);
   border-color: var(--color-paper);
+}
+
+/* Paper variant — applied only to home's .live-sidebar (via modifier class).
+   High-contrast paper/ink base, alarm red for ON AIR badge + highlights to retain energetic Colony Report branding.
+   Countdown keeps its --alarm variant (red units) for accent pops. Schedule sublist remains dark for readable contrast. */
+.live-sidebar--paper {
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+}
+
+.live-sidebar--paper .live-status__title,
+.live-sidebar--paper .live-status__description {
+  color: var(--color-ink);
+}
+
+.live-sidebar--paper .live-status .badge--new {
+  background-color: var(--color-alarm);
+  color: var(--color-paper);
+  border-color: var(--color-alarm);
+}
+
+/* Schedule list (dark ink) inside paper frame needs dark border to remain visible/separated */
+.live-sidebar--paper .schedule-list {
+  border-color: var(--color-ink);
 }
 
 .live-status__title {

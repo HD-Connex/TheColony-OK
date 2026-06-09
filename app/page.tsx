@@ -6,62 +6,19 @@ import LiveStageMount from "./_components/LiveStageMount";
 import { type StageItem } from "./_components/LiveStage";
 import MotionStagger, { MotionStaggerItem } from "./_components/motion/MotionStagger";
 import { PODCAST_ART, storyHero } from "@/lib/media-map";
+import Image from "next/image";
 import { getArticles, type Article } from "@/lib/articles";
 import { getShowsWithEpisodeCounts } from "@/lib/podcasts";
-import { getLiveEvents, eventsToStageItems, type LiveEvent } from "@/lib/live-events";
-import { formatDate } from "@/lib/format";
+import { getLiveEvents, eventsToStageItems } from "@/lib/live-events";
+import { formatDate, formatHeroDateline, formatTimeCT, formatLiveWhen, whenLabel } from "@/lib/format";
 import { CONTRIBUTOR_PLANS } from "@/lib/contributor-plans";
 
 export const revalidate = 60;
 
 const SITE_URL = "https://thecolonyok.com";
 
-function formatHeroDateline(iso?: string | null): string {
-  const d = iso ? new Date(iso) : new Date();
-  const day = d
-    .toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" })
-    .toUpperCase();
-  return `OKLAHOMA CITY · ${day}`;
-}
-
-function formatTimeCT(iso?: string | null): string {
-  if (!iso) return "";
-  const d = new Date(iso);
-  if (Number.isNaN(d.valueOf())) return "";
-  return (
-    d
-      .toLocaleTimeString("en-US", {
-        hour: "numeric",
-        minute: "2-digit",
-        timeZone: "America/Chicago",
-      })
-      .toUpperCase() + " CT"
-  );
-}
-
-function formatLiveWhen(e: LiveEvent): string {
-  if (e.status === "live") return "LIVE NOW";
-  if (!e.scheduled_start) return "UPCOMING";
-  const d = new Date(e.scheduled_start);
-  const time = d.toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-    timeZone: "America/Chicago",
-  });
-  return `${time} CT`;
-}
-
 function authorName(a: Article): string {
   return (a.contributor?.name ?? "THE COLONY STAFF").toUpperCase();
-}
-
-function whenLabel(e: LiveEvent): string {
-  const iso = e.status === "ended" ? (e.ended_at ?? e.scheduled_start) : e.scheduled_start;
-  if (!iso) return e.status === "live" ? "LIVE NOW" : "";
-  const d = new Date(iso)
-    .toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })
-    .toUpperCase();
-  return e.status === "live" ? `LIVE NOW · ${d}` : e.status === "ended" ? `REPLAY · ${d}` : d;
 }
 
 export default async function HomePage() {
@@ -77,7 +34,7 @@ export default async function HomePage() {
   const newsItems = latest.slice(0, 3);
   const ticker = latest.slice(0, 6);
 
-  const nextLive: LiveEvent | undefined = live.live[0] ?? live.upcoming[0];
+  const nextLive = live.live[0] ?? live.upcoming[0];
   const schedule = [...live.live, ...live.upcoming].slice(0, 3);
   const isOnAir = live.live.length > 0;
   const countdownTarget =
@@ -104,60 +61,45 @@ export default async function HomePage() {
         <section className="hero" aria-label="Lead story">
           <div className="hero__grid">
             <article className="hero__primary">
-              <div>
-                <p className="hero__dateline">
-                  <span>
-                    N°43 / <strong>VOL I</strong>
-                  </span>
-                  <span>{formatHeroDateline(hero?.published_at)}</span>
-                  <span>INVESTIGATIONS DESK</span>
-                </p>
+              <p className="hero__dateline">
+                <span>N°43 / <strong>VOL I</strong></span>
+                <span>{formatHeroDateline(hero?.published_at)}</span>
+                <span>INVESTIGATIONS DESK</span>
+              </p>
+              <p className="hero__eyebrow">{hero?.category ?? "Investigative Report"}</p>
+              <h1 className="hero__title">
+                {hero ? (
+                  <Link href={`/stories/${hero.slug}`}>{hero.title}</Link>
+                ) : (
+                  "What They Don't Want You to Know About Oklahoma's Budget Crisis"
+                )}
+              </h1>
+              <p className="hero__excerpt">
+                {hero?.description ?? hero?.dek ?? "Our journalists spent six weeks inside the state capitol. What we found will make you angry — and it's why independent media exists."}
+              </p>
+              <div className="hero__meta">
+                <span>{authorName(hero ?? ({} as Article))}</span>
+                <span className="hero__meta-divider" />
+                <span>8 MIN READ</span>
+                <span className="hero__meta-divider" />
+                <span>FILED {formatDate(hero?.published_at) || "MAY 28, 2026"}</span>
               </div>
-
-              <div>
-                <p className="hero__eyebrow">{hero?.category ?? "Investigative Report"}</p>
-                <h1 className="hero__title">
-                  {hero ? (
-                    <Link href={`/stories/${hero.slug}`}>{hero.title}</Link>
-                  ) : (
-                    "What They Don't Want You to Know About Oklahoma's Budget Crisis"
-                  )}
-                </h1>
-                <p className="hero__excerpt">
-                  {hero?.description ??
-                    hero?.dek ??
-                    "Our journalists spent six weeks inside the state capitol. What we found will make you angry — and it's why independent media exists."}
-                </p>
-                <div className="hero__meta">
-                  <span>{authorName(hero ?? ({} as Article))}</span>
-                  <span className="hero__meta-divider" />
-                  <span>8 MIN READ</span>
-                  <span className="hero__meta-divider" />
-                  <span>FILED {formatDate(hero?.published_at) || "MAY 28, 2026"}</span>
-                </div>
-                <div className="hero__actions">
-                  {hero && (
-                    <Link className="btn btn--primary btn--lg" href={`/stories/${hero.slug}`}>
-                      Read the Report
-                    </Link>
-                  )}
-                  <Link className="btn btn--outline btn--lg" href="/pricing">
-                    Join — $4.99/mo
-                  </Link>
-                </div>
+              <div className="hero__actions">
+                {hero && <Link className="btn btn--primary btn--lg" href={`/stories/${hero.slug}`}>Read the Report</Link>}
+                <Link className="btn btn--outline btn--lg" href="/pricing">Join — $4.99/mo</Link>
               </div>
             </article>
 
-            <aside className="hero__secondary" aria-label="Live tonight">
+            <aside className="hero__secondary hero__secondary--paper" aria-label="Live tonight">
               <div className="hero__secondary-block">
                 <div className="hero__secondary-label">
-                  ▼ {isOnAir ? "LIVE NOW" : "LIVE TONIGHT · " + formatLiveWhen(nextLive ?? ({} as LiveEvent))}
+                  ▼ {isOnAir ? "LIVE NOW" : "LIVE TONIGHT · " + formatLiveWhen(nextLive)}
                 </div>
                 <h2 className="hero__secondary-title">
-                  {nextLive?.title ?? "The Colony Report — Ep. 43 with Jake Merrick"}
+                  {nextLive?.title ?? "The Colony Report"}
                 </h2>
                 <p className="hero__secondary-meta">
-                  {nextLive?.description ?? "Whistleblower interview · Governor's race · Your questions"}
+                  {nextLive?.description ?? "Live from Oklahoma City — whistleblower interviews, governor's race, and your questions."}
                 </p>
               </div>
               <div className="hero__secondary-block hero__secondary--ink">
@@ -206,9 +148,12 @@ export default async function HomePage() {
                 {topSecondary.map((a, i) => (
                   <article className="card card--horizontal" key={a.id}>
                     <div className="card__image">
-                      <img
+                      <Image
                         src={storyHero(a.slug, a.hero_url)}
-                        alt={a.hero_alt ?? a.title}
+                        alt={a.hero_alt ?? `${a.title} — Oklahoma investigative report`}
+                        width={320}
+                        height={180}
+                        sizes="(max-width: 768px) 100vw, 320px"
                         loading="lazy"
                       />
                     </div>
@@ -250,9 +195,13 @@ export default async function HomePage() {
                 <Link className="podcast-card" href={`/podcasts/${show.slug}`}>
                   <span className="podcast-card__number">SHOW N°{String(i + 1).padStart(2, "0")}</span>
                   <div className="podcast-card__art">
-                    <img
-                      src={show.cover_url ?? PODCAST_ART[show.slug] ?? "/assets/images/podcast-colony-report.svg"}
-                      alt={`${show.title} cover art`}
+                    <Image
+                      src={show.cover_url ?? PODCAST_ART[show.slug] ?? "/assets/images/podcasts/colony-report.jpg"}
+                      alt={`${show.title} — The Colony OK podcast cover`}
+                      width={220}
+                      height={220}
+                      sizes="220px"
+                      loading="lazy"
                     />
                     <div className="podcast-card__play">
                       <div className="podcast-card__play-icon">
@@ -298,19 +247,19 @@ export default async function HomePage() {
                 />
               </div>
 
-              <div className="live-sidebar">
+              <div className="live-sidebar live-sidebar--paper">
                 <div className="live-status">
                   <span className="badge badge--new">{isOnAir ? "ON AIR" : "TONIGHT"}</span>
                   {nextLive && (
                     <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", letterSpacing: "var(--track-wide)" }}>
-                      {nextLive.title.slice(0, 24).toUpperCase()}
+                      {nextLive.title.toUpperCase()}
                     </span>
                   )}
                 </div>
-                <h3 className="live-status__title">{nextLive?.title ?? "The Colony Report with Jake Merrick"}</h3>
+                <h3 className="live-status__title">{nextLive?.title ?? "The Colony Report"}</h3>
                 <p className="live-status__description">
                   {nextLive?.description ??
-                    "Live coverage of the governor's race, a whistleblower interview, and your questions answered in real time."}
+                    "Live coverage of the governor's race, whistleblower interviews, and real-time Q&amp;A."}
                 </p>
 
                 <Countdown target={countdownTarget} label="▼ COUNTDOWN" variant="alarm" />

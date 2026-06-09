@@ -1,5 +1,7 @@
 // Shared formatting helpers (no dependencies).
 
+import type { LiveEvent } from "./live-events";
+
 /** "1:02:03" for >= 1h, else "2:03". Accepts seconds. */
 export function formatDuration(totalSeconds?: number | null): string {
   if (!totalSeconds || totalSeconds < 0 || !Number.isFinite(totalSeconds)) return "0:00";
@@ -71,3 +73,54 @@ export function newsDateGroup(iso?: string | null, now = new Date()): NewsDateGr
   if (d >= startOfYesterday) return "yesterday";
   return "earlier";
 }
+
+/** "11:42 CT" style for ticker/hero. Upper + CT. */
+export function formatTimeCT(iso?: string | null): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.valueOf())) return "";
+  return (
+    d
+      .toLocaleTimeString("en-US", {
+        hour: "numeric",
+        minute: "2-digit",
+        timeZone: "America/Chicago",
+      })
+      .toUpperCase() + " CT"
+  );
+}
+
+/** For hero dateline: "OKLAHOMA CITY · WED, JUN 4, 2026" */
+export function formatHeroDateline(iso?: string | null): string {
+  const d = iso ? new Date(iso) : new Date();
+  const day = d
+    .toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" })
+    .toUpperCase();
+  return `OKLAHOMA CITY · ${day}`;
+}
+
+/** Time label for live sidebar / hero (e.g. "7:00 PM CT" or "LIVE NOW"). */
+export function formatLiveWhen(e?: LiveEvent | null): string {
+  if (!e) return "UPCOMING";
+  if (e.status === "live") return "LIVE NOW";
+  if (!e.scheduled_start) return "UPCOMING";
+  const d = new Date(e.scheduled_start);
+  const time = d.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    timeZone: "America/Chicago",
+  });
+  return `${time} CT`;
+}
+
+/** Label used for stage items (LIVE NOW / REPLAY / datestamp). */
+export function whenLabel(e?: LiveEvent | null): string {
+  if (!e) return "";
+  const iso = e.status === "ended" ? (e.ended_at ?? e.scheduled_start) : e.scheduled_start;
+  if (!iso) return e.status === "live" ? "LIVE NOW" : "";
+  const d = new Date(iso)
+    .toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })
+    .toUpperCase();
+  return e.status === "live" ? `LIVE NOW · ${d}` : e.status === "ended" ? `REPLAY · ${d}` : d;
+}
+

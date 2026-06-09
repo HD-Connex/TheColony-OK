@@ -11,7 +11,7 @@ export default function Breadcrumbs({ items }: { items: Crumb[] }) {
       {items.map((c, i) => {
         const isLast = i === items.length - 1;
         return (
-          <span key={i} style={{ display: "inline-flex", alignItems: "center", gap: "var(--space-2)" }}>
+          <span key={c.label + i} className="breadcrumbs__crumb">
             {i > 0 && <span className="breadcrumbs__separator">/</span>}
             {isLast || !c.href ? (
               <span className="breadcrumbs__current">{c.label}</span>

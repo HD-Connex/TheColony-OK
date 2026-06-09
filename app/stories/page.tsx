@@ -32,7 +32,7 @@ export default async function StoriesPage({
   const { cat } = await searchParams;
   const activeKey = CATEGORIES.some((c) => c.key === cat) ? cat! : "all";
 
-  const articles = await getArticles({ limit: 24 }).catch(() => []);
+  const articles = await getArticles({ limit: 24 }).catch((e) => { console.error("Failed loading stories", e); return []; });
   const filtered = articles.filter((a) => matchesCategory(a, activeKey));
 
   const filterOptions = CATEGORIES.map((c) => ({

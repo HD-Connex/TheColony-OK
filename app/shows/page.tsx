@@ -36,7 +36,8 @@ export default async function ShowsPage({
     items = await getVideoSeries();
     if (pillar) items = items.filter((s) => s.pillar === pillar);
     if (oklahomaOnly) items = items.filter((s) => s.is_oklahoma);
-  } catch {
+  } catch (err) {
+    console.error("Failed to load video series", err);
     items = [];
   }
 
@@ -87,7 +88,7 @@ function SeriesCard({ series }: { series: VideoSeries }) {
     <Link href={`/shows/${series.slug}`} className="series-card">
       <div className="series-card__poster">
         {img ? (
-          <Image src={img} alt="" fill sizes="(max-width:640px) 50vw, 25vw" style={{ objectFit: "cover" }} />
+          <Image src={img} alt={series.title} fill sizes="(max-width:640px) 50vw, 25vw" style={{ objectFit: "cover" }} />
         ) : (
           <div style={{ width: "100%", height: "100%", background: series.accent_color ?? "var(--muted)" }} />
         )}

@@ -3,13 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import type { ShowWithCount } from "@/lib/podcasts";
-
-const PODCAST_ART: Record<string, string> = {
-  "colony-report": "/assets/images/podcast-colony-report.svg",
-  "patriot-hour": "/assets/images/podcast-patriot-hour.svg",
-  "oklahoma-underground": "/assets/images/podcast-ok-underground.svg",
-  "faith-and-freedom": "/assets/images/podcast-faith-freedom.svg",
-};
+import { PODCAST_ART } from "@/lib/media-map";
 
 interface Props {
   shows: ShowWithCount[];
@@ -57,8 +51,8 @@ export default function PodcastSearchGrid({ shows }: Props) {
               <span className="podcast-card__number">SHOW N°{String(i + 1).padStart(2, "0")}</span>
               <div className="podcast-card__art">
                 <img
-                  src={show.cover_url ?? PODCAST_ART[show.slug] ?? "/assets/images/podcast-colony-report.svg"}
-                  alt={`${show.title} cover art`}
+                  src={show.cover_url ?? PODCAST_ART[show.slug] ?? "/assets/images/podcasts/colony-report.jpg"}
+                  alt={`${show.title} — The Colony OK podcast cover`}
                   loading="lazy"
                 />
                 <div className="podcast-card__play">
@@ -74,7 +68,6 @@ export default function PodcastSearchGrid({ shows }: Props) {
                 <div className="podcast-card__host">{show.host}</div>
                 <div className="podcast-card__meta">
                   <span className="podcast-card__episodes">{show.episodes} Episodes</span>
-                  {i === 0 && <span className="badge badge--live">NEW</span>}
                 </div>
               </div>
             </Link>

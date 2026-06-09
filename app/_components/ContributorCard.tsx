@@ -5,6 +5,7 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import type { Contributor } from "@/lib/contributors";
 import { tierBadgeClass, tierLabel } from "@/lib/contributor-tiers";
+import { hostPhoto } from "@/lib/media-map";
 
 function Meta({ c }: { c: Contributor }) {
   return (
@@ -40,22 +41,9 @@ export default function ContributorCard({
   teaser?: string; // e.g. "12 stories · 87 episodes · 3 videos" for mixed-work teaser in directory
 }) {
   const href = `/contributors/${c.slug}`;
-  const alt = c.name;
+  const alt = `${c.name} — The Colony OK ${c.role ?? "journalist"}`;
 
-  // Prefer explicit headshot_url (now populated with crisp generated images for key personalities).
-  // Fallback to improved host images for known podcast hosts or the legacy SVG.
-  const photo =
-    c.headshot_url ||
-    (c.slug === "jake-merrick" || c.name.toLowerCase().includes("jake")
-      ? "/assets/images/hosts/jake-merrick.jpg"
-      : c.name.toLowerCase().includes("marcus")
-        ? "/assets/images/hosts/marcus-webb.jpg"
-        : c.name.toLowerCase().includes("rachel") || c.name.toLowerCase().includes("torres")
-          ? "/assets/images/hosts/rachel-torres.jpg"
-          : c.name.toLowerCase().includes("dan") || c.name.toLowerCase().includes("hollis") || c.name.toLowerCase().includes("pastor")
-            ? "/assets/images/hosts/dan-hollis.jpg"
-            : "/assets/images/author-1.svg");
-
+  const photo = hostPhoto(c.slug, c.headshot_url, c.name);
   const isNewHostPhoto = photo.includes("/hosts/");
 
   const photoEl = (
