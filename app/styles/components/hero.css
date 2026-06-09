@@ -126,10 +126,16 @@
 /* ─── Secondary column (live + count) ─── */
 .hero__secondary {
   background-color: var(--color-alarm);
-  color: var(--color-paper);
+  color: var(--color-ink);
   display: flex;
   flex-direction: column;
   position: relative;
+}
+
+.hero__secondary-block:not(.hero__secondary--ink) .hero__secondary-label,
+.hero__secondary-block:not(.hero__secondary--ink) .hero__secondary-title,
+.hero__secondary-block:not(.hero__secondary--ink) .hero__secondary-meta {
+  color: var(--color-ink);
 }
 
 .hero__secondary-block {

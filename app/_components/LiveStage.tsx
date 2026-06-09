@@ -169,7 +169,7 @@ export default function LiveStage({ items: initialItems = [], initialActiveId }:
           </div>
         ) : playbackSrc ? (
           isEmbed ? (
-            <VideoEmbed url={playbackSrc} title={currentTitle} />
+            <VideoEmbed url={playbackSrc} title={currentTitle} bare />
           ) : (
             <VideoPlayer src={playbackSrc} title={currentTitle} isLive={playbackIsLive} />
           )

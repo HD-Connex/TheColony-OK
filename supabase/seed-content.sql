@@ -181,7 +181,7 @@ SELECT
   NULL,
   NULL,
   NULL,
-  'https://www.youtube.com/watch?v=aqz-KE-bpKQ',
+  'https://www.youtube.com/@jakemerrick212/streams',
   'free'
 WHERE NOT EXISTS (
   SELECT 1 FROM public.live_events WHERE id = 'b2222222-2222-4222-8222-222222222222'::uuid
@@ -203,7 +203,7 @@ SELECT
   now() - interval '25 minutes',
   NULL,
   NULL,
-  'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+  'https://www.youtube.com/@jakemerrick212/streams',
   'free'
 WHERE NOT EXISTS (
   SELECT 1 FROM public.live_events WHERE id = 'b3333333-3333-4333-8333-333333333333'::uuid

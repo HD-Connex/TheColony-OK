@@ -66,7 +66,12 @@
   flex-direction: column;
   gap: var(--space-5);
   background-color: var(--color-alarm);
-  color: var(--color-paper);
+  color: var(--color-ink);
+}
+
+.live-sidebar .live-status__title,
+.live-sidebar .live-status__description {
+  color: var(--color-ink);
 }
 
 .live-status {
@@ -143,6 +148,30 @@
   font-size: 0.625rem;
   text-transform: uppercase;
   letter-spacing: var(--track-wide);
+}
+
+/* Red ground — navy digits (Colony Report live blocks) */
+.countdown--alarm {
+  border-color: var(--color-ink);
+}
+
+.countdown--alarm .countdown__unit {
+  background-color: var(--color-alarm);
+}
+
+.countdown--alarm .countdown__value,
+.countdown--alarm .countdown__unit-label {
+  color: var(--color-ink);
+}
+
+/* Navy ground — paper digits (hero STARTS IN block) */
+.countdown--ink .countdown__unit {
+  background-color: var(--color-ink);
+}
+
+.countdown--ink .countdown__value,
+.countdown--ink .countdown__unit-label {
+  color: var(--color-paper);
 }
 
 /* ─── Upcoming schedule ─── */

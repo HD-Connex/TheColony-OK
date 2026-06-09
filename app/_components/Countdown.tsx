@@ -9,7 +9,7 @@ interface Props {
   variant?: "ink" | "alarm" | "block";
 }
 
-export default function Countdown({ target, label }: Props) {
+export default function Countdown({ target, label, variant = "ink" }: Props) {
   const [parts, setParts] = useState({ h: "--", m: "--", s: "--" });
   const reduced = useReducedMotion();
 
@@ -49,8 +49,11 @@ export default function Countdown({ target, label }: Props) {
     </div>
   );
 
+  const variantClass =
+    variant === "alarm" ? "countdown--alarm" : variant === "block" ? "countdown--block" : "countdown--ink";
+
   return (
-    <div className="countdown">
+    <div className={`countdown ${variantClass}`}>
       {label && <span className="countdown__label">{label}</span>}
       <Unit value={parts.h} unit="HRS" />
       <Unit value={parts.m} unit="MIN" />

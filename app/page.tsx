@@ -161,7 +161,7 @@ export default async function HomePage() {
               </div>
               <div className="hero__secondary-block hero__secondary--ink">
                 <div className="hero__secondary-label">STARTS IN</div>
-                <Countdown target={countdownTarget} />
+                <Countdown target={countdownTarget} variant="ink" />
                 <Link className="btn btn--outline btn--full" href="/live" style={{ marginTop: "var(--space-5)" }}>
                   Watch Live
                 </Link>
@@ -312,7 +312,7 @@ export default async function HomePage() {
                     "Live coverage of the governor's race, a whistleblower interview, and your questions answered in real time."}
                 </p>
 
-                <Countdown target={countdownTarget} label="▼ COUNTDOWN" />
+                <Countdown target={countdownTarget} label="▼ COUNTDOWN" variant="alarm" />
 
                 <div className="schedule-list">
                   {schedule.length > 0 ? (

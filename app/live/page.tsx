@@ -99,7 +99,7 @@ export default async function LivePage({
               </div>
               <h2 className="live-status__title">{nextLive?.title ?? "Schedule coming soon"}</h2>
               {nextLive?.description && <p className="live-status__description">{nextLive.description}</p>}
-              <Countdown target={countdownTarget} label="▼ COUNTDOWN" />
+              <Countdown target={countdownTarget} label="▼ COUNTDOWN" variant="alarm" />
 
               <div className="schedule-list">
                 {schedule.length > 0 ? (

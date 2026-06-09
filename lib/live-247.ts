@@ -4,6 +4,7 @@
  */
 
 import { getLiveEvents } from "./live-events";
+import { JAKE_MERRICK_STREAMS_URL } from "./video";
 
 /** Demo replay loop until Mux 247 ingest is wired. */
 export const DEMO_247_MP4 =
@@ -34,12 +35,15 @@ function resolve247StreamUrl(): string {
   if (process.env.NEXT_PUBLIC_247_MP4_URL) {
     return process.env.NEXT_PUBLIC_247_MP4_URL;
   }
-  return DEMO_247_MP4;
+  if (process.env.NEXT_PUBLIC_247_YOUTUBE_URL) {
+    return process.env.NEXT_PUBLIC_247_YOUTUBE_URL;
+  }
+  return JAKE_MERRICK_STREAMS_URL;
 }
 
 export const COLONY_247: Live247Channel = {
   id: "colony-247",
-  title: "Colony 24/7 · Replay Loop",
+  title: "Colony Live · Jake Merrick Streams",
   streamUrl: resolve247StreamUrl(),
   isLive: true,
   schedule: [
