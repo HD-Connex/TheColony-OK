@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Script from "next/script";
+import { Archivo_Black, Inter_Tight, JetBrains_Mono } from "next/font/google";
 import "./styles/main.css";
 import Header from "./_components/Header";
 import Footer from "./_components/Footer";
@@ -7,6 +8,29 @@ import SiteChrome from "./_components/SiteChrome";
 import SiteClient from "./_components/SiteClient";
 
 const SITE_URL = "https://thecolonyok.com";
+
+// Phase 3-05: Self-hosted fonts (next/font) per audit + vercel best practices.
+// Eliminates external Google Fonts request, improves CWV/INP, removes layout shift.
+const fontDisplay = Archivo_Black({
+  subsets: ["latin"],
+  weight: "400",
+  variable: "--font-display",
+  display: "swap",
+});
+
+const fontSans = Inter_Tight({
+  subsets: ["latin"],
+  weight: ["400", "500", "700", "900"],
+  variable: "--font-sans",
+  display: "swap",
+});
+
+const fontMono = JetBrains_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500", "700"],
+  variable: "--font-mono",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -38,18 +62,14 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${fontDisplay.variable} ${fontSans.variable} ${fontMono.variable}`}>
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+        {/* Phase 3-05: Removed external Google Fonts links (now via next/font above).
+            Kept other preconnects for Stripe/YouTube/Rumble/Plausible perf. */}
         <link rel="dns-prefetch" href="https://js.stripe.com" />
         <link rel="dns-prefetch" href="https://www.youtube.com" />
         <link rel="dns-prefetch" href="https://rumble.com" />
         <link rel="dns-prefetch" href="https://plausible.io" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter+Tight:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap"
-          rel="stylesheet"
-        />
       </head>
       <body>
         <SiteChrome header={<Header />} footer={<Footer />}>
