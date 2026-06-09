@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Submit a Tip — The Colony OK</title>
+  <meta name="description" content="Secure tip line for The Colony OK investigations desk. Email, Signal, or anonymous form.">
+  <link rel="canonical" href="https://thecolonyok.com/pages/submit-a-tip/">
+
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta name="referrer" content="no-referrer">
+
+  <meta property="og:site_name" content="The Colony OK">
+  <meta property="og:title" content="Submit a Tip — The Colony OK">
+  <meta property="og:description" content="Secure tip line for investigations.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://thecolonyok.com/pages/submit-a-tip/">
+  <meta property="og:image" content="https://thecolonyok.com/assets/images/og-home.svg">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="icon" type="image/svg+xml" href="/assets/icons/favicon.svg">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter+Tight:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <script defer data-domain="thecolonyok.com" src="https://plausible.io/js/script.outbound-links.tagged-events.js"></script>
+</head>
+<body>
+  <div data-component="header"></div>
+
+  <main id="main">
+    <div class="container">
+
+      <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <a href="/">Home</a>
+        <span class="breadcrumbs__separator">/</span>
+        <span class="breadcrumbs__current">Submit a Tip</span>
+      </nav>
+
+      <header class="page-header">
+        <p class="page-header__eyebrow">▼ INVESTIGATIONS DESK · ANONYMOUS LINE</p>
+        <h1 class="page-header__title">Submit a Tip</h1>
+        <p class="page-header__lede">Have a lead worth investigating? Choose the channel below that fits your level of caution. Encrypted options first, then standard.</p>
+      </header>
+
+      <div class="grid-2" style="margin-top: var(--space-12); gap: 0; border-top: var(--rule-medium) solid var(--color-text-primary);">
+
+        <article style="padding: var(--space-8); border-right: var(--rule-hairline) solid var(--color-border);">
+          <p style="font-family: var(--font-mono); font-size: var(--text-xs); letter-spacing: var(--track-wider); text-transform: uppercase; color: var(--color-alarm); margin-bottom: var(--space-4);">▼ MOST SECURE · ENCRYPTED</p>
+          <h2 style="font-family: var(--font-display); font-size: var(--text-2xl); font-weight: 900; letter-spacing: var(--track-tight); margin-bottom: var(--space-4);">Signal</h2>
+          <p style="color: var(--color-text-secondary); line-height: var(--leading-relaxed); margin-bottom: var(--space-5);">End-to-end encrypted messaging. Your number is not visible to us if you use a Signal username. We do not store messages.</p>
+          <div style="font-family: var(--font-mono); font-size: var(--text-base); letter-spacing: var(--track-wide); padding: var(--space-4); border: var(--rule-medium) solid var(--color-alarm); color: var(--color-paper); display: inline-block;">@thecolonyok.99</div>
+        </article>
+
+        <article style="padding: var(--space-8); background-color: var(--color-ink-soft);">
+          <p style="font-family: var(--font-mono); font-size: var(--text-xs); letter-spacing: var(--track-wider); text-transform: uppercase; color: var(--color-alarm); margin-bottom: var(--space-4);">▼ STANDARD · EMAIL</p>
+          <h2 style="font-family: var(--font-display); font-size: var(--text-2xl); font-weight: 900; letter-spacing: var(--track-tight); margin-bottom: var(--space-4);">Encrypted Email</h2>
+          <p style="color: var(--color-text-secondary); line-height: var(--leading-relaxed); margin-bottom: var(--space-5);">PGP key available on request. Use a personal email account (not work).</p>
+          <a class="btn btn--primary" href="mailto:tips@thecolonyok.com">tips@thecolonyok.com</a>
+        </article>
+
+        <article style="padding: var(--space-8); border-right: var(--rule-hairline) solid var(--color-border); border-top: var(--rule-hairline) solid var(--color-border);">
+          <p style="font-family: var(--font-mono); font-size: var(--text-xs); letter-spacing: var(--track-wider); text-transform: uppercase; color: var(--color-alarm); margin-bottom: var(--space-4);">▼ ANONYMOUS · WEB FORM</p>
+          <h2 style="font-family: var(--font-display); font-size: var(--text-2xl); font-weight: 900; letter-spacing: var(--track-tight); margin-bottom: var(--space-4);">Anonymous Tip Form</h2>
+          <p style="color: var(--color-text-secondary); line-height: var(--leading-relaxed); margin-bottom: var(--space-5);">Use Tor Browser for full anonymity. We do not log IPs on this form. We follow up only if you provide a contact method.</p>
+
+          <form name="tip" method="POST" data-netlify="true" netlify-honeypot="bot-field" style="display: flex; flex-direction: column; gap: var(--space-3);">
+            <input type="hidden" name="form-name" value="tip">
+            <input type="hidden" name="bot-field">
+            <textarea name="tip" rows="6" placeholder="Your tip..." required style="background: transparent; border: var(--rule-medium) solid var(--color-paper); padding: var(--space-3) var(--space-4); color: var(--color-paper); font-family: var(--font-mono); font-size: var(--text-sm); letter-spacing: var(--track-wide);"></textarea>
+            <input type="email" name="contact" placeholder="OPTIONAL CONTACT EMAIL" style="background: transparent; border: var(--rule-medium) solid var(--color-paper); padding: var(--space-3) var(--space-4); color: var(--color-paper); font-family: var(--font-mono); font-size: var(--text-sm); letter-spacing: var(--track-wide);">
+            <button type="submit" class="btn btn--primary">Submit Tip</button>
+          </form>
+        </article>
+
+        <article style="padding: var(--space-8); background-color: var(--color-alarm); color: var(--color-paper); border-top: var(--rule-hairline) solid var(--color-border);">
+          <p style="font-family: var(--font-mono); font-size: var(--text-xs); letter-spacing: var(--track-wider); text-transform: uppercase; margin-bottom: var(--space-4);">▼ POSTAL · NO ELECTRONIC TRAIL</p>
+          <h2 style="font-family: var(--font-display); font-size: var(--text-2xl); font-weight: 900; letter-spacing: var(--track-tight); margin-bottom: var(--space-4);">Snail Mail</h2>
+          <p style="line-height: var(--leading-relaxed); margin-bottom: var(--space-5);">Send physical documents to our P.O. Box. We open mail in person. Do not include a return address if anonymity matters.</p>
+          <div style="font-family: var(--font-mono); font-size: var(--text-sm); letter-spacing: var(--track-wide); padding: var(--space-4); border: var(--rule-medium) solid var(--color-ink); line-height: var(--leading-relaxed);">
+            THE COLONY OK<br>
+            ATTN: INVESTIGATIONS<br>
+            P.O. BOX 12<br>
+            OKLAHOMA CITY OK 73101
+          </div>
+        </article>
+
+      </div>
+
+    </div>
+  </main>
+
+  <div data-component="footer"></div>
+  <script type="module" src="/js/main.js"></script>
+</body>
+</html>

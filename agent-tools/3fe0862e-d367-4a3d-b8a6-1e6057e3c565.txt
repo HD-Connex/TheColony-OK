@@ -1,0 +1,194 @@
+
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta name="viewport" content="width=device-width, 
+initial-scale=1"/><link rel="preload" href="/assets/images/podcast-faith-freedom.svg" as="image"/><link rel="preload" 
+href="/assets/images/podcast-colony-report.svg" as="image"/><link rel="preload" 
+href="/assets/images/podcast-patriot-hour.svg" as="image"/><link rel="preload" 
+href="/assets/images/podcast-ok-underground.svg" as="image"/><link rel="stylesheet" 
+href="/_next/static/chunks/0~8o~--pp94qj.css" data-precedence="next"/><link rel="preload" as="script" 
+fetchPriority="low" href="/_next/static/chunks/0gz7455-hjwbm.js"/><script src="/_next/static/chunks/0dgq26a5_oy.a.js" 
+async=""></script><script src="/_next/static/chunks/0m_p1bxtorv5i.js" async=""></script><script 
+src="/_next/static/chunks/0x~d-uw7zrjqi.js" async=""></script><script 
+src="/_next/static/chunks/turbopack-0vrf4y.moeknt.js" async=""></script><script 
+src="/_next/static/chunks/0l3ycv91zpmgh.js" async=""></script><script src="/_next/static/chunks/0d3shmwh5_nmn.js" 
+async=""></script><script src="/_next/static/chunks/01~y~504tc..s.js" async=""></script><script 
+src="/_next/static/chunks/0z.ku1i89vx~n.js" async=""></script><script src="/_next/static/chunks/05cga11xu6~os.js" 
+async=""></script><script src="/_next/static/chunks/04zae6_in9g-i.js" async=""></script><script 
+src="/_next/static/chunks/0i27ugxw-65t1.js" async=""></script><link rel="preload" href="https://fonts.googleapis.com/cs
+s2?family=Archivo+Black&amp;family=Inter+Tight:wght@400;500;700;900&amp;family=JetBrains+Mono:wght@400;500;700&amp;disp
+lay=swap" as="style"/><link rel="preload" href="https://plausible.io/js/script.outbound-links.tagged-events.js" 
+as="script"/><link rel="preconnect" href="https://fonts.googleapis.com"/><link rel="preconnect" 
+href="https://fonts.gstatic.com" crossorigin=""/><link rel="dns-prefetch" href="https://js.stripe.com"/><link 
+rel="dns-prefetch" href="https://www.youtube.com"/><link rel="dns-prefetch" href="https://rumble.com"/><link 
+rel="dns-prefetch" href="https://plausible.io"/><title>The Colony OK — Independent Oklahoma Press</title><meta 
+name="description" content="Oklahoma&#x27;s independent conservative press. Investigative journalism, podcasting, live 
+programming, and daily news — funded by readers, not advertisers."/><link rel="manifest" 
+href="/manifest.webmanifest"/><meta name="referrer" content="strict-origin-when-cross-origin"/><meta 
+name="X-Content-Type-Options" content="nosniff"/><link rel="canonical" href="https://thecolonyok.com"/><meta 
+property="og:title" content="The Colony OK — Independent Oklahoma Press"/><meta property="og:description" 
+content="Oklahoma&#x27;s independent conservative press. Investigative journalism, podcasting, live programming, and 
+daily news — funded by readers, not advertisers."/><meta property="og:url" content="https://thecolonyok.com"/><meta 
+property="og:site_name" content="The Colony OK"/><meta property="og:locale" content="en_US"/><meta property="og:image" 
+content="https://thecolonyok.com/assets/images/og-home.svg"/><meta property="og:image:width" content="1200"/><meta 
+property="og:image:height" content="630"/><meta property="og:type" content="website"/><meta name="twitter:card" 
+content="summary_large_image"/><meta name="twitter:site" content="@thecolonyok"/><meta name="twitter:title" 
+content="The Colony OK — Independent Oklahoma Press"/><meta name="twitter:description" content="Oklahoma&#x27;s 
+independent conservative press. Investigative journalism, podcasting, live programming, and daily news — funded by 
+readers, not advertisers."/><meta name="twitter:image" 
+content="https://thecolonyok.com/assets/images/og-home.svg"/><link rel="icon" href="/assets/icons/favicon.svg"/><link h
+ref="https://fonts.googleapis.com/css2?family=Archivo+Black&amp;family=Inter+Tight:wght@400;500;700;900&amp;family=JetB
+rains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/><script src="/_next/static/chunks/03~yq9q893hmn.js" 
+noModule=""></script></head><body><div hidden=""><!--$--><!--/$--></div><header class="site-header"><a 
+class="skip-link" href="#main">Skip to main content</a><div class="container"><nav class="nav" aria-label="Main 
+navigation"><a class="nav__logo" href="/"><span class="nav__logo-text">THE<span>COLONY</span>OK</span><span 
+class="nav__logo-mark">EST 2026 / N°01</span></a><div class="nav__links"><a class="nav__link" 
+href="/stories">Stories</a><a class="nav__link" href="/shows">Shows</a><a class="nav__link" 
+href="/podcasts">Podcasts</a><a class="nav__link nav__link--live" href="/live"><span class="badge 
+badge--live">LIVE</span>Watch</a><a class="nav__link" href="/news">News</a></div><div class="nav__actions"><a 
+class="btn btn--outline btn--sm" href="/membership">Sign In</a><a class="btn btn--primary btn--sm" 
+href="/pricing">Join $4.99/mo</a></div><button type="button" class="nav__hamburger" aria-label="Toggle menu" 
+aria-expanded="false" aria-controls="mobile-menu"><span></span><span></span><span></span></button><div 
+class="nav__mobile" id="mobile-menu" hidden=""><a class="nav__link" href="/stories">Stories</a><a class="nav__link" 
+href="/shows">Shows</a><a class="nav__link" href="/podcasts">Podcasts</a><a class="nav__link nav__link--live" 
+href="/live">Watch Live</a><a class="nav__link" href="/news">Daily News</a><a class="btn btn--primary btn--full" 
+href="/pricing">Join — $4.99/month</a><a class="btn btn--outline btn--full" href="/membership">Sign 
+In</a></div></nav></div><div class="breaking-bar" role="region" aria-label="Breaking news"><span 
+class="breaking-bar__label">▼ FILED</span><div class="ticker"><div class="ticker__track"><span 
+class="ticker__item"><a href="/stories/oklahoma-budget-crisis">What They Don&#x27;t Want You to Know About 
+Oklahoma&#x27;s Budget Crisis</a><span class="ticker__filed">10:31 AM CT</span></span><span class="ticker__item"><a 
+href="/stories/lobbyist-network-silence">The Lobbyist Network That Keeps Oklahoma Voters in the Dark</a><span 
+class="ticker__filed">4:31 PM CT</span></span><span class="ticker__item"><a 
+href="/stories/parents-curriculum-pushback">Oklahoma Parents Draw the Line on Classroom Curriculum Mandates</a><span 
+class="ticker__filed">4:31 PM CT</span></span><span class="ticker__item"><a 
+href="/stories/energy-sector-green-mandates">Oklahoma Energy Jobs on the Line as Green Mandates Hit the 
+Pipeline</a><span class="ticker__filed">4:31 PM CT</span></span><span class="ticker__item"><a 
+href="/stories/sheriffs-race-investigation">Inside the Sheriff&#x27;s Race That Oklahoma Power Brokers Don&#x27;t Want 
+Audited</a><span class="ticker__filed">4:31 PM CT</span></span><span class="ticker__item"><a 
+href="/stories/oklahoma-budget-crisis">What They Don&#x27;t Want You to Know About Oklahoma&#x27;s Budget 
+Crisis</a><span class="ticker__filed">10:31 AM CT</span></span><span class="ticker__item"><a 
+href="/stories/lobbyist-network-silence">The Lobbyist Network That Keeps Oklahoma Voters in the Dark</a><span 
+class="ticker__filed">4:31 PM CT</span></span><span class="ticker__item"><a 
+href="/stories/parents-curriculum-pushback">Oklahoma Parents Draw the Line on Classroom Curriculum Mandates</a><span 
+class="ticker__filed">4:31 PM CT</span></span><span class="ticker__item"><a 
+href="/stories/energy-sector-green-mandates">Oklahoma Energy Jobs on the Line as Green Mandates Hit the 
+Pipeline</a><span class="ticker__filed">4:31 PM CT</span></span><span class="ticker__item"><a 
+href="/stories/sheriffs-race-investigation">Inside the Sheriff&#x27;s Race That Oklahoma Power Brokers Don&#x27;t Want 
+Audited</a><span class="ticker__filed">4:31 PM CT</span></span></div></div></div></header><!--$?--><template 
+id="B:0"></template><div>Loading…</div><!--/$--><footer class="site-footer"><div class="container"><div 
+class="footer__masthead"><div class="footer__mark">THE<span>COLONY</span>OK</div><div class="footer__imprint"><div>EST 
+2026 · VOL I</div><div>OKLAHOMA CITY, OK</div><div>READER-FUNDED PRESS</div></div></div><div 
+class="footer__grid"><div><p class="footer__brand-tagline">Oklahoma&#x27;s independent conservative press — 
+investigative journalism, podcasting, and live programming funded by readers, not advertisers.</p></div><div><div 
+class="footer__col-title">Coverage</div><div class="footer__links"><a class="footer__link" 
+href="/stories">Stories</a><a class="footer__link" href="/news">Daily News</a><a class="footer__link" 
+href="/live">Watch Live</a><a class="footer__link" href="/podcasts">Podcasts</a></div></div><div><div 
+class="footer__col-title">Membership</div><div class="footer__links"><a class="footer__link" href="/pricing">Join — 
+$4.99/mo</a><a class="footer__link" href="/membership">Sign In</a><a class="footer__link" href="/vs/blaze">The Colony 
+vs BlazeTV</a></div></div><div><div class="footer__col-title">Network</div><div class="footer__links"><a 
+class="footer__link" href="/shows">Shows</a><a class="footer__link" href="/search">Search</a></div></div></div><div 
+class="footer__bottom"><span class="footer__copyright">© 2026 The Colony OK. All rights reserved.</span><div 
+class="footer__legal"><a class="footer__legal-link" href="/pricing">Terms</a><a class="footer__legal-link" href="/prici
+ng">Privacy</a></div></div></div></footer><script>requestAnimationFrame(function(){$RT=performance.now()});</script><sc
+ript src="/_next/static/chunks/0gz7455-hjwbm.js" id="_R_" async=""></script><div hidden id="S:0"><script 
+type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"The Colony 
+OK","url":"https://thecolonyok.com"}</script><main id="main"><section class="hero" aria-label="Lead story"><div 
+class="hero__grid"><article class="hero__primary"><div><p class="hero__dateline"><span>N°43 / <strong>VOL 
+I</strong></span><span>OKLAHOMA CITY · MON, JUN 8, 2026</span><span>INVESTIGATIONS DESK</span></p></d
+
+... (output truncated) ...
+
+ve-player
+\",\"children\":[\"$\",\"$L28\",null,{\"items\":[{\"id\":\"3af12bf7-9f86-4818-82e9-d8e4f92874da\",\"title\":\"The 
+Colony Report — 
+Live\",\"kind\":\"embed\",\"src\":\"https://www.youtube.com/watch?v=jfKfPfyJRdk\",\"isLive\":true,\"when\":\"LIVE NOW 
+· JUN 1, 12:00 
+AM\",\"locked\":false,\"tierLabel\":\"Free\"},{\"id\":\"3645e436-dd2d-42a4-874c-b3434454be7e\",\"title\":\"Colony 
+Report — Ep. 42 
+Replay\",\"kind\":\"embed\",\"src\":\"https://www.youtube.com/watch?v=jfKfPfyJRdk\",\"isLive\":false,\"when\":\"REPLAY 
+· MAY 28, 1:18 
+AM\",\"locked\":false,\"tierLabel\":\"Free\"},{\"id\":\"9bba4271-5322-4c64-a863-04579860a25a\",\"title\":\"Patriot 
+Hour — Energy \u0026 the Federal Mandate\",\"kind\":\"embed\",\"src\":\"https://www.youtube.com/watch?v=jfKfPfyJRdk\"
+,\"isLive\":false,\"when\":\"REPLAY · MAY 24, 11:52 PM\",\"locked\":true,\"tierLabel\":\"Members\"}],\"initialActiveId
+\":\"3af12bf7-9f86-4818-82e9-d8e4f92874da\"}]}],[\"$\",\"div\",null,{\"className\":\"live-sidebar\",\"children\":[[\"$\
+",\"div\",null,{\"className\":\"live-status\",\"children\":[[\"$\",\"span\",null,{\"className\":\"badge 
+badge--new\",\"children\":\"ON AIR\"}],[\"$\",\"span\",null,{\"style\":{\"fontFamily\":\"var(--font-mono)\",\"fontSize\
+":\"var(--text-xs)\",\"letterSpacing\":\"var(--track-wide)\"},\"children\":\"THE COLONY REPORT — 
+LIVE\"}]]}],[\"$\",\"h3\",null,{\"className\":\"live-status__title\",\"children\":\"The Colony Report — 
+Live\"}],[\"$\",\"p\",null,{\"className\":\"live-status__description\",\"children\":\"Live coverage of the governor's 
+race, a whistleblower interview, and your questions in the 
+chat.\"}],[\"$\",\"$L17\",null,{\"target\":\"2026-06-01T00:00:00+00:00\",\"label\":\"▼ COUNTDOWN\"}],[\"$\",\"div\",n
+ull,{\"className\":\"schedule-list\",\"children\":[[\"$\",\"div\",\"3af12bf7-9f86-4818-82e9-d8e4f92874da\",{\"className
+\":\"schedule-item 
+schedule-item--current\",\"children\":[[\"$\",\"span\",null,{\"className\":\"schedule-item__time\",\"children\":\"LIVE 
+NOW\"}],[\"$\",\"span\",null,{\"className\":\"schedule-item__show\",\"children\":\"The Colony Report — Live\"}]]}],[\
+"$\",\"div\",\"3b94ec4b-8ca9-4cca-b5f7-0dd123c03823\",{\"className\":\"schedule-item\",\"children\":[[\"$\",\"span\",nu
+ll,{\"className\":\"schedule-item__time\",\"children\":\"6:00 PM 
+CT\"}],[\"$\",\"span\",null,{\"className\":\"schedule-item__show\",\"children\":\"Patriot Hour — Live Q\u0026A\"}]]}]
+,[\"$\",\"div\",\"fc3216f2-9f1e-4c89-b86a-d978bf60397a\",{\"className\":\"schedule-item\",\"children\":[[\"$\",\"span\"
+,null,{\"className\":\"schedule-item__time\",\"children\":\"11:00 AM 
+CT\"}],[\"$\",\"span\",null,{\"className\":\"schedule-item__show\",\"children\":\"Faith \u0026 Freedom — Sunday 
+Service\"}]]}]]}],[\"$\",\"$L7\",null,{\"className\":\"btn btn--ink btn--full\",\"href\":\"/live\",\"children\":\"Full 
+Schedule\"}]]}]]}]]}]}]\n"])</script><script>self.__next_f.push([1,"23:[\"$\",\"section\",null,{\"className\":\"section
+\",\"children\":[\"$\",\"div\",null,{\"className\":\"container\",\"children\":[[\"$\",\"header\",null,{\"className\":\"
+section-header\",\"children\":[[\"$\",\"span\",null,{\"className\":\"section-header__number\",\"children\":\"N°04\"}],
+[\"$\",\"div\",null,{\"className\":\"section-header__group\",\"children\":[[\"$\",\"h2\",null,{\"className\":\"section-
+title\",\"children\":\"Daily 
+News\"}],[\"$\",\"span\",null,{\"className\":\"section-header__dateline\",\"children\":[\"FILED THIS MORNING · 
+\",3,\" ITEMS\"]}]]}],[\"$\",\"$L7\",null,{\"className\":\"section-link\",\"href\":\"/news\",\"children\":\"All News �
+�\"}]]}],[\"$\",\"div\",null,{\"className\":\"grid-3\",\"children\":[[\"$\",\"article\",\"f1111111-1111-4111-8111-11111
+1111101\",{\"className\":\"card card--article\",\"children\":[\"$\",\"div\",null,{\"className\":\"card__body\",\"childr
+en\":[[\"$\",\"div\",null,{\"className\":\"card__meta\",\"children\":[[\"$\",\"span\",null,{\"className\":\"badge badge
+--category\",\"children\":\"Investigations\"}],[\"$\",\"span\",null,{\"className\":\"card__date\",\"children\":[\"JUN 
+8, 2026\",\" · \",\"10:31 AM CT\"]}]]}],[\"$\",\"h3\",null,{\"className\":\"card__title\",\"children\":[\"$\",\"$L7\",
+null,{\"href\":\"/stories/oklahoma-budget-crisis\",\"children\":\"What They Don't Want You to Know About Oklahoma's 
+Budget Crisis\"}]}],[\"$\",\"p\",null,{\"className\":\"card__excerpt\",\"children\":\"Our journalists spent six weeks 
+inside the state capitol tracing how emergency funds, education dollars, and infrastructure bonds were rerouted 
+without a public vote. Documents obtained through open-records requests show a pattern of last-minute amendments 
+pushed through after midnight sessions. What we found will make you angry — and it is why independent Oklahoma media 
+exists.\"}]]}]}],[\"$\",\"article\",\"f1111111-1111-4111-8111-111111111102\",{\"className\":\"card card--article\",\"ch
+ildren\":[\"$\",\"div\",null,{\"className\":\"card__body\",\"children\":[[\"$\",\"div\",null,{\"className\":\"card__met
+a\",\"children\":[[\"$\",\"span\",null,{\"className\":\"badge 
+badge--category\",\"children\":\"Politics\"}],[\"$\",\"span\",null,{\"className\":\"card__date\",\"children\":[\"JUN 
+7, 2026\",\" · \",\"4:31 PM CT\"]}]]}],[\"$\",\"h3\",null,{\"className\":\"card__title\",\"children\":[\"$\",\"$L7\",n
+ull,{\"href\":\"/stories/lobbyist-network-silence\",\"children\":\"The Lobbyist Network That Keeps Oklahoma Voters in 
+the Dark\"}]}],[\"$\",\"p\",null,{\"className\":\"card__excerpt\",\"children\":\"A coordinated roster of contract 
+lobbyists has been shaping utility rates, education policy, and tax credits while their clients stay off the public 
+docket. Colony reporters mapped more than forty LLC shells tied to three out-of-state firms operating from Oklahoma 
+City office suites. Members get the full donor matrix, meeting logs, and the lawmakers who signed the confidentiality 
+agreements.\"}]]}]}],[\"$\",\"article\",\"f1111111-1111-4111-8111-111111111103\",{\"className\":\"card card--article\",
+\"children\":[\"$\",\"div\",null,{\"className\":\"card__body\",\"children\":[[\"$\",\"div\",null,{\"className\":\"card_
+_meta\",\"children\":[[\"$\",\"span\",null,{\"className\":\"badge 
+badge--category\",\"children\":\"Culture\"}],[\"$\",\"span\",null,{\"className\":\"card__date\",\"children\":[\"JUN 6, 
+2026\",\" · \",\"4:31 PM CT\"]}]]}],[\"$\",\"h3\",null,{\"className\":\"card__title\",\"children\":[\"$\",\"$L7\",null
+,{\"href\":\"/stories/parents-curriculum-pushback\",\"children\":\"Oklahoma Parents Draw the Line on Classroom 
+Curriculum Mandates\"}]}],[\"$\",\"p\",null,{\"className\":\"card__excerpt\",\"children\":\"School board meetings from 
+Edmond to Lawton have turned into standing-room-only forums as parents demand a say in reading lists, history 
+standards, and vendor contracts. The Colony interviewed two dozen families who pulled public records on curriculum 
+adoptions their districts never advertised. Their pushback is reshaping the 2026 legislative session — and both 
+parties are scrambling to claim the parent vote.\"}]]}]}]]}]]}]}]\n"])</script><script>self.__next_f.push([1,"24:[\"$\"
+,\"section\",null,{\"className\":\"membership-cta\",\"aria-label\":\"Membership\",\"children\":[[\"$\",\"div\",null,{\"
+className\":\"membership-cta__inner\",\"children\":[[\"$\",\"div\",null,{\"className\":\"membership-cta__lead\",\"child
+ren\":[[\"$\",\"p\",null,{\"className\":\"membership-cta__eyebrow\",\"children\":\"▼ JOIN THE COLONY · 
+N°05\"}],[\"$\",\"h2\",null,{\"className\":\"membership-cta__title\",\"children\":\"Independent press costs less than 
+a cup of coffee.\"}],[\"$\",\"p\",null,{\"className\":\"membership-cta__subtitle\",\"children\":\"Full access to every 
+article, every podcast, every live broadcast — from journalists who answer to readers, not advertisers.\"}],[\"$\",\"
+ul\",null,{\"className\":\"membership-cta__features\",\"children\":[[\"$\",\"li\",null,{\"className\":\"membership-cta_
+_feature\",\"children\":\"All investigative articles — no 
+paywall\"}],[\"$\",\"li\",null,{\"className\":\"membership-cta__feature\",\"children\":\"Full podcast library across 
+every show\"}],[\"$\",\"li\",null,{\"className\":\"membership-cta__feature\",\"children\":\"Live streams + replay 
+archives\"}],[\"$\",\"li\",null,{\"className\":\"membership-cta__feature\",\"children\":\"Members-only briefings and 
+bonus episodes\"}],[\"$\",\"li\",null,{\"className\":\"membership-cta__feature\",\"children\":\"Cancel anytime — no c
+ontracts\"}]]}]]}],[\"$\",\"div\",null,{\"className\":\"membership-cta__price-card\",\"children\":[[\"$\",\"div\",null,
+{\"className\":\"membership-cta__price\",\"children\":[[\"$\",\"span\",null,{\"className\":\"membership-cta__amount\",\
+"children\":\"$$4.99\"}],[\"$\",\"span\",null,{\"className\":\"membership-cta__period\",\"children\":\"/MONTH\"}]]}],[\
+"$\",\"div\",null,{\"className\":\"membership-cta__actions\",\"children\":[[\"$\",\"$L7\",null,{\"className\":\"btn 
+btn--primary btn--lg btn--full\",\"href\":\"/pricing\",\"children\":\"Join 
+Now\"}],[\"$\",\"$L7\",null,{\"className\":\"btn btn--outline btn--full\",\"href\":\"/pricing\",\"children\":\"What's 
+Included\"}]]}],[\"$\",\"p\",null,{\"className\":\"membership-cta__disclaimer\",\"children\":\"Secure checkout via 
+Stripe\"}]]}]]}],[\"$\",\"div\",null,{\"className\":\"membership-cta__footer-band\",\"children\":\"▼ 1,200+ 
+OKLAHOMANS JOINED THIS MONTH\"}]]}]\n"])</script><script>self.__next_f.push([1,"26:[\"$\",\"h3\",null,{\"className\":\"
+card__title\",\"children\":[\"$\",\"$L7\",null,{\"href\":\"/stories/sheriffs-race-investigation\",\"children\":\"Inside
+ the Sheriff's Race That Oklahoma Power Brokers Don't Want Audited\"}]}]\n27:[\"$\",\"div\",null,{\"className\":\"podca
+st-card__meta\",\"children\":[[\"$\",\"span\",null,{\"className\":\"podcast-card__episodes\",\"children\":[4,\" 
+Episodes\"]}],false]}]\n"])</script></body></html>
+
+

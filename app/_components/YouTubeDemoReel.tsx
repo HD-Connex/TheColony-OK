@@ -174,107 +174,35 @@ export default function YouTubeDemoReel({ items, onExit }: YouTubeDemoReelProps)
   }
 
   return (
-    <div
-      className="live-player"
-      style={{
-        position: "relative",
-        background: "#000",
-        overflow: "hidden",
-      }}
-    >
+    <div className="live-player reel-container">
       {/* The YT player mounts here */}
-      <div
-        id={containerId}
-        style={{
-          width: "100%",
-          height: "100%",
-          position: "absolute",
-          inset: 0,
-        }}
-      />
+      <div id={containerId} className="reel-player-frame" />
 
-      {/* Subtle "as-live" overlay — makes it feel like a finished live product using archived streams */}
-      <div
-        style={{
-          position: "absolute",
-          top: 10,
-          left: 10,
-          zIndex: 10,
-          background: "rgba(0, 0, 0, 0.65)",
-          color: "#fff",
-          fontFamily: "var(--font-mono)",
-          fontSize: "10px",
-          letterSpacing: "1.5px",
-          padding: "3px 8px",
-          border: "1px solid rgba(255,255,255,0.2)",
-          textTransform: "uppercase",
-          pointerEvents: "none",
-          userSelect: "none",
-        }}
-      >
-        INVESTOR DEMO • STEADY ARCHIVE REEL • THE COLONY OK
+      {/* Subtle "as-live" overlay — archive continuity indicator (purged investor/demo labels) */}
+      <div className="reel-overlay-top">
+        ARCHIVE REEL • THE COLONY OK
       </div>
 
       {/* Current title overlay (shows which archived broadcast is "on air" right now) */}
-      <div
-        style={{
-          position: "absolute",
-          bottom: 10,
-          left: 10,
-          zIndex: 10,
-          maxWidth: "70%",
-          background: "rgba(0, 0, 0, 0.7)",
-          color: "#fff",
-          fontSize: "12px",
-          padding: "4px 10px",
-          fontFamily: "var(--font-body)",
-          lineHeight: 1.3,
-          pointerEvents: "none",
-        }}
-      >
+      <div className="reel-overlay-bottom">
         {titles[currentIndex] || "Archived Broadcast"}
       </div>
 
-      {/* Exit control — minimal, only for the presenter/investor session */}
+      {/* Exit control — functional for demo-reel mode only */}
       {onExit && (
         <button
           type="button"
           onClick={onExit}
-          style={{
-            position: "absolute",
-            top: 10,
-            right: 10,
-            zIndex: 20,
-            fontSize: "10px",
-            padding: "3px 8px",
-            background: "rgba(236, 16, 36, 0.85)",
-            color: "#fff",
-            border: "1px solid #fff",
-            fontFamily: "var(--font-mono)",
-            letterSpacing: "1px",
-            cursor: "pointer",
-            textTransform: "uppercase",
-          }}
-          title="Exit the investor demo reel and return to normal schedule"
+          className="reel-exit"
+          title="Exit the archive reel and return to normal schedule"
         >
-          EXIT DEMO REEL
+          EXIT REEL
         </button>
       )}
 
-      {/* Small progress hint */}
-      <div
-        style={{
-          position: "absolute",
-          bottom: 10,
-          right: 10,
-          zIndex: 10,
-          fontSize: "10px",
-          color: "rgba(255,255,255,0.6)",
-          fontFamily: "var(--font-mono)",
-          pointerEvents: "none",
-        }}
-      >
-        {currentIndex + 1} / {videoIds.length} • AUTO
+      {/* Small progress hint (no AUTO pollution) */}
+      <div className="reel-progress">
+        {currentIndex + 1} / {videoIds.length}
       </div>
     </div>
   );

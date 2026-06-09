@@ -77,11 +77,13 @@
 /* ─── Hamburger ─── */
 .nav__hamburger {
   display: none;
-  width: 36px;
-  height: 36px;
+  /* Phase 1: a11y/touch — 44px minimum target (was 36px) */
+  width: 44px;
+  height: 44px;
   position: relative;
   border: var(--rule-medium) solid var(--color-paper);
   background-color: transparent;
+  padding: 0;
 }
 .nav__hamburger span {
   position: absolute;

@@ -131,12 +131,12 @@ export default function VsBlazePage() {
             lede="National reach meets Oklahoma roots. Both serve audiences who want conservative and faith-aligned media — The Colony is built lean, local, and private, with a founding membership price that honors where we started."
           />
 
-          <section className="section" aria-label="Platform overview" style={{ margin: "var(--space-8) 0" }}>
+          <section className="section compare-section" aria-label="Platform overview">
             <div className="grid-2">
               <div className="bio-card">
                 <h2 className="bio-card__name">BlazeTV (National)</h2>
                 <p className="bio-card__role">Cable-style commentary network</p>
-                <ul className="prose-block" style={{ margin: 0, paddingLeft: "1.25rem" }}>
+                <ul className="bio-card__list">
                   <li>$15/mo or annual (~$10/mo) — bonus eps, docs, and movies</li>
                   <li>24/7 live + national personalities (Beck, Deace, Levin, and more)</li>
                   <li>Weekly &quot;Off the Record&quot; private live chats</li>
@@ -149,7 +149,7 @@ export default function VsBlazePage() {
               <div className="bio-card">
                 <h2 className="bio-card__name">The Colony (OK + Local)</h2>
                 <p className="bio-card__role">Reader-funded Oklahoma press</p>
-                <ul className="prose-block" style={{ margin: 0, paddingLeft: "1.25rem" }}>
+                <ul className="bio-card__list">
                   <li>Founding tiers from $4.99/mo with transparent reader funding</li>
                   <li>Local rural shows: Ag Report, Energy OK, Small Town Faith, and more</li>
                   <li>Member clips and county forums — continuous community vs weekly chats</li>
@@ -163,7 +163,7 @@ export default function VsBlazePage() {
             </div>
           </section>
 
-          <section aria-label="Feature comparison" style={{ margin: "var(--space-8) 0" }}>
+          <section className="compare-section" aria-label="Feature comparison">
             <header className="section-header">
               <span className="section-header__number">N°01</span>
               <div className="section-header__group">
@@ -192,7 +192,7 @@ export default function VsBlazePage() {
             </table>
           </section>
 
-          <section aria-label="Key wins" style={{ margin: "var(--space-8) 0" }}>
+          <section className="compare-section" aria-label="Key wins">
             <header className="section-header">
               <span className="section-header__number">N°02</span>
               <div className="section-header__group">
@@ -223,7 +223,7 @@ export default function VsBlazePage() {
             </table>
           </section>
 
-          <section className="prose-block" style={{ margin: "var(--space-8) 0" }}>
+          <section className="prose-block compare-section">
             <h2>Why members choose The Colony</h2>
             <p>
               BlazeTV is a well-known national platform. The Colony is different by design: independent press funded by
@@ -237,72 +237,13 @@ export default function VsBlazePage() {
             </p>
           </section>
 
-          <section
-            aria-label="Community demo"
-            style={{
-              margin: "var(--space-8) 0",
-              padding: "var(--space-6)",
-              border: "1px solid var(--color-border)",
-              borderRadius: "var(--radius-md)",
-              background: "var(--color-surface)",
-            }}
-          >
-            <header className="section-header" style={{ marginBottom: "var(--space-4)" }}>
-              <span className="section-header__number">N°03</span>
-              <div className="section-header__group">
-                <h2 className="section-title">Community in Action</h2>
-                <span className="section-header__dateline">MEMBER CLIPS · THREADED DISCUSSION</span>
-              </div>
-            </header>
-            <p className="prose-block" style={{ marginBottom: "var(--space-4)" }}>
-              Subscribers upload short clips — ranch reports, faith moments, local ag updates. Reviewed, transcribed,
-              and featured on the hub and live queue. Continuous community, not a weekly invite-only chat.
-            </p>
-            <div
-              style={{
-                background: "var(--color-paper)",
-                color: "var(--color-ink)",
-                padding: "var(--space-4)",
-                borderRadius: "var(--radius-sm)",
-                marginBottom: "var(--space-4)",
-              }}
-            >
-              <p
-                style={{
-                  fontFamily: "var(--font-mono)",
-                  fontSize: "var(--text-xs)",
-                  letterSpacing: "var(--track-wide)",
-                  margin: 0,
-                }}
-              >
-                [Member Clip: OK Ag — &quot;Drought report from Jackson County&quot; by @ruralok — 28s]
-              </p>
-              <p
-                style={{
-                  margin: "var(--space-2) 0 0 var(--space-4)",
-                  paddingLeft: "var(--space-3)",
-                  borderLeft: "2px solid var(--color-alarm)",
-                  fontSize: "var(--text-xs)",
-                  color: "var(--color-text-ink-soft)",
-                }}
-              >
-                Thread: &quot;This matches our Farm Bureau update…&quot; Reply with your clip.
-              </p>
-            </div>
-            <Link className="btn btn--outline" href="/pricing">
-              Upload Clips (Members)
-            </Link>
-            <button className="px-4 py-1 bg-[#8B0000] text-white text-sm rounded ml-2">Upload Your 30s Clip (Members) • TWA Optimized</button>
-            <p className="text-[10px] mt-1">Clips feed personalization (L11) + live (L1) + vs national chats. See docs/RICH_COMMENTS_MEMBER_CLIPS.md + MOBILE_TWA_PWA_STRATEGY.md</p>
-          </section>
-
           {/* Contextual close for comparison page — full hub value & membership pitch lives on home (as all-in-one) and /pricing (conversion). Per agency hub model + competitor (TheFP clear value, ProPublica trust signals). */}
           <section className="section section--paper section--tight text-center" aria-label="Choose The Colony">
             <p className="mono-eyebrow">▼ READER-FUNDED • OK-ROOTED • BETTER FOR LOCAL</p>
             <Link className="btn btn--primary btn--lg" href="/pricing">
               Join The Colony — from $4.99/mo (Founding)
             </Link>
-            <p className="text-sm mt-2">Full details, perks, and comparison on the Membership page. Watch live now on the hub.</p>
+            <p className="text-muted">Full details, perks, and comparison on the Membership page. Watch live now on the hub.</p>
           </section>
         </div>
       </main>

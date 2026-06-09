@@ -5,10 +5,7 @@ export default function NotFound() {
     <main id="main">
       <div className="container">
         <section className="system-page" aria-labelledby="not-found-title">
-          <p
-            className="page-header__eyebrow"
-            style={{ marginBottom: "var(--space-4)" }}
-          >
+          <p className="page-header__eyebrow">
             ▼ FILED · WRONG DRAWER
           </p>
 
@@ -26,14 +23,7 @@ export default function NotFound() {
             head back to the front page.
           </p>
 
-          <div
-            style={{
-              display: "flex",
-              gap: "var(--space-4)",
-              flexWrap: "wrap",
-              marginBottom: "var(--space-8)",
-            }}
-          >
+          <div className="system-page__actions">
             <Link className="btn btn--primary btn--lg" href="/">
               Back to Front Page
             </Link>
@@ -43,16 +33,7 @@ export default function NotFound() {
           </div>
 
           <div>
-            <h2
-              style={{
-                fontFamily: "var(--font-mono)",
-                fontSize: "var(--text-xs)",
-                letterSpacing: "var(--track-wider)",
-                textTransform: "uppercase",
-                color: "var(--color-alarm)",
-                marginBottom: "var(--space-4)",
-              }}
-            >
+            <h2 className="system-page__sections-title">
               ▼ SECTIONS
             </h2>
             <nav className="system-page__links" aria-label="Site sections">

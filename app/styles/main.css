@@ -607,6 +607,14 @@ main:not(.page--inner) { padding-bottom: 0; }
 .clips-teaser__count { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--color-alarm); }
 .clips-teaser__desc { font-size: var(--text-sm); line-height: var(--leading-relaxed); margin: 0 0 var(--space-3); }
 
+/* Phase 1 Quick Wins: zero-radius enforcement (brutalist DS — no rounded cards/frames except intentional photo circles via .photo-frame if needed).
+   All .card, .contrib-*, buttons etc. are sharp. */
+.photo-frame {
+  display: inline-block;
+  border-radius: 0;
+  overflow: hidden;
+}
+
 .host-bio { display: flex; gap: var(--space-6); align-items: flex-start; padding: var(--space-6); border-right: var(--rule-hairline) solid var(--color-border); }
 .host-bio__photo img { border-radius: var(--radius-sm); object-fit: cover; border: var(--rule-medium) solid var(--color-border-light); }
 .host-bio__name { font-family: var(--font-display); font-size: var(--text-3xl); font-weight: 900; letter-spacing: var(--track-tight); margin-bottom: var(--space-4); }
@@ -615,3 +623,64 @@ main:not(.page--inner) { padding-bottom: 0; }
 .host-contact { padding: var(--space-6); background-color: var(--color-ink-soft); color: var(--color-paper); }
 .host-contact__label { font-family: var(--font-mono); font-size: var(--text-xs); letter-spacing: var(--track-wider); text-transform: uppercase; color: var(--color-alarm); margin-bottom: var(--space-3); }
 .host-contact__info { font-family: var(--font-mono); font-size: var(--text-sm); line-height: var(--leading-relaxed); }
+
+/* Phase 1 Quick Wins continuation — purge inline style/raw/hex/radius from shows/[slug], podcasts per-show, per-ep pages, live. Brutalist zero-radius. Use tokens/classes. */
+.img-cover { object-fit: cover; }
+.img-hero-dim { opacity: 0.35; }
+.series-hero {
+  position: relative;
+  margin-bottom: var(--space-8);
+  padding: var(--space-8) 0;
+  overflow: hidden;
+  border-radius: 0;
+}
+.series-hero__bg { position: absolute; inset: 0; z-index: 0; }
+.series-hero__overlay { position: absolute; inset: 0; background: linear-gradient(to top, var(--background), transparent 70%); }
+.series-hero__content { position: relative; z-index: 1; }
+.series-hero__bg-tint { background: radial-gradient(ellipse at top, var(--color-ink-soft), transparent 60%); }
+.series-hero__badges { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem; }
+.series-hero__actions { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; }
+.series-episodes-grid { display: grid; gap: 2.5rem; }
+.episode-meta-row { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
+.episode-date { font-size: 0.75rem; color: var(--color-text-muted); margin: 0.35rem 0 0; }
+.account-desc { margin: 0; line-height: 1.6; }
+.sub-links { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.block { display: block; }
+.text-ink-muted { color: var(--color-text-muted); }
+
+/* Compact overrides for shows/[slug] episode header (purged from inline) */
+.episode-header-tight { margin-bottom: 1rem; }
+.episode-title-compact { font-size: 1.5rem; margin: 0; }
+.episode-num { font-size: 0.7rem; }
+.ep-desc { margin-top: var(--space-4); line-height: 1.6; color: var(--color-text-secondary); }
+.chapter-list-tight { margin-top: var(--space-4); }
+.text-xs { font-size: var(--text-xs); }
+
+.pod-latest-main {
+  background-color: var(--color-ink-soft);
+  padding: var(--space-8);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  justify-content: center;
+}
+.pod-latest-meta {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--track-wider);
+  text-transform: uppercase;
+  color: var(--color-alarm);
+}
+.pod-latest-title {
+  font-family: var(--font-display);
+  font-size: var(--text-3xl);
+  font-weight: 900;
+  letter-spacing: var(--track-tight);
+  line-height: 1;
+}
+.pod-latest-desc { color: var(--color-text-secondary); line-height: var(--leading-relaxed); }
+.pod-latest-actions { display: flex; gap: var(--space-3); flex-wrap: wrap; }
+.pod-ep-body { margin-top: var(--space-4); }
+.account-card-tight { margin-top: var(--space-8); }
+.account-card__h { margin-top: 0; }
+.account-card__note { margin-bottom: 0; margin-top: var(--space-3); color: var(--color-text-secondary); }

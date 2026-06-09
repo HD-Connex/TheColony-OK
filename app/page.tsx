@@ -105,7 +105,7 @@ export default async function HomePage() {
               <div className="hero__secondary-block hero__secondary--ink">
                 <div className="hero__secondary-label">STARTS IN</div>
                 <Countdown target={countdownTarget} variant="ink" />
-                <Link className="btn btn--outline btn--full" href="/live" style={{ marginTop: "var(--space-5)" }}>
+                <Link className="btn btn--outline btn--full" href="/live">
                   Watch Live
                 </Link>
               </div>
@@ -338,6 +338,7 @@ export default async function HomePage() {
           </div>
         </section>
 
+        {/* Hub teaser only — full depth + tiers on dedicated /contributors/join (per hub model + no-repeats rule in DS + audit Phase 1). */}
         <section className="section section--alarm">
           <div className="container">
             <header className="section-header">
@@ -347,72 +348,47 @@ export default async function HomePage() {
                 <span className="section-header__dateline">CONTRIBUTOR · FEATURED · HEADLINER</span>
               </div>
               <Link className="section-link" href="/contributors/join">
-                Apply Now →
+                See Tiers &amp; Apply →
               </Link>
             </header>
 
-            <div className="contrib-plan-grid" aria-label="Contributor pricing tiers">
-              {CONTRIBUTOR_PLANS.map((plan) => (
-                <article
-                  key={plan.id}
-                  className={`contrib-plan-card${plan.highlight ? " contrib-plan-card--highlight" : ""}`}
-                >
-                  <p className="contrib-plan-card__eyebrow">
-                    {plan.highlight ? "▼ MOST POPULAR" : `▼ ${plan.tier.toUpperCase()}`}
-                  </p>
-                  <h3 className="contrib-plan-card__name">{plan.name}</h3>
-                  <div>
-                    <span className="contrib-plan-card__price">${plan.price}</span>{" "}
-                    <span className="contrib-plan-card__period">/ month</span>
-                  </div>
-                  <p className="contrib-plan-card__summary">{plan.exposureSummary}</p>
-                  <Link
-                    className={`btn ${plan.highlight ? "btn--primary" : "btn--ink"} btn--full`}
-                    href={`/contributors/join?plan=${plan.id}`}
-                  >
-                    Apply — {plan.name}
-                  </Link>
-                </article>
-              ))}
+            <div className="card card--horizontal">
+              <div className="card__body">
+                <p className="card__excerpt">
+                  Contributor, Featured, and Headliner tiers with exposure across stories, shows, live, and the hub.
+                  Full pricing, work rails, and application on the dedicated Contributors page.
+                </p>
+                <Link className="btn btn--ink btn--full" href="/contributors/join">
+                  Apply to the Masthead
+                </Link>
+              </div>
             </div>
           </div>
         </section>
 
-        <section className="membership-cta" aria-label="Membership">
-          <div className="membership-cta__inner">
-            <div className="membership-cta__lead">
-              <p className="membership-cta__eyebrow">▼ JOIN THE COLONY · N°07</p>
-              <h2 className="membership-cta__title">Independent press costs less than a cup of coffee.</h2>
-              <p className="membership-cta__subtitle">
-                Full access to every article, every podcast, every live broadcast — from journalists who answer to
-                readers, not advertisers.
-              </p>
-              <ul className="membership-cta__features">
-                <li className="membership-cta__feature">All investigative articles — no paywall</li>
-                <li className="membership-cta__feature">Full podcast library across every show</li>
-                <li className="membership-cta__feature">Live streams + replay archives</li>
-                <li className="membership-cta__feature">Members-only briefings and bonus episodes</li>
-                <li className="membership-cta__feature">Cancel anytime — no contracts</li>
-              </ul>
-            </div>
+        {/* Hub teaser only — full membership details + conversion on /pricing (home owns discovery, pricing owns the ask per DS). */}
+        <section className="section section--paper">
+          <div className="container">
+            <header className="section-header">
+              <span className="section-header__number">N°07</span>
+              <div className="section-header__group">
+                <h2 className="section-title">Become a Member</h2>
+                <span className="section-header__dateline">READER-FUNDED · INDEPENDENT</span>
+              </div>
+              <Link className="section-link" href="/pricing">
+                Full Details &amp; Join →
+              </Link>
+            </header>
 
-            <div className="membership-cta__price-card">
-              <div className="membership-cta__price">
-                <span className="membership-cta__amount">$4.99</span>
-                <span className="membership-cta__period">/MONTH</span>
+            <div className="card card--horizontal">
+              <div className="card__body">
+                <p className="card__excerpt">
+                  $4.99/mo unlocks every article, every podcast, every live broadcast and replay. No ads, no tracking, cancel anytime.
+                  Exact perks, tiers, and secure Stripe checkout live on the Pricing page.
+                </p>
               </div>
-              <div className="membership-cta__actions">
-                <Link className="btn btn--primary btn--lg btn--full" href="/pricing">
-                  Join Now
-                </Link>
-                <Link className="btn btn--outline btn--full" href="/pricing">
-                  What&apos;s Included
-                </Link>
-              </div>
-              <p className="membership-cta__disclaimer">Secure checkout via Stripe</p>
             </div>
           </div>
-          <div className="membership-cta__footer-band">▼ 1,200+ OKLAHOMANS JOINED THIS MONTH</div>
         </section>
       </main>
     </>

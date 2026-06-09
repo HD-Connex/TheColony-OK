@@ -128,7 +128,7 @@ export default async function VideoEpisodePage({ params }: { params: Promise<Par
             {episode.description && (
               <section aria-label="About this episode">
                 <SectionBlock number="N°01" title="About this episode">
-                  <p style={{ marginTop: "var(--space-4)", lineHeight: 1.6, color: "var(--color-text-secondary)" }}>
+                  <p className="ep-desc">
                     {episode.description}
                   </p>
                 </SectionBlock>
@@ -157,19 +157,19 @@ export default async function VideoEpisodePage({ params }: { params: Promise<Par
                 linkHref={`/shows/${series.slug}`}
                 linkLabel="All →"
               >
-                <ul className="chapter-list" style={{ marginTop: "var(--space-4)" }}>
+                <ul className="chapter-list chapter-list-tight">
                   {related.map((s) => (
                     <li key={s.id}>
                       <Link href={`/shows/${series.slug}/${s.slug}`} className="chapter-btn episode-related">
                         <span className="episode-related__thumb">
                           {s.thumbnail_url && (
-                            <Image src={s.thumbnail_url} alt={s.title} fill sizes="72px" style={{ objectFit: "cover" }} />
+                            <Image src={s.thumbnail_url} alt={s.title} fill sizes="72px" className="img-cover" />
                           )}
                         </span>
                         <span>
-                          <span style={{ display: "block" }}>{s.title}</span>
+                          <span className="block">{s.title}</span>
                           {s.duration_seconds != null && (
-                            <span style={{ color: "var(--color-text-muted)", fontSize: "var(--text-xs)" }}>
+                            <span className="text-ink-muted text-xs">
                               {formatDuration(s.duration_seconds)}
                             </span>
                           )}

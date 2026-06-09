@@ -230,3 +230,62 @@
   .live-section { grid-template-columns: 1fr; }
   .live-player { border-right: none; border-bottom: var(--rule-medium) solid var(--color-text-primary); }
 }
+
+/* Phase 1: purge inline styles + demo pollution labels from YouTubeDemoReel (used in live stage for archive reel). Zero raw hex, use DS tokens. */
+.reel-overlay-top {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 10;
+  background: rgba(0, 0, 0, 0.65);
+  color: var(--color-paper);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  padding: 3px 8px;
+  border: 1px solid rgba(255,255,255,0.2);
+  text-transform: uppercase;
+  pointer-events: none;
+  user-select: none;
+}
+.reel-overlay-bottom {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  z-index: 10;
+  max-width: 70%;
+  background: rgba(0, 0, 0, 0.7);
+  color: var(--color-paper);
+  font-size: 12px;
+  padding: 4px 10px;
+  font-family: var(--font-body);
+  line-height: 1.3;
+  pointer-events: none;
+}
+.reel-exit {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 20;
+  font-size: 10px;
+  padding: 3px 8px;
+  background: rgba(236, 16, 36, 0.85);
+  color: var(--color-paper);
+  border: 1px solid var(--color-paper);
+  font-family: var(--font-mono);
+  letter-spacing: 1px;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+.reel-progress {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  z-index: 10;
+  font-size: 10px;
+  color: rgba(255,255,255,0.6);
+  font-family: var(--font-mono);
+  pointer-events: none;
+}
+.reel-container { overflow: hidden; }
+.reel-player-frame { width: 100%; height: 100%; position: absolute; inset: 0; }

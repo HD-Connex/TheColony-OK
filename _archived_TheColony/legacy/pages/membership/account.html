@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Account — The Colony OK</title>
+  <meta name="description" content="Sign in or manage your Colony OK membership. Magic-link login, no passwords.">
+  <link rel="canonical" href="https://thecolonyok.com/pages/membership/account.html">
+  <meta name="robots" content="noindex, nofollow">
+
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="icon" type="image/svg+xml" href="/assets/icons/favicon.svg">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter+Tight:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <script defer data-domain="thecolonyok.com" src="https://plausible.io/js/script.outbound-links.tagged-events.js"></script>
+</head>
+<body>
+
+  <div data-component="header"></div>
+
+  <main id="main">
+    <div class="container">
+
+      <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <a href="/">Home</a>
+        <span class="breadcrumbs__separator">/</span>
+        <a href="/pages/membership/">Join</a>
+        <span class="breadcrumbs__separator">/</span>
+        <span class="breadcrumbs__current">Account</span>
+      </nav>
+
+      <header class="page-header">
+        <p class="page-header__eyebrow">▼ MEMBER ACCOUNT</p>
+        <h1 class="page-header__title">Sign In</h1>
+        <p class="page-header__lede">Enter your email. We send a one-time login link to your inbox — no password to remember, no app to install.</p>
+      </header>
+
+      <div class="grid-2" style="padding-block: var(--space-12); gap: 0; border-top: var(--rule-medium) solid var(--color-text-primary);">
+
+        <!-- Login -->
+        <section style="padding: var(--space-10) var(--space-8); border-right: var(--rule-hairline) solid var(--color-border);">
+          <h2 style="font-family:var(--font-display); font-size:var(--text-3xl); font-weight:900; letter-spacing:var(--track-tight); margin-bottom:var(--space-5);">Already a Member</h2>
+          <p style="color: var(--color-text-secondary); margin-bottom: var(--space-6); line-height: var(--leading-relaxed);">Enter the email you joined with. We'll send you a magic link to manage your subscription, billing, and account.</p>
+
+          <form id="login-form" class="newsletter__form" style="border: var(--rule-medium) solid var(--color-paper);">
+            <input type="email" name="email" class="newsletter__input" placeholder="YOUR@EMAIL.COM" required aria-label="Account email">
+            <button type="submit" class="btn btn--primary">Send Link</button>
+          </form>
+          <div id="login-status" style="margin-top: var(--space-4); font-family: var(--font-mono); font-size: var(--text-xs); letter-spacing: var(--track-wide); text-transform: uppercase; color: var(--color-text-muted); min-height: 1.5em;"></div>
+
+          <div style="margin-top: var(--space-8); padding-top: var(--space-6); border-top: var(--rule-hairline) solid var(--color-border);">
+            <h3 style="font-family: var(--font-mono); font-size: var(--text-xs); letter-spacing: var(--track-wider); text-transform: uppercase; color: var(--color-alarm); margin-bottom: var(--space-3);">▼ MANAGE SUBSCRIPTION</h3>
+            <p style="color: var(--color-text-secondary); font-size: var(--text-sm); line-height: var(--leading-relaxed); margin-bottom: var(--space-4);">Update card, view billing history, or cancel — all in the Stripe Customer Portal.</p>
+            <a class="btn btn--outline btn--full" href="https://billing.stripe.com/p/login/REPLACE_WITH_PORTAL_LINK" data-plausible-event-name="portal-open">Open Customer Portal</a>
+          </div>
+        </section>
+
+        <!-- Not a member -->
+        <aside style="padding: var(--space-10) var(--space-8); background-color: var(--color-ink-soft);">
+          <h2 style="font-family:var(--font-display); font-size:var(--text-3xl); font-weight:900; letter-spacing:var(--track-tight); margin-bottom:var(--space-5);">Not a Member Yet?</h2>
+          <p style="color: var(--color-text-secondary); margin-bottom: var(--space-6); line-height: var(--leading-relaxed);">Join 1,200+ Oklahomans funding independent journalism. $4.99/month, cancel anytime.</p>
+          <ul class="membership-cta__features" style="border-top-color: var(--color-paper); margin-bottom: var(--space-6);">
+            <li class="membership-cta__feature" style="color: var(--color-paper); border-bottom-color: var(--color-border);">All investigative reporting</li>
+            <li class="membership-cta__feature" style="color: var(--color-paper); border-bottom-color: var(--color-border);">Full podcast library</li>
+            <li class="membership-cta__feature" style="color: var(--color-paper); border-bottom-color: var(--color-border);">Live broadcasts + replays</li>
+            <li class="membership-cta__feature" style="color: var(--color-paper); border-bottom-color: var(--color-border);">Members-only briefings</li>
+          </ul>
+          <a class="btn btn--primary btn--lg btn--full" href="/pages/membership/">Join — $4.99/month</a>
+        </aside>
+
+      </div>
+
+    </div>
+  </main>
+
+  <div data-component="footer"></div>
+
+  <script type="module" src="/js/main.js"></script>
+  <script>
+    // Stub: in production this triggers the Stripe Customer Portal magic link email.
+    // For now it acknowledges the request — the Stripe portal will issue the actual email.
+    const form = document.getElementById('login-form');
+    const status = document.getElementById('login-status');
+    form?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const email = form.querySelector('input[name="email"]').value.trim();
+      if (!email) return;
+      status.textContent = '▼ SENDING LINK...';
+      setTimeout(() => {
+        status.textContent = `▼ LINK SENT TO ${email.toUpperCase()} · CHECK YOUR INBOX`;
+        window.plausible?.('login-link-requested');
+      }, 700);
+    });
+  </script>
+</body>
+</html>

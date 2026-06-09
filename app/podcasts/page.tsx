@@ -7,6 +7,7 @@ import PodcastSearchGrid from "./_components/PodcastSearchGrid";
 import { getShowsWithEpisodeCounts, getRecentEpisodes } from "@/lib/podcasts";
 import { formatDate, formatDurationLabel } from "@/lib/format";
 import { PODCAST_ART } from "@/lib/media-map";
+import Image from "next/image";
 
 export const metadata: Metadata = {
   title: "Podcast Network",
@@ -59,7 +60,14 @@ export default async function PodcastsIndexPage() {
                         className="episode-rail__card"
                       >
                         <div className="episode-rail__thumb">
-                          <img src={thumb} alt={`${ep.show_title} — episode thumbnail for ${ep.title}`} loading="lazy" />
+                          <Image
+                            src={thumb}
+                            alt={`${ep.show_title} — episode thumbnail for ${ep.title}`}
+                            width={160}
+                            height={90}
+                            loading="lazy"
+                            style={{ width: '100%', height: 'auto', objectFit: 'cover' }}
+                          />
                         </div>
                         <div className="episode-rail__body">
                           <span className="episode-rail__show">{ep.show_title}</span>

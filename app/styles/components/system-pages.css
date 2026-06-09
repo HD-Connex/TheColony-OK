@@ -439,3 +439,106 @@
   .work-rail__item { grid-template-columns: 1fr; }
   .work-rail__meta { text-align: left; }
 }
+
+/* Phase 1 Quick Wins: purge inline styles from system pages (error/loading/not-found).
+   Token-driven, zero extra radius, full a11y support. */
+.system-page__actions {
+  display: flex;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-8);
+}
+
+.system-page__sections-title {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--track-wider);
+  text-transform: uppercase;
+  color: var(--color-alarm);
+  margin-bottom: var(--space-4);
+}
+
+/* Loading state uses existing tokens + prose-block patterns */
+.system-page__loading {
+  padding: var(--space-24) 0;
+  min-height: 40vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.system-page__loading-text {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  letter-spacing: var(--track-wider);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+/* Phase 1 Quick Wins (per SITE_AUDIT_REPORT): semantic support for vs/blaze purge.
+   compare-table / bio lists use ONLY CSS vars + zero-radius (vars enforce 0), navy/cream/alarm tokens.
+   Brutalist: mono N°/headers, heavy rules, high contrast, no raw hex/inline/tailwind hacks.
+   Added here (existing system-pages.css) to keep page purely class-based. */
+.compare-section {
+  margin: var(--space-8) 0;
+}
+
+.bio-card__list {
+  margin: 0;
+  padding-left: var(--space-5);
+  list-style-position: outside;
+}
+
+.compare-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: var(--rule-medium) solid var(--color-border);
+  background: var(--color-bg-card);
+  color: var(--color-paper);
+  font-size: var(--text-base);
+  line-height: var(--leading-relaxed);
+}
+
+.compare-table th,
+.compare-table td {
+  padding: var(--space-4);
+  text-align: left;
+  border-bottom: var(--rule-hairline) solid var(--color-border);
+  vertical-align: top;
+}
+
+.compare-table thead th {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--track-wide);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  background: var(--color-ink);
+  border-bottom: var(--rule-medium) solid var(--color-border);
+  text-align: left;
+}
+
+.compare-table th:first-child {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--track-wide);
+  text-transform: uppercase;
+  color: var(--color-alarm);
+  width: 30%;
+}
+
+.compare-table--wins .compare--edge {
+  text-align: center;
+}
+
+.compare--secondary {
+  color: var(--color-text-secondary);
+}
+
+.compare--edge {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+  color: var(--color-alarm);
+  white-space: nowrap;
+}

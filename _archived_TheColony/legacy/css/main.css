@@ -1,0 +1,174 @@
+@import 'variables.css';
+@import 'reset.css';
+@import 'components/nav.css';
+@import 'components/hero.css';
+@import 'components/cards.css';
+@import 'components/membership.css';
+@import 'components/footer.css';
+@import 'components/ticker.css';
+@import 'components/buttons.css';
+@import 'components/badges.css';
+@import 'components/podcast.css';
+@import 'components/live.css';
+@import 'components/articles.css';
+@import 'components/newsletter.css';
+@import 'components/breadcrumbs.css';
+
+/* ─── Layout ─── */
+.container {
+  width: 100%;
+  max-width: var(--max-width);
+  margin-inline: auto;
+  padding-inline: var(--container-padding);
+}
+
+.section {
+  padding-block: var(--space-16);
+  border-top: var(--rule-hairline) solid var(--color-border);
+}
+
+.section--flush { padding-block: 0; }
+.section--tight { padding-block: var(--space-10); }
+.section--paper { background-color: var(--color-paper); color: var(--color-ink); border-top-color: var(--color-ink); }
+.section--paper a { color: var(--color-ink); }
+
+/* ─── Section Header (numbered dateline rhythm) ─── */
+.section-header {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: end;
+  gap: var(--space-6);
+  margin-bottom: var(--space-10);
+  padding-bottom: var(--space-4);
+  border-bottom: var(--rule-medium) solid var(--color-text-primary);
+}
+
+.section-header__number {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  letter-spacing: var(--track-wide);
+  color: var(--color-text-muted);
+}
+
+.section-header__group { display: flex; flex-direction: column; gap: var(--space-1); }
+
+.section-title {
+  font-family: var(--font-display);
+  font-size: clamp(var(--text-2xl), 3.5vw, var(--text-4xl));
+  font-weight: var(--weight-black);
+  text-transform: uppercase;
+  letter-spacing: var(--track-tight);
+  line-height: var(--leading-tight);
+  color: var(--color-text-primary);
+}
+
+.section-header__dateline {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--track-wide);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.section-link {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: var(--track-wider);
+  color: var(--color-alarm);
+  white-space: nowrap;
+  border-bottom: var(--rule-medium) solid var(--color-alarm);
+  padding-bottom: 2px;
+  transition: color var(--transition-fast);
+}
+
+.section-link:hover { color: var(--color-alarm-hover); }
+
+.section--paper .section-header { border-bottom-color: var(--color-ink); }
+.section--paper .section-title,
+.section--paper .section-header__number,
+.section--paper .section-header__dateline { color: var(--color-ink); }
+
+/* ─── Grids ─── */
+.grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-8); }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border-top: var(--rule-hairline) solid var(--color-border); }
+.grid-3 > * { border-bottom: var(--rule-hairline) solid var(--color-border); border-right: var(--rule-hairline) solid var(--color-border); }
+.grid-3 > *:nth-child(3n) { border-right: none; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border-top: var(--rule-hairline) solid var(--color-border); }
+.grid-4 > * { border-bottom: var(--rule-hairline) solid var(--color-border); border-right: var(--rule-hairline) solid var(--color-border); }
+.grid-4 > *:nth-child(4n) { border-right: none; }
+
+.grid-feature {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 0;
+  border-top: var(--rule-medium) solid var(--color-text-primary);
+}
+.grid-feature > * { border-right: var(--rule-hairline) solid var(--color-border); }
+.grid-feature > *:last-child { border-right: none; }
+
+/* ─── Dividers ─── */
+.divider { border: none; border-top: var(--rule-hairline) solid var(--color-border); margin-block: var(--space-8); }
+.divider--alarm { border-top: var(--rule-heavy) solid var(--color-alarm); }
+
+/* ─── Utility Classes ─── */
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.text-alarm { color: var(--color-alarm); }
+.text-muted { color: var(--color-text-secondary); }
+.text-center { text-align: center; }
+.text-upper { text-transform: uppercase; letter-spacing: var(--track-wide); }
+.text-mono { font-family: var(--font-mono); }
+.text-display { font-family: var(--font-display); }
+
+.bg-paper { background-color: var(--color-paper); color: var(--color-ink); }
+.bg-ink { background-color: var(--color-ink); color: var(--color-paper); }
+.bg-alarm { background-color: var(--color-alarm); color: var(--color-paper); }
+
+.mono-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--track-wider);
+  text-transform: uppercase;
+  color: var(--color-alarm);
+}
+
+.mono-eyebrow::before {
+  content: '▼';
+  font-size: 0.7em;
+}
+
+/* ─── Reveal-on-load (one-shot staggered) ─── */
+[data-reveal] { opacity: 0; transform: translateY(12px); transition: opacity 600ms ease, transform 600ms ease; }
+[data-reveal].is-revealed { opacity: 1; transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] { opacity: 1; transform: none; transition: none; }
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 1024px) {
+  .grid-4 { grid-template-columns: repeat(2, 1fr); }
+  .grid-4 > *:nth-child(4n) { border-right: var(--rule-hairline) solid var(--color-border); }
+  .grid-4 > *:nth-child(2n) { border-right: none; }
+  .grid-feature { grid-template-columns: 1fr; }
+  .grid-feature > * { border-right: none; border-bottom: var(--rule-hairline) solid var(--color-border); }
+}
+
+@media (max-width: 768px) {
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+  .grid-3 > *, .grid-4 > * { border-right: none; }
+  .section-header { grid-template-columns: 1fr; gap: var(--space-3); }
+  .section-link { justify-self: start; }
+}

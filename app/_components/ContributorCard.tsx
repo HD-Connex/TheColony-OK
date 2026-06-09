@@ -62,7 +62,7 @@ export default function ContributorCard({
     <motion.div
       whileHover={{ scale: 1.03 }}
       transition={{ type: "spring", stiffness: 300, damping: 20 }}
-      style={{ display: "inline-block", borderRadius: "var(--radius-sm)", overflow: "hidden" }}
+      className="photo-frame"
     >
       {photoEl}
     </motion.div>
@@ -81,7 +81,7 @@ export default function ContributorCard({
           <h3 className="contrib__name"><Link href={href}>{c.name}</Link></h3>
           {c.bio && <p className="contrib__bio">{c.bio}</p>}
           <Meta c={c} />
-          {teaser && <div className="contrib__meta" style={{ marginTop: "var(--space-1)", fontSize: "var(--text-xs)" }}>{teaser}</div>}
+          {teaser && <div className="contrib__meta text-xs" style={{ marginTop: "var(--space-1)" }}>{teaser}</div>}
           <Link className="btn btn--outline btn--sm" href={href} style={{ alignSelf: "start" }}>Read their work →</Link>
         </div>
       </motion.article>
@@ -102,7 +102,7 @@ export default function ContributorCard({
           {c.role && <span className="contrib__role">{c.role}</span>}
           {c.bio && <p className="contrib__bio" style={{ fontSize: "var(--text-sm)" }}>{c.bio}</p>}
           <Meta c={c} />
-          {teaser && <div className="contrib__meta" style={{ marginTop: "var(--space-1)", fontSize: "var(--text-xs)" }}>{teaser}</div>}
+          {teaser && <div className="contrib__meta text-xs" style={{ marginTop: "var(--space-1)" }}>{teaser}</div>}
         </div>
       </motion.article>
     );
@@ -113,7 +113,7 @@ export default function ContributorCard({
       <motion.div
         whileHover={{ scale: 1.04 }}
         transition={{ type: "spring", stiffness: 320, damping: 18 }}
-        style={{ display: "inline-block", borderRadius: "var(--radius-sm)", overflow: "hidden" }}
+        className="photo-frame"
       >
         {photoEl}
       </motion.div>

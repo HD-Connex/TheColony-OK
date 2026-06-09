@@ -1,0 +1,34 @@
+{
+  "@context": "https://schema.org",
+  "@type": "NewsMediaOrganization",
+  "@id": "https://thecolonyok.com/#organization",
+  "name": "The Colony OK",
+  "alternateName": "Colony OK",
+  "url": "https://thecolonyok.com",
+  "logo": {
+    "@type": "ImageObject",
+    "url": "https://thecolonyok.com/assets/images/logo.png",
+    "width": 600,
+    "height": 60
+  },
+  "description": "Oklahoma's independent conservative media hub — investigative journalism, podcasting, and live programming.",
+  "foundingDate": "2026",
+  "foundingLocation": {
+    "@type": "Place",
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": "Oklahoma City",
+      "addressRegion": "OK",
+      "addressCountry": "US"
+    }
+  },
+  "sameAs": [
+    "https://x.com/thecolonyok",
+    "https://facebook.com/thecolonyok",
+    "https://rumble.com/thecolonyok",
+    "https://youtube.com/@thecolonyok"
+  ],
+  "ethicsPolicy": "https://thecolonyok.com/about/ethics",
+  "diversityPolicy": "https://thecolonyok.com/about/editorial-standards",
+  "actionableFeedbackPolicy": "https://thecolonyok.com/about/corrections"
+}

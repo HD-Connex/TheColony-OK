@@ -75,7 +75,7 @@ export default async function LivePage({
               <div className="live-status">
                 <span className="badge badge--new">{isOnAir ? "ON AIR" : "TONIGHT"}</span>
                 {nextLive && (
-                  <span className="text-mono text-upper" style={{ fontSize: "var(--text-xs)" }}>
+                  <span className="text-mono text-upper text-xs">
                     {nextLive.title.slice(0, 24).toUpperCase()}
                   </span>
                 )}

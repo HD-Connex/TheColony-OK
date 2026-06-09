@@ -18,10 +18,7 @@ export default function Error({
     <main id="main">
       <div className="container">
         <section className="system-page" aria-labelledby="error-title">
-          <p
-            className="page-header__eyebrow"
-            style={{ marginBottom: "var(--space-4)" }}
-          >
+          <p className="page-header__eyebrow">
             ▼ SYSTEM · FAULT
           </p>
 
@@ -38,14 +35,7 @@ export default function Error({
             section while we sort it out.
           </p>
 
-          <div
-            style={{
-              display: "flex",
-              gap: "var(--space-4)",
-              flexWrap: "wrap",
-              marginBottom: "var(--space-8)",
-            }}
-          >
+          <div className="system-page__actions">
             <button type="button" className="btn btn--primary btn--lg" onClick={reset}>
               Try Again
             </button>
@@ -55,16 +45,7 @@ export default function Error({
           </div>
 
           <div>
-            <h2
-              style={{
-                fontFamily: "var(--font-mono)",
-                fontSize: "var(--text-xs)",
-                letterSpacing: "var(--track-wider)",
-                textTransform: "uppercase",
-                color: "var(--color-alarm)",
-                marginBottom: "var(--space-4)",
-              }}
-            >
+            <h2 className="system-page__sections-title">
               ▼ SECTIONS
             </h2>
             <nav className="system-page__links" aria-label="Site sections">

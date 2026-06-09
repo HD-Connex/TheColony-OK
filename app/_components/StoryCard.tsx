@@ -42,7 +42,7 @@ export default function StoryCard({ a, variant = "default" }: { a: Article; vari
               <motion.div
                 whileHover={{ scale: 1.06 }}
                 transition={{ type: "spring", stiffness: 320, damping: 18 }}
-                style={{ display: "inline-block", borderRadius: "999px", overflow: "hidden" }}
+                className="photo-frame"
               >
                 <Image
                   src={bylinePhoto}

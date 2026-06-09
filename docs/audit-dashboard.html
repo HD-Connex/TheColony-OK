@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Colony OK — Full Site Audit Dashboard</title>
+  <style>
+    :root {
+      --ink: #0a1f3d;
+      --paper: #f4f0e6;
+      --alarm: #ec1024;
+      --ink-soft: #0f2a4f;
+      --rule: #1a3358;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Inter Tight', system-ui, sans-serif;
+      background: var(--paper);
+      color: var(--ink);
+      margin: 0;
+      line-height: 1.5;
+    }
+    .header {
+      background: var(--ink);
+      color: var(--paper);
+      padding: 2rem 1.5rem;
+      border-bottom: 8px solid var(--alarm);
+      position: relative;
+    }
+    .header::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 4px;
+      background: linear-gradient(to right, var(--alarm), transparent);
+    }
+    h1 {
+      font-family: 'Archivo Black', system-ui, sans-serif;
+      font-size: clamp(2.5rem, 8vw, 4.5rem);
+      letter-spacing: -0.02em;
+      margin: 0 0 0.5rem;
+      text-transform: uppercase;
+    }
+    .subtitle {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.9rem;
+      letter-spacing: 0.16em;
+      opacity: 0.85;
+    }
+    .container {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+    .nav {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-top: 1rem;
+    }
+    .nav a {
+      color: var(--paper);
+      text-decoration: none;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      padding: 0.5rem 1rem;
+      border: 2px solid var(--paper);
+      transition: all 0.2s ease;
+    }
+    .nav a:hover, .nav a.active {
+      background: var(--alarm);
+      border-color: var(--alarm);
+      color: var(--ink);
+    }
+    .section {
+      padding: 3rem 0;
+      border-top: 1px solid var(--rule);
+    }
+    .section-header {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: end;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 4px solid var(--ink);
+    }
+    .section-number {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.875rem;
+      letter-spacing: 0.16em;
+      color: var(--alarm);
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+    }
+    .section-title {
+      font-family: 'Archivo Black', system-ui, sans-serif;
+      font-size: 2.25rem;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      text-transform: uppercase;
+      line-height: 0.95;
+      margin: 0;
+    }
+    .section-meta {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--alarm);
+      text-align: right;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.5rem;
+    }
+    .card {
+      background: white;
+      border: 2px solid var(--rule);
+      padding: 1.5rem;
+      transition: transform 0.2s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.2s;
+      position: relative;
+    }
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 30px -15px rgba(0,0,0,0.2);
+    }
+    .card h3 {
+      font-family: 'Archivo Black', system-ui, sans-serif;
+      font-size: 1.1rem;
+      margin: 0 0 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: -0.01em;
+    }
+    .card ul {
+      margin: 0;
+      padding-left: 1.25rem;
+      font-size: 0.9rem;
+    }
+    .card ul li {
+      margin-bottom: 0.4rem;
+    }
+    .badge {
+      display: inline-block;
+      font-size: 0.65rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      padding: 0.2rem 0.6rem;
+      border: 1px solid currentColor;
+      margin-bottom: 0.5rem;
+    }
+    .badge.strength { color: #0a1f3d; border-color: #0a1f3d; }
+    .badge.weak { color: #ec1024; border-color: #ec1024; }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 1rem;
+      margin: 2rem 0;
+    }
+    .stat {
+      text-align: center;
+      padding: 1rem;
+      border: 2px solid var(--rule);
+    }
+    .stat-number {
+      font-family: 'Archivo Black', system-ui, sans-serif;
+      font-size: 2.5rem;
+      line-height: 1;
+    }
+    .stat-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+    .phase {
+      margin: 2rem 0;
+      padding: 1.5rem;
+      border-left: 6px solid var(--alarm);
+      background: rgba(236,16,36,0.05);
+    }
+    .phase h4 {
+      margin: 0 0 0.5rem;
+      font-family: 'Archivo Black', system-ui, sans-serif;
+      text-transform: uppercase;
+    }
+    .footer {
+      background: var(--ink);
+      color: var(--paper);
+      padding: 2rem 1.5rem;
+      font-size: 0.8rem;
+      text-align: center;
+      border-top: 4px solid var(--alarm);
+    }
+    @media (max-width: 768px) {
+      .stats { grid-template-columns: 1fr 1fr; }
+      .grid { grid-template-columns: 1fr; }
+    }
+    .motion {
+      transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+    .reveal {
+      opacity: 0;
+      transform: translateY(20px);
+      animation: reveal 0.6s forwards;
+    }
+    @keyframes reveal {
+      to { opacity: 1; transform: none; }
+    }
+    .grain {
+      position: relative;
+    }
+    .grain::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: 
+        linear-gradient(rgba(0,0,0,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px);
+      background-size: 4px 4px;
+      pointer-events: none;
+      z-index: 1;
+      mix-blend-mode: multiply;
+    }
+  </style>
+</head>
+<body>
+  <header class="header grain">
+    <div class="container">
+      <div style="display: flex; align-items: baseline; gap: 1rem; flex-wrap: wrap;">
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; letter-spacing: 0.22em; opacity: 0.7;">N°01 / AUDIT</div>
+        <h1 style="flex: 1;">THE COLONY OK</h1>
+      </div>
+      <p class="subtitle">COMPREHENSIVE FULL-SITE AUDIT &amp; PROGRESS REPORT</p>
+      <p style="max-width: 60ch; margin-top: 1rem; opacity: 0.9;">Brutalist patriotic media platform — post ui-ux-pro-max overhaul assessment. Strengths, weaknesses, gaps, and actionable roadmap for top-tier agency quality.</p>
+      
+      <nav class="nav">
+        <a href="#strengths">STRENGTHS</a>
+        <a href="#weaknesses">WEAKNESSES</a>
+        <a href="#missing">MISSING / FAILURES</a>
+        <a href="#improve">AREAS TO IMPROVE</a>
+        <a href="#features">FEATURES ADD/REMOVE</a>
+        <a href="#roadmap">RECOMMENDATIONS</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- SUMMARY STATS -->
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-number">5</div>
+        <div class="stat-label">Layers Audited</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number">26+</div>
+        <div class="stat-label">Files Reviewed</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number">4</div>
+        <div class="stat-label">Subagent Audits</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number">HIGH</div>
+        <div class="stat-label">Priority Items</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number">BUILD</div>
+        <div class="stat-label">CLEAN ✓</div>
+      </div>
+    </div>
+
+    <!-- STRENGTHS -->
+    <section id="strengths" class="section">
+      <div class="section-header">
+        <div class="section-number">01</div>
+        <h2 class="section-title">Strengths</h2>
+        <div class="section-meta">FOUNDATION • IDENTITY • PARTIAL POLISH</div>
+      </div>
+      
+      <div class="grid">
+        <div class="card grain">
+          <div class="badge strength">UI/UX</div>
+          <h3>Brutalist Patriotic Design System</h3>
+          <ul>
+            <li>variables.css with full ui-ux-pro-max comments (99 guidelines, priorities, legacy fidelity)</li>
+            <li>Zero radius, navy/cream/alarm tokens, N° mono headers, heavy rules — faithful to legacy/ + evolved</li>
+            <li>Hub model with explicit "curated teasers" comments (home as front-page per FP/ProPublica inspiration)</li>
+          </ul>
+        </div>
+        
+        <div class="card grain">
+          <div class="badge strength">UI/UX</div>
+          <h3>New Agency Components + Polish</h3>
+          <ul>
+            <li>AuthorityBadge + ClipsTeaser for E-E-A-T and community elevation (integrated across journalists, per-ep, live, podcasts)</li>
+            <li>Polished Paywall (token-driven, aria, .btn--lg, no raw hex)</li>
+            <li>Dedicated immersion: Live TV HUB + Channel Guide, podcasts deep + chapters, stories hero + badge</li>
+          </ul>
+        </div>
+        
+        <div class="card grain">
+          <div class="badge strength">Technical</div>
+          <h3>Security, Images, SEO, Build</h3>
+          <ul>
+            <li>Strong headers (HSTS preload, nosniff, SAMEORIGIN, restrictive Permissions) in next.config</li>
+            <li>next/image widespread with sizes/lazy/remote (mux/supabase/yt)</li>
+            <li>Metadata + sitemap + JsonLd + build clean (SSG/ISR hybrid, many static routes)</li>
+            <li>PWA manifest + sw push stub + crons (*/20)</li>
+          </ul>
+        </div>
+        
+        <div class="card grain">
+          <div class="badge strength">Backend</div>
+          <h3>Solid Integrations Foundation</h3>
+          <ul>
+            <li>Dual Supabase (admin/public) + central Show/Episode types with video/chapters support</li>
+            <li>RSS ingest + crons functional (video detection, idempotent, per-show errors)</li>
+            <li>Stripe (checkout, portal, members sync via webhook + RLS), Mux + chapters + webhooks</li>
+            <li>Search/semantic + realtime tables ready + RLS + 13 migrations with comments</li>
+          </ul>
+        </div>
+        
+        <div class="card grain">
+          <div class="badge strength">Content / IA</div>
+          <h3>Hub + Dedicated Execution (Partial)</h3>
+          <ul>
+            <li>Home: curated teasers + N° sections + live embed + explicit hub comments</li>
+            <li>Dedicated: Live TV HUB + guide + ClipsTeaser; podcasts deep + per-ep immersion; journalists authority + badges; contributors tiers + work rails</li>
+            <li>Implemented ideas visible (clips teasers, AuthorityBadge, E-E-A-T, live polish)</li>
+          </ul>
+        </div>
+        
+        <div class="card grain">
+          <div class="badge strength">Docs + Strategy</div>
+          <h3>Rich Layer Documentation</h3>
+          <ul>
+            <li>UI_UX_DESIGN_SYSTEM.md (updated with "post-plan execution" notes, new components, claims)</li>
+            <li>LOCAL_OK, RICH_COMMENTS, MOBILE_TWA_PWA, MONITORING, ARCHITECTURE, COMPETITIVE_MATRIX — detailed roadmaps</li>
+            <li>Legacy fidelity preserved (_archived/legacy/ as benchmark)</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- WEAKNESSES -->
+    <section id="weaknesses" class="section">
+      <div class="section-header">
+        <div class="section-number">02</div>
+        <h2 class="section-title">Weaknesses</h2>
+        <div class="section-meta">DRIFT • REPETITION • STUBS</div>
+      </div>
+      
+      <div class="grid">
+        <div class="card grain">
+          <div class="badge weak">UI/UX</div>
+          <h3>Inline Styles &amp; Raw Hex Proliferation</h3>
+          <ul>
+            <li>120+ style={{}} hits (vs/blaze dozens + tailwind hacks, shows hero/ep, per-ep, system pages, home, LiveStage, etc.)</li>
+            <li>Raw hex outside tokens (manifest, live.css #000, vs/blaze bg-[#8B0000], components)</li>
+            <li>Radius violations (50%, 999px, var(--radius-sm) where zero expected)</li>
+          </ul>
+        </div>
+        
+        <div class="card grain">
+          <div class="badge weak">UI/UX</div>
+          <h3>Repetition &amp; Hub Leaks</h3>
+          <ul>
+            <li>Full membership-cta + masthead grids duplicated on home (hero + N°06 + N°07) + journalists leak + vs</li>
+            <li>Schedules/hardcoded fallbacks on home duplicate live page</li>
+            <li>ClipsTeaser variants repeated without abstraction</li>
+          </ul>
+        </div>
+        
+        <div class="card grain">
+          <div class="badge weak">Technical</div>
+          <h3>PWA / Fonts / Security Gaps</h3>
+          <ul>
+            <li>Manifest icons broken (all logo.jpg, shortcuts 404); no SW registration/install prompt; sw.js stub only (no offline per strategy)</li>
+            <li>External Google fonts (no next/font); no CSP</li>
+            <li>Raw &lt;img&gt; in podcasts/live; inline in system pages; Sentry files missing</li>
+          </ul>
+        </div>
+        
+        <div class="card grain">
+          <div class="badge weak">Backend</div>
+          <h3>Stubs &amp; TODO Debt</h3>
+          <ul>
+            <li>stripe.ts: 4x stubs (gifts, hasPerkAccess always-true, logUsage, handleEvent) + TODOs referencing legacy</li>
+            <li>transcripts.ts: pure stub (demo segments, confidence 0) + TODOs for real impl/player/ingest</li>
+            <li>viewer, live-247, video placeholders + DEMO data; realtime DB ready but client polling</li>
+          </ul>
+        </div>
+        
+        <div class="card grain">
+          <div class="badge weak">Content</div>
+          <h3>Surface-Only Ideas + Thin Depth</h3>
+          <ul>
+            <li>Clips/community teasers only — no functional upload, DB, moderation, embeds, forum (vs RICH spec)</li>
+            <li>Transcripts stub; personalization static only; rural content generic (vs LOCAL strategy)</li>
+            <li>Hub leaks + dev pollution in prod views</li>
+          </ul>
+        </div>
+        
+        <div class="card grain">
+          <div class="badge weak">Docs / Alignment</div>
+          <h3>Claims vs Reality Drift</h3>
+          <ul>
+            <li>UI_UX doc claims "no repeats", "build clean", "every page elite" — partial only</li>
+            <li>Monitoring/Sentry, full PWA/TWA, rural depth aspirational in docs vs code</li>
+            <li>Legacy "thecolony-ok" refs linger in comments/code</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- MISSING / FAILURES -->
+    <section id="missing" class="section">
+      <div class="section-header">
+        <div class="section-number">03</div>
+        <h2 class="section-title">Missing / Failures</h2>
+        <div class="section-meta">CORE GAPS • BLOCKERS</div>
+      </div>
+      
+      <div class="phase">
+        <h4>Clips / Community (RICH_COMMENTS_MEMBER_CLIPS spec)</h4>
+        <p>Upload, auto-transcript, AI review/best-of-n, embeds, forum, moderation swarm, DB schema — <strong>only teasers + contributor apply URLs + vs demo</strong>. No functional member clips system.</p>
+      </div>
+      
+      <div class="phase">
+        <h4>Transcripts + AI Pipeline</h4>
+        <p>Stub only (demo segments). No integration to EpisodePlayer, search, SEO, or cron. jobs/transcribe "pending_pipeline".</p>
+      </div>
+      
+      <div class="phase">
+        <h4>Gifts / Perks / Usage (legacy + stripe stubs)</h4>
+        <p>redeemGift / hasPerkAccess / logUsage stubs (always true + console). No perk_grants table or full county/rural logic per legacy prisma.</p>
+      </div>
+      
+      <div class="phase">
+        <h4>PWA / TWA (MOBILE_TWA_PWA_STRATEGY)</h4>
+        <p>No icons dir, no SW registration, no offline cache/fetch per doc, broken shortcuts, no assetlinks. Manifest incomplete.</p>
+      </div>
+      
+      <div class="phase">
+        <h4>Hub Purity + Repeats</h4>
+        <p>Full membership/masthead grids + CTAs on home + leaks on journalists/vs. Schedules duplicated. Violates "home curated teasers only".</p>
+      </div>
+      
+      <div class="phase">
+        <h4>Local Rural Depth (LOCAL_OK_CONTENT_STRATEGY)</h4>
+        <p>Generic shows only. No seeded Ag/Energy/Faith/Community shows, partnerships metadata, or agentic rural content per strategy.</p>
+      </div>
+      
+      <div class="phase">
+        <h4>Advanced Personalization &amp; Forum</h4>
+        <p>Static member teasers only. No "My Colony", agentic inserts, or rich threaded comments/forum surfaces per docs.</p>
+      </div>
+      
+      <div class="phase">
+        <h4>Technical Completeness</h4>
+        <p>No CSP, no next/font, no Sentry (files missing), limited realtime client, raw &lt;img&gt;, inline styles, middleware empty, apply-migrations incomplete, stubs in production paths.</p>
+      </div>
+    </section>
+
+    <!-- AREAS TO IMPROVE -->
+    <section id="improve" class="section">
+      <div class="section-header">
+        <div class="section-number">04</div>
+        <h2 class="section-title">Areas to Improve</h2>
+        <div class="section-meta">PRIORITIZED (DS + PLAN)</div>
+      </div>
+      
+      <div class="phase">
+        <h4>1. Purge Inline / Raw / Drift (Priority 1/4/6)</h4>
+        <p>Eliminate 120+ style={{}} and raw hex (vs/blaze first, then shows/per-ep/system/home/components). Enforce tokens + zero-radius everywhere. Update manifest.</p>
+      </div>
+      
+      <div class="phase">
+        <h4>2. Enforce Hub Model + Remove Repeats</h4>
+        <p>Strip full masthead grid + membership-cta from home (pure teasers + links). Clean journalists leak per its own comment. Extract shared CTAs. Limit schedules to dedicated.</p>
+      </div>
+      
+      <div class="phase">
+        <h4>3. Complete Functional Depth (High Moat)</h4>
+        <p>Clips upload/DB/moderation/embeds/forum; real transcripts + player integration; gifts/perks/usage full; rural shows per LOCAL; advanced personalization; realtime client subs.</p>
+      </div>
+      
+      <div class="phase">
+        <h4>4. Platform Gaps (PWA / Fonts / Sentry / CSP)</h4>
+        <p>Icons dir + SW full + registration + offline per strategy; next/font; CSP; full Sentry per MONITORING; fix raw &lt;img&gt; and system pages.</p>
+      </div>
+      
+      <div class="phase">
+        <h4>5. A11y / Touch / Polish</h4>
+        <p>44px+ targets; complete labels; uniform badges/teasers/E-E-A-T; clean dev pollution; consistent N°/hierarchy; expand work rails and vs page.</p>
+      </div>
+      
+      <div class="phase">
+        <h4>6. Maintainability</h4>
+        <p>Central error handling; remove dual fallbacks/hardcodes/TODOs; update apply-migrations; add CI/tests; align docs claims to reality; remove lingering legacy refs.</p>
+      </div>
+    </section>
+
+    <!-- FEATURES TO ADD/REMOVE -->
+    <section id="features" class="section">
+      <div class="section-header">
+        <div class="section-number">05</div>
+        <h2 class="section-title">Features to Add / Remove</h2>
+        <div class="section-meta">PRIORITIZED + EFFORT</div>
+      </div>
+      
+      <div class="grid">
+        <div class="card grain">
+          <div class="badge strength">ADD HIGH</div>
+          <h3>Full Member Clips System</h3>
+          <p>Upload + storage + auth (TWA), auto-transcript + AI review/best-of-n, moderation, embeds in comments/hub/live/pods, county forums, DB + RLS, feeds personalization. (RICH/ARCHITECTURE — direct blocker.)</p>
+        </div>
+        
+        <div class="card grain">
+          <div class="badge strength">ADD HIGH</div>
+          <h3>Real Transcripts + Pipeline</h3>
+          <p>Whisper/Mux/OpenAI provider, upsert, EpisodePlayer panel (search/seek/timestamps), SEO JsonLd, cron hook, 24/7 captioning. (lib/transcripts + 0011 + jobs.)</p>
+        </div>
+        
+        <div class="card grain">
+          <div class="badge strength">ADD HIGH</div>
+          <h3>Gifts / Perks / Usage Full</h3>
+          <p>perk_grants table + migration; real redeem/hasPerkAccess (county) + logUsage + webhook grants + limits/analytics. (legacy prisma + stripe stubs.)</p>
+        </div>
+        
+        <div class="card grain">
+          <div class="badge strength">ADD HIGH</div>
+          <h3>Full PWA / TWA</h3>
+          <p>Icons dir + assets + screenshots + maskable; SW registration + full fetch/offline + install prompt + background; assetlinks; rural packs. (MOBILE strategy.)</p>
+        </div>
+        
+        <div class="card grain">
+          <div class="badge strength">ADD HIGH</div>
+          <h3>Advanced Personalization + Forum</h3>
+          <p>Auth-gated member rails ("your clips", local hints); agentic inserts; rich threaded comments/forum on per-ep/live/stories etc. (ARCHITECTURE + RICH.)</p>
+        </div>
+        
+        <div class="card grain">
+          <div class="badge strength">ADD HIGH</div>
+          <h3>Local Rural Content Depth</h3>
+          <p>Seed specific Ag/Energy/Faith/Community shows + hosts + partnerships + clip tags + agent aggregator + best-of-n per LOCAL strategy. (Fills rural moat gap.)</p>
+        </div>
+        
+        <div class="card grain">
+          <div class="badge weak">REMOVE HIGH</div>
+          <h3>All Inline Styles + Raw Hex</h3>
+          <p>vs/blaze, shows, per-ep, system pages, home, components, live.css etc. Replace with tokens/classes. (Biggest drift + violation.)</p>
+        </div>
+        
+        <div class="card grain">
+          <div class="badge weak">REMOVE HIGH</div>
+          <h3>Demo / Investor Pollution + Repeats</h3>
+          <p>LiveStage demo reel + (AUTO) + comments; vs demo button + placeholder; full masthead/membership grids from home + journalists leak; hardcoded fallbacks/schedules on hub.</p>
+        </div>
+        
+        <div class="card grain">
+          <div class="badge weak">REMOVE MED</div>
+          <h3>Non-Token / Drift Elements</h3>
+          <p>Tailwind hacks + rounded in vs/blaze; raw &lt;img&gt;; external font link (once migrated); dupe motion; empty SiteClient stub; placeholder data (RECENT_LIVE, JAKE hardcodes once real 247).</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- RECOMMENDATIONS / ROADMAP -->
+    <section id="roadmap" class="section">
+      <div class="section-header">
+        <div class="section-number">06</div>
+        <h2 class="section-title">Recommendations &amp; Phased Roadmap</h2>
+        <div class="section-meta">ACTIONABLE • TIED TO PRIOR PLAN + DS</div>
+      </div>
+      
+      <div class="phase">
+        <h4>Phase 1: Quick Wins (Debt + Purity — 1-2 weeks)</h4>
+        <p>Purge inlines/raw/hex (batch replaces, ESLint). Enforce zero-radius + tokens. Remove repeats from home + leaks. A11y/touch (44px, labels). Clean prod pollution (demo code). Standardize N°/SectionBlock. Update docs claims.</p>
+      </div>
+      
+      <div class="phase">
+        <h4>Phase 2: Core Functional Depth (Moat — 3-6 weeks)</h4>
+        <p>Clips upload/DB/moderation/embeds/forum + realtime. Real transcripts + player integration. Gifts/perks/usage full (tables + logic). Advanced personalization + rural shows per LOCAL. Realtime client subs. Clips in search + VideoObject.</p>
+      </div>
+      
+      <div class="phase">
+        <h4>Phase 3: Platform Completeness (PWA / Sentry / Fonts — 2-4 weeks)</h4>
+        <p>Full PWA (icons/SW/registration/offline/install + TWA assetlinks). next/font + CSP. Full Sentry (configs/instrumentation/CI per MONITORING). Polish secondary pages (news/shows/system/vs). Error centralization + CI/tests.</p>
+      </div>
+      
+      <div class="phase">
+        <h4>Phase 4: "Next Level" + Verify (Ongoing)</h4>
+        <p>Expand (forum full, journalist portfolios clean, exports, partnerships UI, best-of-n admin, personalization dashboard). Full a11y/mobile/Lighthouse verification + subagent re-review. User sign-off on "top-tier agency" + moat. Maintain docs/plan alignment.</p>
+      </div>
+      
+      <p style="font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; letter-spacing: 0.16em; margin-top: 2rem; opacity: 0.7;">
+        EVIDENCE: Subagent outputs (UI/UX, Technical, Content, Backend) + direct reads/greps/build (clean) + docs (UI_UX execution notes, LOCAL/RICH/MOBILE/MONITORING/ARCHITECTURE/COMPETITIVE) + legacy source + competitor research. All paths absolute from D:\1Projects\thecolony-app.
+      </p>
+    </section>
+  </div>
+
+  <footer class="footer grain">
+    <div class="container">
+      THE COLONY OK — AUDIT DASHBOARD • BRUTALIST PATRIOTIC • UI-UX-PRO-MAX APPLIED • BUILD CLEAN • PARTIAL OVERHAUL EXECUTED<br>
+      Use this as living reference. Prioritize Phase 1 for immediate "elite agency" lift. Full report in docs/SITE_AUDIT_REPORT.md.
+    </div>
+  </footer>
+
+  <script>
+    // Simple motion + active nav (frontend-design inspired: high-impact micro, scroll reveal, intentional)
+    document.querySelectorAll('.card').forEach((card, i) => {
+      card.style.animationDelay = (i * 80) + 'ms';
+      card.classList.add('reveal');
+    });
+    
+    const navLinks = document.querySelectorAll('.nav a');
+    window.addEventListener('scroll', () => {
+      let current = '';
+      document.querySelectorAll('section[id]').forEach(section => {
+        const sectionTop = section.offsetTop;
+        if (scrollY >= sectionTop - 200) current = section.getAttribute('id');
+      });
+      navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === '#' + current) link.classList.add('active');
+      });
+    });
+    
+    // Keyboard: / focuses first nav
+    document.addEventListener('keydown', (e) => {
+      if (e.key === '/' && document.activeElement.tagName === 'BODY') {
+        e.preventDefault();
+        document.querySelector('.nav a').focus();
+      }
+    });
+  </script>
+</body>
+</html>

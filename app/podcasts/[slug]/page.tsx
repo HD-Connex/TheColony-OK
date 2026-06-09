@@ -110,18 +110,18 @@ export default async function PodcastShowPage({ params }: PageProps) {
               </header>
 
               <article className="live-section live-section--even">
-                <div style={{ backgroundColor: "var(--color-ink-soft)", padding: "var(--space-8)", display: "flex", flexDirection: "column", gap: "var(--space-4)", justifyContent: "center" }}>
-                  <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", letterSpacing: "var(--track-wider)", textTransform: "uppercase", color: "var(--color-alarm)" }}>
+                <div className="pod-latest-main">
+                  <div className="pod-latest-meta">
                     EPISODE {latest.episode_no ?? "—"} · {formatDurationLabel(latest.duration_s)}
                   </div>
-                  <h3 style={{ fontFamily: "var(--font-display)", fontSize: "var(--text-3xl)", fontWeight: 900, letterSpacing: "var(--track-tight)", lineHeight: 1 }}>{latest.title}</h3>
-                  {latest.description && <p style={{ color: "var(--color-text-secondary)", lineHeight: "var(--leading-relaxed)" }}>{latest.description}</p>}
-                  <div style={{ display: "flex", gap: "var(--space-3)", flexWrap: "wrap" }}>
+                  <h3 className="pod-latest-title">{latest.title}</h3>
+                  {latest.description && <p className="pod-latest-desc">{latest.description}</p>}
+                  <div className="pod-latest-actions">
                     {latest.audio_url && <a className="btn btn--primary" href="#library">▶ Play Episode</a>}
                     <a className="btn btn--outline" href="#library">Show Notes</a>
                   </div>
                 </div>
-                <div className="live-sidebar" style={{ backgroundColor: "var(--color-alarm)" }}>
+                <div className="live-sidebar">
                   <span className="badge badge--new">NEW</span>
                   <h3 className="live-status__title">Latest Episode</h3>
                   <p className="live-status__description">{latest.description ? latest.description.slice(0, 120) + "…" : "Full episode now available."}</p>

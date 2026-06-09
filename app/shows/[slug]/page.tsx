@@ -40,7 +40,6 @@ export default async function SeriesPage({ params }: PageProps) {
   if (!series) notFound();
 
   const episodes = await getSeriesEpisodes(series.id).catch((e) => { console.error(e); return []; });
-  const accent = series.accent_color ?? "#f0b429";
 
   return (
     <>
@@ -66,46 +65,23 @@ export default async function SeriesPage({ params }: PageProps) {
         lede={series.tagline ?? undefined}
         section={false}
       >
-        <section
-          style={{
-            position: "relative",
-            marginBottom: "var(--space-8)",
-            padding: "var(--space-8) 0",
-            borderRadius: "var(--radius-sm)",
-            overflow: "hidden",
-          }}
-        >
+        <section className="series-hero">
           {series.hero_url && (
-            <div style={{ position: "absolute", inset: 0, zIndex: 0 }}>
+            <div className="series-hero__bg">
               <Image
                 src={series.hero_url}
                 alt={series.title}
                 fill
                 priority
                 sizes="100vw"
-                style={{ objectFit: "cover", opacity: 0.35 }}
+                className="img-cover img-hero-dim"
               />
-              <div
-                style={{
-                  position: "absolute",
-                  inset: 0,
-                  background: "linear-gradient(to top, var(--background), transparent 70%)",
-                }}
-              />
+              <div className="series-hero__overlay" />
             </div>
           )}
-          {!series.hero_url && (
-            <div
-              style={{
-                position: "absolute",
-                inset: 0,
-                zIndex: 0,
-                background: `radial-gradient(ellipse at top, ${accent}33, transparent 60%)`,
-              }}
-            />
-          )}
-          <div style={{ position: "relative", zIndex: 1 }}>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: ".5rem", marginBottom: "1rem" }}>
+          {!series.hero_url && <div className="series-hero__bg series-hero__bg-tint" />}
+          <div className="series-hero__content">
+            <div className="series-hero__badges">
               {series.is_oklahoma && <span className="badge badge--new">Oklahoma Original</span>}
               {series.pillar && <span className="badge">{series.pillar}</span>}
               <span className="badge">{series.type}</span>
@@ -113,7 +89,7 @@ export default async function SeriesPage({ params }: PageProps) {
                 <span className="badge badge--members">{tierLabel(series.tier_required)}</span>
               )}
             </div>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: ".75rem", alignItems: "center" }}>
+            <div className="series-hero__actions">
               {episodes[0] && (
                 <Link className="btn btn--primary" href={`/shows/${series.slug}/${episodes[0].slug}`}>
                   ▶ Play latest
@@ -124,10 +100,10 @@ export default async function SeriesPage({ params }: PageProps) {
           </div>
         </section>
 
-        <div style={{ display: "grid", gap: "2.5rem" }}>
+        <div className="series-episodes-grid">
           <section aria-label="Episodes" className="section section--tight">
-            <header className="section-header" style={{ marginBottom: "1rem" }}>
-              <h2 className="section-title" style={{ fontFamily: "var(--font-display)", fontSize: "1.5rem", margin: 0 }}>
+            <header className="section-header episode-header-tight">
+              <h2 className="section-title episode-title-compact">
                 Episodes
               </h2>
             </header>
@@ -142,22 +118,16 @@ export default async function SeriesPage({ params }: PageProps) {
                       <Link href={`/shows/${series.slug}/${ep.slug}`} className="episode-row">
                         <div className="episode-row__thumb">
                           {ep.thumbnail_url && (
-                            <Image src={ep.thumbnail_url} alt={ep.title} fill sizes="176px" style={{ objectFit: "cover" }} />
+                            <Image src={ep.thumbnail_url} alt={ep.title} fill sizes="176px" className="img-cover" />
                           )}
                           {ep.duration_seconds != null && (
                             <span className="episode-row__duration">{formatDuration(ep.duration_seconds)}</span>
                           )}
                         </div>
                         <div className="episode-row__content">
-                          <div style={{ display: "flex", gap: ".5rem", flexWrap: "wrap", alignItems: "center" }}>
+                          <div className="episode-meta-row">
                             {ep.episode_number != null && (
-                              <span
-                                style={{
-                                  fontFamily: "var(--font-mono)",
-                                  fontSize: ".7rem",
-                                  color: "var(--muted-foreground)",
-                                }}
-                              >
+                              <span className="text-mono text-ink-muted episode-num">
                                 S{ep.season_number ?? 1}·E{ep.episode_number}
                               </span>
                             )}
@@ -171,9 +141,7 @@ export default async function SeriesPage({ params }: PageProps) {
                           <h3 className="episode-row__title">{ep.title}</h3>
                           {ep.description && <p className="episode-row__desc">{ep.description}</p>}
                           {ep.published_at && (
-                            <p style={{ fontSize: ".75rem", color: "var(--muted-foreground)", margin: ".35rem 0 0" }}>
-                              {formatDate(ep.published_at)}
-                            </p>
+                            <p className="episode-date">{formatDate(ep.published_at)}</p>
                           )}
                         </div>
                       </Link>
@@ -188,13 +156,13 @@ export default async function SeriesPage({ params }: PageProps) {
             {series.description && (
               <div className="account-card">
                 <h2>About</h2>
-                <p style={{ margin: 0, lineHeight: 1.6 }}>{series.description}</p>
+                <p className="account-desc">{series.description}</p>
               </div>
             )}
             {(series.apple_url || series.spotify_url || series.rumble_url || series.youtube_url) && (
               <div className="account-card">
                 <h2>Also on</h2>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: ".5rem" }}>
+                <div className="sub-links">
                   {series.apple_url && <SubLink href={series.apple_url} label="Apple" />}
                   {series.spotify_url && <SubLink href={series.spotify_url} label="Spotify" />}
                   {series.rumble_url && <SubLink href={series.rumble_url} label="Rumble" />}

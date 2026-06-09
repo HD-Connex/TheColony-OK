@@ -1,0 +1,182 @@
+/* ─── Brutalist Membership CTA — full-bleed cream block ─── */
+.membership-cta {
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+  border-top: var(--rule-slab) solid var(--color-ink);
+  border-bottom: var(--rule-slab) solid var(--color-alarm);
+  padding: var(--space-16) var(--container-padding) 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.membership-cta__inner {
+  max-width: var(--max-width);
+  margin-inline: auto;
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: var(--space-16);
+  padding-bottom: var(--space-16);
+}
+
+.membership-cta__lead { display: flex; flex-direction: column; gap: var(--space-6); }
+
+.membership-cta__eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--track-wider);
+  text-transform: uppercase;
+  color: var(--color-alarm);
+}
+
+.membership-cta__title {
+  font-family: var(--font-display);
+  font-size: clamp(var(--text-3xl), 5vw, var(--text-5xl));
+  font-weight: var(--weight-black);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--track-tight);
+  color: var(--color-ink);
+  text-transform: none;
+}
+
+.membership-cta__subtitle {
+  font-size: var(--text-lg);
+  color: var(--color-text-ink-soft);
+  line-height: var(--leading-relaxed);
+  max-width: 52ch;
+}
+
+.membership-cta__features {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border-top: var(--rule-medium) solid var(--color-ink);
+}
+
+.membership-cta__feature {
+  display: grid;
+  grid-template-columns: 32px 1fr;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  color: var(--color-ink);
+  border-bottom: var(--rule-hairline) solid var(--color-ink);
+}
+
+.membership-cta__feature::before {
+  content: '+';
+  font-family: var(--font-mono);
+  font-size: var(--text-xl);
+  color: var(--color-alarm);
+  font-weight: var(--weight-bold);
+}
+
+/* ─── Price block ─── */
+.membership-cta__price-card {
+  background-color: var(--color-ink);
+  color: var(--color-paper);
+  padding: var(--space-8);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  border: var(--rule-medium) solid var(--color-ink);
+  align-self: start;
+}
+
+.membership-cta__price {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  padding-bottom: var(--space-5);
+  border-bottom: var(--rule-medium) solid var(--color-alarm);
+}
+
+.membership-cta__amount {
+  font-family: var(--font-display);
+  font-size: clamp(4rem, 8vw, 7rem);
+  font-weight: var(--weight-black);
+  line-height: 0.85;
+  letter-spacing: var(--track-tight);
+  color: var(--color-paper);
+}
+
+.membership-cta__period {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  letter-spacing: var(--track-wide);
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+}
+
+.membership-cta__actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.membership-cta__disclaimer {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--track-wide);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.membership-cta__footer-band {
+  background-color: var(--color-alarm);
+  color: var(--color-paper);
+  margin-inline: calc(-1 * var(--container-padding));
+  padding: var(--space-4) var(--container-padding);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--track-wider);
+  text-transform: uppercase;
+  text-align: center;
+}
+
+/* ─── Paywall gate ─── */
+.paywall { position: relative; }
+
+.paywall__fade {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 220px;
+  background: linear-gradient(to bottom, transparent, var(--color-ink) 70%);
+  pointer-events: none;
+}
+
+.paywall__gate {
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+  border: var(--rule-medium) solid var(--color-ink);
+  border-top: var(--rule-slab) solid var(--color-alarm);
+  padding: var(--space-8);
+  text-align: center;
+  margin-top: calc(-1 * var(--space-12));
+  position: relative;
+  z-index: var(--z-above);
+}
+
+.paywall__gate-title {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-black);
+  letter-spacing: var(--track-tight);
+  margin-bottom: var(--space-4);
+}
+
+.paywall__gate-copy {
+  font-size: var(--text-base);
+  color: var(--color-text-ink-soft);
+  max-width: 48ch;
+  margin: 0 auto var(--space-6);
+  line-height: var(--leading-relaxed);
+}
+
+@media (max-width: 1024px) {
+  .membership-cta__inner { grid-template-columns: 1fr; gap: var(--space-10); }
+}

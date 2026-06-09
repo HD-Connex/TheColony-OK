@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import Image from "next/image";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 import VideoPlayer from "./VideoPlayer";
@@ -159,7 +160,7 @@ export default function LiveStage({ items: initialItems = [], initialActiveId }:
           </span>
         </div>
         {demoReelActive && (
-          <span className="note" style={{ color: "#ec1024" }}>
+          <span className="note" style={{ color: "var(--color-alarm)" }}>
             Steady archive stream • auto-advancing • investor preview
           </span>
         )}
@@ -192,7 +193,13 @@ export default function LiveStage({ items: initialItems = [], initialActiveId }:
           )
         ) : (
           <div className="off-air">
-            <img src={channel247?.fallbackSlate || "/assets/images/slates/off-air.jpg"} alt="The Colony OK — Off air. Next live broadcast soon." />
+            <Image
+              src={channel247?.fallbackSlate || "/assets/images/slates/off-air.jpg"}
+              alt="The Colony OK — Off air. Next live broadcast soon."
+              width={640}
+              height={360}
+              style={{ maxWidth: '100%', height: 'auto' }}
+            />
             <p>Next live event soon. In the meantime enjoy the 24/7 Colony feed.</p>
             <button type="button" onClick={() => setActiveId(null)}>
               Watch 24/7 Channel
@@ -286,7 +293,7 @@ export default function LiveStage({ items: initialItems = [], initialActiveId }:
                   </span>
                 )}
                 {ev.when && <span className="when">{whenLabelFromItem(ev)}</span>}
-                {demoReelActive && <span style={{ marginLeft: 6, fontSize: "0.7em", opacity: 0.6 }}>(AUTO)</span>}
+                {demoReelActive && <span style={{ marginLeft: 6, fontSize: "0.7em", opacity: 0.6 }} aria-hidden>archived</span>}
               </motion.button>
             ))}
             {channel247 && !demoReelActive && (

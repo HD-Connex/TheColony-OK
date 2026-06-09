@@ -123,18 +123,14 @@ export default async function PerEpisodePage({ params }: { params: Promise<Param
             {episode.description && (
               <section aria-label="About this episode">
                 <SectionBlock number="N°01" title="About this episode">
-                  <div
-                    className="article__body"
-                    style={{ marginTop: "var(--space-4)" }}
-                    dangerouslySetInnerHTML={{ __html: episode.description }}
-                  />
+                  <div className="article__body pod-ep-body" dangerouslySetInnerHTML={{ __html: episode.description }} />
                 </SectionBlock>
               </section>
             )}
 
             {(contributor || episode.host_name) && (
-              <aside className="account-card" style={{ marginTop: "var(--space-8)" }}>
-                <h2 style={{ marginTop: 0 }}>Featuring</h2>
+              <aside className="account-card account-card-tight">
+                <h2 className="account-card__h">Featuring</h2>
                 <Link
                   href={`/contributors/${contributor?.slug || episode.host_name?.toLowerCase().replace(/\s+/g, "-")}`}
                 >
@@ -142,7 +138,7 @@ export default async function PerEpisodePage({ params }: { params: Promise<Param
                   {contributor ? " → full profile" : ""}
                 </Link>
                 <AuthorityBadge verified />
-                <p style={{ marginBottom: 0, marginTop: "var(--space-3)", color: "var(--color-text-secondary)" }}>
+                <p className="account-card__note">
                   Explore their body of work across stories, podcasts &amp; video.
                 </p>
               </aside>
@@ -180,7 +176,7 @@ export default async function PerEpisodePage({ params }: { params: Promise<Param
                 linkHref={`/podcasts/${showSlug}`}
                 linkLabel="All →"
               >
-                <ul className="chapter-list" style={{ marginTop: "var(--space-4)" }}>
+                <ul className="chapter-list chapter-list-tight">
                   {related.map((s) => (
                     <li key={s.id}>
                       <Link href={`/podcasts/${showSlug}/${s.slug || s.id}`} className="chapter-btn">

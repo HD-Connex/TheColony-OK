@@ -3,25 +3,11 @@ export default function Loading() {
     <main id="main">
       <div className="container">
         <div
-          style={{
-            padding: "var(--space-24) 0",
-            minHeight: "40vh",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
+          className="system-page__loading"
           aria-live="polite"
           aria-busy="true"
         >
-          <p
-            style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: "var(--text-sm)",
-              letterSpacing: "var(--track-wider)",
-              textTransform: "uppercase",
-              color: "var(--color-text-muted)",
-            }}
-          >
+          <p className="system-page__loading-text">
             ▼ Loading…
           </p>
         </div>
