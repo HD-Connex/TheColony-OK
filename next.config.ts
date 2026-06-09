@@ -1,5 +1,4 @@
 import type { NextConfig } from 'next';
-import { withSentryConfig } from '@sentry/nextjs';
 
 const securityHeaders = [
   { key: "X-Content-Type-Options", value: "nosniff" },
@@ -47,13 +46,8 @@ const nextConfig: NextConfig = {
   },
 };
 
-// Phase 3-05: Sentry + Next.js config wrapper.
-// Provides automatic source maps, release tracking, and better error context for the clips layer etc.
-// The wrapper is safe even without DSN (Sentry just won't send events).
-export default withSentryConfig(nextConfig, {
-  // Minimal safe options for current @sentry/nextjs (avoids deprecation + type issues in this version).
-  // Full options: https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/
-  silent: true,
-  // org and project can be provided via .sentryclirc or env if you want to upload source maps on build.
-  // widenClientFileUpload: true, // enable later when you have a Sentry org/project configured
-});
+// Phase 3-05: Sentry runtime wiring is in sentry.*.config.ts + instrumentation.ts.
+// These are completely optional (no-op without SENTRY_DSN / NEXT_PUBLIC_SENTRY_DSN).
+// Removed build wrapper (withSentryConfig) to eliminate any potential source-map-upload or auth errors during Vercel builds when tokens/org not configured.
+// Re-enable the wrapper later with proper SENTRY_AUTH_TOKEN + org/project for full source maps + releases.
+export default nextConfig;
