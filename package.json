@@ -12,6 +12,7 @@
   "dependencies": {
     "@mux/mux-node": "^14.1.1",
     "@supabase/supabase-js": "^2.106.2",
+    "@vercel/blob": "^2.4.0",
     "fast-xml-parser": "^4.4.1",
     "framer-motion": "^12.40.0",
     "motion": "^12.40.0",
