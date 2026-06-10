@@ -6,6 +6,7 @@ import Header from "./_components/Header";
 import Footer from "./_components/Footer";
 import SiteChrome from "./_components/SiteChrome";
 import SiteClient from "./_components/SiteClient";
+import ScrollToTop from "./_components/ScrollToTop";
 
 const SITE_URL = "https://thecolonyok.com";
 
@@ -78,6 +79,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {children}
         </SiteChrome>
         <SiteClient />
+        <ScrollToTop />
         <Script
           defer
           data-domain="thecolonyok.com"

@@ -30,6 +30,8 @@ interface LiveStageProps {
   initialActiveId?: string | null;
   /** compact=true (home teaser): suppresses internal .queue (the sidebar already renders schedule) to stop extra boxes/queue content from flowing out of the .live-player grid cell and overlaying the next section ("Latest Dispatches"). */
   compact?: boolean;
+  /** hideInteractivity: for pages like full /live that render chat/poll in custom sidebar instead of inside the stage (prevents text leaking outside player container) */
+  hideInteractivity?: boolean;
 }
 
 function whenLabelFromItem(item: StageItem): string {
@@ -37,7 +39,7 @@ function whenLabelFromItem(item: StageItem): string {
   return item.isLive ? "LIVE NOW" : "";
 }
 
-export default function LiveStage({ items: initialItems = [], initialActiveId, compact = false }: LiveStageProps) {
+export default function LiveStage({ items: initialItems = [], initialActiveId, compact = false, hideInteractivity = false }: LiveStageProps) {
   const [items, setItems] = useState<StageItem[]>(initialItems);
   const [activeId, setActiveId] = useState<string | null>(() => {
     if (initialActiveId !== undefined) return initialActiveId;
@@ -193,16 +195,15 @@ export default function LiveStage({ items: initialItems = [], initialActiveId, c
             <VideoPlayer src={playbackSrc} title={currentTitle} isLive={playbackIsLive} />
           )
         ) : (
-          <div className="off-air">
+          <div className="live-player__offline">
             <Image
               src={channel247?.fallbackSlate || "/assets/images/slates/off-air.jpg"}
               alt="The Colony OK — Off air. Next live broadcast soon."
               width={640}
               height={360}
-              className="offair-slate"
+              style={{ maxWidth: "100%", height: "auto", opacity: 0.8 }}
             />
-            <p>Next live event soon. In the meantime enjoy the 24/7 Colony feed.</p>
-            <button type="button" onClick={() => setActiveId(null)}>
+            <button type="button" onClick={() => setActiveId(null)} className="btn btn--outline">
               Watch 24/7 Channel
             </button>
           </div>
@@ -279,7 +280,7 @@ export default function LiveStage({ items: initialItems = [], initialActiveId, c
       </div>
       )}
 
-      {!compact && (
+      {!compact && !hideInteractivity && (
         <>
           <div className="live-interactivity">
             <LiveChat liveEventId={is247 ? null : activeId} isMember={isMember} currentUser={user} />

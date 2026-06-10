@@ -725,3 +725,24 @@ main:not(.page--inner) { padding-bottom: 0; }
 .account-card-tight { margin-top: var(--space-8); }
 .account-card__h { margin-top: 0; }
 .account-card__note { margin-bottom: 0; margin-top: var(--space-3); color: var(--color-text-secondary); }
+
+/* Scroll to top button */
+.scroll-to-top {
+  display: none;
+  /* additional for visibility */
+}
+.scroll-to-top.visible {
+  display: block;
+}
+
+/* Image lead styles to reduce inline styles */
+.section-lead-image {
+  margin-bottom: var(--space-4);
+  border-bottom: var(--rule-hairline) solid var(--color-border);
+}
+.img-aesthetic {
+  width: 100%;
+  height: auto;
+  display: block;
+  filter: grayscale(0.1) contrast(1.05);
+}

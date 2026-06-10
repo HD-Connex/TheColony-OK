@@ -54,13 +54,13 @@ export default async function StoriesPage({
       <FilterBar options={filterOptions} activeKey={activeKey} />
 
       {/* Aesthetic lead image for stories */}
-      <div style={{ marginBottom: "var(--space-4)", borderBottom: "var(--rule-hairline) solid var(--color-border)" }}>
+      <div className="section-lead-image">
         <Image
           src="/assets/images/stories/oklahoma-budget-crisis.jpg"
           alt="Investigative reporting from Oklahoma"
           width={1200}
           height={400}
-          style={{ width: "100%", height: "auto", display: "block", filter: "grayscale(0.1) contrast(1.05)" }}
+          className="img-aesthetic"
         />
       </div>
 

@@ -33,7 +33,7 @@ export default async function ContributorsPage() {
         <>
           Headliners get hero placement. Featured voices get priority rails. Contributors file under a named byline.
           Want in?{" "}
-          <Link href="/contributors/join" style={{ color: "var(--color-alarm)", borderBottom: "1px solid" }}>
+          <Link href="/contributors/join" className="accent-link">
             Join the masthead
           </Link>
           .

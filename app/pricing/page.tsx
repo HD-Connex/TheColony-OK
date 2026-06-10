@@ -79,7 +79,7 @@ export default function PricingPage() {
           }
         />
 
-        <section className="membership-cta" id="benefits" style={{ borderTop: "none", paddingTop: "var(--space-12)" }}>
+        <section className="membership-cta membership-cta--top" id="benefits">
           <div className="membership-cta__inner">
             <div className="membership-cta__lead">
               <p className="membership-cta__eyebrow">▼ EVERYTHING / NO PAYWALL</p>
@@ -90,13 +90,13 @@ export default function PricingPage() {
               </p>
 
               {/* Aesthetic image to bring life to pricing */}
-              <div style={{ marginTop: "var(--space-4)", border: "var(--rule-hairline) solid var(--color-border)" }}>
+              <div className="section-lead-image">
                 <Image
                   src="/assets/images/heroes/lead-hero.jpg"
                   alt="The Colony OK independent press"
                   width={900}
                   height={320}
-                  style={{ width: "100%", height: "auto", display: "block", filter: "grayscale(0.1) contrast(1.05)" }}
+                  className="img-aesthetic"
                 />
               </div>
               <ul className="membership-cta__features">

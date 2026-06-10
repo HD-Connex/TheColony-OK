@@ -114,9 +114,9 @@ export default async function ContributorJoinPage({ searchParams }: PageProps) {
       </section>
 
       <section className="section section--alarm section--tight">
-        <div className="container" style={{ textAlign: "center" }}>
+        <div className="container text-center">
           <p className="page-header__eyebrow" style={{ marginBottom: "var(--space-4)" }}>▼ ALREADY ON STAFF?</p>
-          <h2 style={{ fontFamily: "var(--font-display)", fontSize: "var(--text-2xl)", fontWeight: 900, marginBottom: "var(--space-6)" }}>Browse the masthead</h2>
+          <h2 className="section-title" style={{ marginBottom: "var(--space-6)" }}>Browse the masthead</h2>
           <Link className="btn btn--ink btn--lg" href="/journalists">Our Journalists →</Link>
         </div>
       </section>

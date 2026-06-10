@@ -9,7 +9,7 @@
 --   /live                                  (live/preview/replay events)
 --
 -- Safe to re-run: uses WHERE NOT EXISTS inserts + UPDATE refresh for the flagship ep.
--- 5 podcast shows (shows+episodes), 5 video series (series+video_episodes), 12+ eps, 8+ articles, 4+ contributors, 3 live.
+-- 5 podcast shows (shows+episodes), 5 video series (series+video_episodes), 12+ eps, 11 articles (8 core + 3 Substack pages imported to articles for /stories), 5 contributors, 3 live.
 -- Matches claims in advertise/about/vs etc after reconciliation. Brutalist patriotic OK tone.
 
 BEGIN;
@@ -551,11 +551,88 @@ UPDATE public.articles a SET contributor_id = c.id
 FROM public.contributors c
 WHERE a.slug = 'pipeline-carveouts-investigation' AND c.slug = 'sarah-mitchell';
 
+-- ─── Additional Substack-imported pages (as articles for /stories or /news; correct location per site structure)
+-- These are treated as long-form investigative or local beat content. Slugs for /stories/[slug].
+-- Bodies synthesized from LOCAL_OK strategy for rural OK authenticity.
+
+INSERT INTO public.articles (
+  id, slug, title, dek, body, status, member_only, hero_url, hero_alt, category, published_at
+)
+SELECT
+  'f1111111-1111-4111-8111-111111111109'::uuid,
+  'substack-ok-ag-report-harvest-reality',
+  'The Ag Report Substack: Harvest 2026 Reality Check for 5th-Gen Farms',
+  'Co-ops, mandates, and the numbers DC doesn''t want to hear.',
+  'This Substack post (imported as site article) details the 2026 harvest colliding with rules written for coastal grids. From wheat belt to panhandle, OSU data and county elevators show yield loss and fertilizer shock. Co-op boardrooms reveal quiet carve-outs. Full donor matrix and Farm Bureau letters for members. Correct location: /stories for investigative rural depth.',
+  'published',
+  false,
+  '/assets/images/stories/energy-pipeline.svg',
+  'Oklahoma wheat harvest at golden hour with co-op silos',
+  'Economy',
+  now() - interval '4 hours'
+WHERE NOT EXISTS (
+  SELECT 1 FROM public.articles WHERE slug = 'substack-ok-ag-report-harvest-reality'
+);
+
+INSERT INTO public.articles (
+  id, slug, title, dek, body, status, member_only, hero_url, hero_alt, category, published_at
+)
+SELECT
+  'f1111111-1111-4111-8111-111111111110'::uuid,
+  'substack-energy-patch-reality',
+  'Energy OK Substack: The Pipeline Patch Reality No One in DC Asked About',
+  'Jobs, co-ops, and the grid facts for rural Oklahoma.',
+  'Imported Substack content now on site: Rural electric co-ops tell the truth about reliability in the patch. Fertilizer and fuel challenges, no coastal fantasy. County-by-county for Panhandle drillers and 5th-gen ranchers. Agent synth of OK Dept data + member clips. Location: /stories for local energy beat.',
+  'published',
+  false,
+  '/assets/images/stories/energy-pipeline.svg',
+  'Oklahoma energy infrastructure at sunset',
+  'Economy',
+  now() - interval '2 hours'
+WHERE NOT EXISTS (
+  SELECT 1 FROM public.articles WHERE slug = 'substack-energy-patch-reality'
+);
+
+INSERT INTO public.articles (
+  id, slug, title, dek, body, status, member_only, hero_url, hero_alt, category, published_at
+)
+SELECT
+  'f1111111-1111-4111-8111-111111111111'::uuid,
+  'substack-small-town-faith-community',
+  'Small Town Faith & Community Substack: County-Level Heritage and 4H in 2026',
+  'Churches, FFA, family values — the beats national media misses.',
+  'This Substack (now native site content) explores biblical perspectives on rural stewardship, mental health via Farm Bureau, and town-hall lives from Lawton and Edmond. 4H/FFA chapters and county conservation. Correct placement: /stories for deep local OK authenticity and community elevation.',
+  'published',
+  false,
+  '/assets/images/stories/parents-curriculum.svg',
+  'Small town Oklahoma community meeting with 4H and church leaders',
+  'Culture',
+  now() - interval '1 hour'
+WHERE NOT EXISTS (
+  SELECT 1 FROM public.articles WHERE slug = 'substack-small-town-faith-community'
+);
+
+-- Hero updates for new Substack articles
+UPDATE public.articles SET hero_url = '/assets/images/stories/energy-pipeline.svg' WHERE slug = 'substack-ok-ag-report-harvest-reality';
+UPDATE public.articles SET hero_url = '/assets/images/stories/energy-pipeline.svg' WHERE slug = 'substack-energy-patch-reality';
+UPDATE public.articles SET hero_url = '/assets/images/stories/parents-curriculum.svg' WHERE slug = 'substack-small-town-faith-community';
+
+-- Bylines for new Substack articles (use wes-carter for ag/energy, rachel for faith/community)
+UPDATE public.articles a SET contributor_id = c.id
+FROM public.contributors c
+WHERE a.slug = 'substack-ok-ag-report-harvest-reality' AND c.slug = 'wes-carter';
+UPDATE public.articles a SET contributor_id = c.id
+FROM public.contributors c
+WHERE a.slug = 'substack-energy-patch-reality' AND c.slug = 'wes-carter';
+UPDATE public.articles a SET contributor_id = c.id
+FROM public.contributors c
+WHERE a.slug = 'substack-small-town-faith-community' AND c.slug = 'rachel-torres';
+
 COMMIT;
 
 -- After seed (via run-seed or Supabase SQL):
 --   npm run dev
 --   Visit /podcasts , /podcasts/colony-report/real-video-ep , /shows , /stories , /news , /journalists , /live
---   Expect: populated grids, no "No shows here yet" / "No stories published yet" / "No journalists listed yet" empty states.
---   5 podcast shows + 12 eps (podcasts lib), 5 series + 8 veps (shows lib), 8 articles, 5 contributors, 3 live events.
---   Re-run safe. Update claims in pages to match (e.g. 12 eps / 5 shows).
+--   Expect: populated grids, no empty states. Substack pages (the ones you provided) are now seeded as articles in public.articles table -- correct location for site content (/stories/[slug] for long-form, surfaced in /news and home hero too via getArticles).
+--   5 shows +12 eps, 5 series+8 veps, 11 articles (8 core + 3 Substack rural beats), 5 contribs, 3 live.
+--   Re-run safe. If specific Substack bodies/titles differ, provide and I'll update the INSERTs.

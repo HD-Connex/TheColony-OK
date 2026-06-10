@@ -46,13 +46,13 @@ export default function AdvertisePage() {
         </div>
 
         {/* Aesthetic image for advertise reach */}
-        <div style={{ marginTop: "var(--space-4)", border: "var(--rule-hairline) solid var(--color-border)" }}>
+        <div className="section-lead-image">
           <Image
             src="/assets/images/og-home.jpg"
             alt="The Colony OK media reach and audience"
             width={900}
             height={300}
-            style={{ width: "100%", height: "auto", display: "block", filter: "grayscale(0.15) contrast(1.05)" }}
+            className="img-aesthetic"
           />
         </div>
 

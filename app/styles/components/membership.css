@@ -8,6 +8,10 @@
   position: relative;
   overflow: hidden;
 }
+.membership-cta--top {
+  border-top: none;
+  padding-top: var(--space-12);
+}
 
 .membership-cta__inner {
   max-width: var(--max-width);

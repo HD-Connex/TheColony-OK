@@ -9,6 +9,7 @@ import LiveStageMount from "../_components/LiveStageMount";
 import { type StageItem } from "../_components/LiveStage";
 import LivePlatformTabs from "../_components/LivePlatformTabs";
 import ClipsTeaser from "../_components/ClipsTeaser";
+import LiveChat from "../_components/LiveChat";
 import { getLiveEvents, eventsToStageItems, tierLocked, tierLabel, type LiveEvent } from "@/lib/live-events";
 import { whenLabel, formatLiveWhen } from "@/lib/format";
 
@@ -69,6 +70,7 @@ export default async function LivePage({
                 items={items}
                 initialActiveId={live[0]?.id ?? null}
                 prefer247={prefer247}
+                hideInteractivity
               />
             </div>
 
@@ -124,14 +126,17 @@ export default async function LivePage({
 
               <ClipsTeaser count={15} />
 
+              {/* Live chat in sidebar container (global or event) to keep player clean and text contained */}
+              <LiveChat liveEventId={live[0]?.id ?? null} isMember={false} currentUser={null} />
+
               {/* Aesthetic life image for live section */}
-              <div style={{ marginTop: "var(--space-4)", borderTop: "var(--rule-hairline) solid var(--color-border)" }}>
+              <div className="section-lead-image">
                 <Image
                   src="/assets/images/slates/colony-247-slate.jpg"
                   alt="The Colony 24/7 live feed"
                   width={800}
                   height={300}
-                  style={{ width: "100%", height: "auto", display: "block", filter: "grayscale(0.15) contrast(1.1)" }}
+                  className="img-aesthetic"
                 />
               </div>
             </div>

@@ -1,5 +1,6 @@
 -- seed content for episodes / colony-report sample (dual video ep with chapters) per verified + 0002 + Phase 6 refinements
 -- Full video ep + slug for per-ep page testing. Data-driven.
+-- Note: Main expanded seed is now in ../supabase/seed-content.sql (includes Substack pages as articles). This is legacy partial.
 INSERT INTO episodes 
   (title, slug, show_slug, description, audio_url, video_url, mux_playback_id, thumbnail_url, chapters, host_name, published_at, duration)
 VALUES 

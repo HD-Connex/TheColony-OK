@@ -47,13 +47,13 @@ export default function AboutPage() {
 
         <h2>The Team</h2>
         {/* Aesthetic team life image */}
-        <div style={{ margin: "var(--space-4) 0", border: "var(--rule-hairline) solid var(--color-border)" }}>
+        <div className="section-lead-image">
           <Image
             src="/assets/images/hosts/jake-merrick.jpg"
             alt="The Colony OK team and masthead"
             width={800}
             height={300}
-            style={{ width: "100%", height: "auto", display: "block", filter: "grayscale(0.1) contrast(1.05)" }}
+            className="img-aesthetic"
           />
         </div>
         <p>

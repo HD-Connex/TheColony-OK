@@ -31,6 +31,12 @@
   gap: var(--space-4);
   background-color: #000;
   color: var(--color-text-secondary);
+  text-align: center;
+  padding: var(--space-4);
+}
+.live-player__offline p,
+.live-player__offline button {
+  margin: 0;
 }
 
 .live-player__status {

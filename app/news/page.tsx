@@ -82,7 +82,7 @@ function NewsList({ items, showDate }: { items: Article[]; showDate: boolean }) 
               {formatNewsTime(a.published_at, showDate)}
             </time>
             <div>
-              <div style={{ display: "flex", gap: ".5rem", marginBottom: ".25rem" }}>
+              <div className="news-item__meta">
                 {a.category && <span className="badge badge--category">{a.category}</span>}
                 {tierLocked(a.tier_required) && <span className="badge badge--members">Members</span>}
               </div>
@@ -111,13 +111,13 @@ export default async function NewsPage() {
       section={false}
     >
       {/* Aesthetic lead image for news */}
-      <div style={{ marginBottom: "var(--space-4)", borderBottom: "var(--rule-hairline) solid var(--color-border)" }}>
+      <div className="section-lead-image">
         <Image
           src="/assets/images/heroes/lead-hero.jpg"
           alt="Daily news and dispatches from Oklahoma"
           width={1200}
           height={380}
-          style={{ width: "100%", height: "auto", display: "block", filter: "grayscale(0.1) contrast(1.05)" }}
+          className="img-aesthetic"
         />
       </div>
 

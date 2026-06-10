@@ -80,13 +80,13 @@ export default async function ShowsPage({
       )}
 
       {/* Aesthetic visual for shows catalog */}
-      <div style={{ marginTop: "var(--space-4)", borderTop: "var(--rule-hairline) solid var(--color-border)" }}>
+      <div className="section-lead-image">
         <Image
           src="/assets/images/slates/colony-247-slate.jpg"
           alt="The Colony shows and video library"
           width={900}
           height={300}
-          style={{ width: "100%", height: "auto", display: "block", filter: "grayscale(0.1) contrast(1.05)" }}
+          className="img-aesthetic"
         />
       </div>
     </InnerPageShell>
