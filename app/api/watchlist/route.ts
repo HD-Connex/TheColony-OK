@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getUserFromRequest, isUuid } from "@/lib/auth-server";
 import { supabaseAdmin } from "@/lib/supabase";
+import { rateLimit, tooManyRequests } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -30,6 +31,9 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   const user = await getUserFromRequest(req);
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const rl = await rateLimit(`watchlist:${user.id}`, { limit: 30, windowSec: 60 });
+  if (!rl.ok) return tooManyRequests(rl);
 
   let body: unknown;
   try {

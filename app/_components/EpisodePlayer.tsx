@@ -5,7 +5,6 @@ import { AnimatePresence, motion } from "framer-motion";
 import AudioPlayer from "./AudioPlayer";
 import VideoPlayer from "./VideoPlayer";
 import VideoEmbed from "./VideoEmbed";
-import ClipEmbed from "./ClipEmbed";
 import { formatDate, formatDuration, formatDurationLabel } from "@/lib/format";
 
 export interface PlayableEpisode {
@@ -297,35 +296,6 @@ export default function EpisodePlayer({ episodes: episodesProp, episode: episode
                 </motion.div>
               )}
             </AnimatePresence>
-
-            {/* Phase 2/3 clips layer integration (per frontend-design + RICH spec + seo-schema): demo approved member clips embed.
-               Real: fetch from clips table (approved=true, ep_id match), use ClipEmbed for rich player with transcript/tags.
-               Follows DS: zero-radius card, mono eyebrow, alarm accents, spatial rules. VideoObject schema for clips. */}
-            <div className="podcast-player__clips">
-              <div className="podcast-player__clips-header">
-                <span className="mono-eyebrow podcast-player__clips-label">▼ MEMBER CLIPS</span>
-                <span className="text-xs podcast-player__clips-count">2 approved • 30s TWA</span>
-              </div>
-              <ClipEmbed clip={{
-                id: 'demo-clip-1',
-                url: 'https://example.com/demo-ranch-clip.mp4', // from vercel blob in real upload
-                title: 'Jackson County drought update',
-                duration_s: 28,
-                tags: ['ag', 'rural-ok'],
-                transcript: 'Local producers report... [full Claude transcript]'
-              }} compact />
-              {/* SEO schema per seo-schema / vercel:nextjs (demo VideoObject for clip; real in generateMetadata or layout + sitemap) */}
-              <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
-                "@context": "https://schema.org",
-                "@type": "VideoObject",
-                "name": "Jackson County drought update",
-                "description": "Member clip: Local ag update from Jackson County.",
-                "duration": "PT28S",
-                "uploadDate": "2026-06-09",
-                "contentUrl": "https://example.com/demo-ranch-clip.mp4",
-                "tags": ["ag", "rural-ok"]
-              }) }} />
-            </div>
 
             {/* Chapters (basic list + clickable seek). Per design skill player anatomy (seekbar with chapters support).
                Data from episodes.chapters (jsonb via admin/seed/RSS). Clicking seeks the active media source via the shared sync cmd (works for audio + native video). */}

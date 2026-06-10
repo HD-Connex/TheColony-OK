@@ -42,8 +42,8 @@ export default function SubmitTipPage() {
           <p className="tip-channel__eyebrow">▼ ANONYMOUS · WEB FORM</p>
           <h2 className="tip-channel__title">Anonymous Tip Form</h2>
           <p className="tip-channel__body">
-            Use Tor Browser for full anonymity. We follow up only if you provide a contact method. Submissions open your
-            mail client to tips@thecolonyok.com — we do not store form data on our servers.
+            Use Tor Browser for full anonymity. We follow up only if you provide a contact method. Submissions go to a
+            rate-limited server endpoint and are stored (sanitized) for the desk. No mail client is opened.
           </p>
           <TipForm />
         </article>

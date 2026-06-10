@@ -1,64 +1,197 @@
-// Enhanced transcribe job for clips layer.
-// Per claude-api + vercel:ai-sdk/gateway (for summarization/chapter gen), vercel:vercel-functions (nodejs).
-// Replaces pure stub. Triggers from upload, updates clip.transcript.
-// Uses after() for any background. For MVP: stub Claude call with dummy + comment for real integration.
+// Transcription job for clips + podcast audio. Internal endpoint — requires
+// ADMIN_SERVICE_TOKEN (machine callers) or an admin/editor user.
+//
+// Real transcription via Whisper:
+//   - GROQ_API_KEY  → whisper-large-v3 (fast/cheap, preferred)
+//   - OPENAI_API_KEY → whisper-1
+// Without either key the job reports unavailable — it never writes fake
+// transcript text to the database.
 
 import { NextResponse } from 'next/server';
-import { after } from 'next/server';
 import { supabaseAdmin } from "@/lib/supabase";
+import { requireAdmin, requireServiceToken } from "@/lib/admin-auth";
+import { withRetry } from "@/lib/jobs";
+import { log } from "@/lib/log";
 
 export const runtime = 'nodejs';
+export const maxDuration = 300;
+
+const MAX_AUDIO_BYTES = 25 * 1024 * 1024; // Whisper API limit
 
 function jsonError(message: string, status = 400) {
   return NextResponse.json({ error: message }, { status });
 }
 
+interface WhisperProvider {
+  endpoint: string;
+  apiKey: string;
+  model: string;
+}
+
+function resolveProvider(): WhisperProvider | null {
+  if (process.env.GROQ_API_KEY) {
+    return {
+      endpoint: 'https://api.groq.com/openai/v1/audio/transcriptions',
+      apiKey: process.env.GROQ_API_KEY,
+      model: 'whisper-large-v3',
+    };
+  }
+  if (process.env.OPENAI_API_KEY) {
+    return {
+      endpoint: 'https://api.openai.com/v1/audio/transcriptions',
+      apiKey: process.env.OPENAI_API_KEY,
+      model: 'whisper-1',
+    };
+  }
+  return null;
+}
+
+async function transcribeUrl(url: string, provider: WhisperProvider): Promise<string | any> {
+  const media = await fetch(url, { signal: AbortSignal.timeout(60_000) });
+  if (!media.ok) throw new Error(`Failed to fetch media (${media.status})`);
+  const blob = await media.blob();
+  if (blob.size > MAX_AUDIO_BYTES) {
+    throw new Error(`Media too large for transcription API (${blob.size} bytes)`);
+  }
+
+  const form = new FormData();
+  form.append('file', blob, 'media');
+  form.append('model', provider.model);
+  // Phase 3: verbose_json for timed segments (start/end) for jump-to + auto-clips
+  form.append('response_format', 'verbose_json');
+
+  const res = await fetch(provider.endpoint, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${provider.apiKey}` },
+    body: form,
+    signal: AbortSignal.timeout(240_000),
+  });
+  if (!res.ok) {
+    const detail = await res.text().catch(() => '');
+    throw new Error(`Transcription API ${res.status}: ${detail.slice(0, 200)}`);
+  }
+  // verbose_json returns object; plain would be text. Caller handles.
+  const ct = res.headers.get('content-type') || '';
+  if (ct.includes('json')) {
+    return res.json();
+  }
+  return (await res.text()).trim();
+}
+
 export async function POST(req: Request) {
   try {
-    const supabase = supabaseAdmin();
+    const admin = await requireAdmin(req, 'editor');
+    if (!admin && !requireServiceToken(req)) {
+      return jsonError('Forbidden', 403);
+    }
 
     const { clipId, url } = await req.json();
-    if (!clipId || !url) {
+    if (!clipId || !url || typeof url !== 'string') {
       return jsonError('Missing clipId or url', 400);
     }
 
-    // Fetch clip to verify
-    const { data: clip } = await supabase.from('clips').select('*').eq('id', clipId).single();
-    if (!clip) {
-      return jsonError('Clip not found', 404);
+    const supabase = supabaseAdmin();
+    const { data: clip } = await supabase.from('clips').select('id').eq('id', clipId).single();
+    if (!clip) return jsonError('Clip not found', 404);
+
+    const provider = resolveProvider();
+    if (!provider) {
+      return NextResponse.json(
+        { clipId, status: 'unavailable', reason: 'No transcription provider configured (GROQ_API_KEY or OPENAI_API_KEY)' },
+        { status: 503 },
+      );
     }
 
-    // Real integration (per skills): Use Claude via direct API or @vercel/ai-sdk + gateway for:
-    // - Transcript (if not from Mux auto)
-    // - Summary
-    // - Chapters (JSONB array)
-    // Example stub (replace with real call):
-    // import { generateText } from 'ai';
-    // import { openai } from '@ai-sdk/openai'; // or anthropic via gateway
-    // const { text: summary } = await generateText({ model: openai('gpt-4o'), prompt: `Summarize this audio transcript from ${url}...` });
-    // For now, dummy + log for Claude integration point.
-    const transcript = `[Claude-generated transcript stub for ${url}. Real: call claude-api or vercel ai-sdk for Whisper-like or Mux captions + summary/chapters.]`;
-    const summary = 'Stub summary: This clip covers local OK rural topics (ag/energy per LOCAL strategy).';
-    const chapters = [
-      { time: 0, title: 'Intro', summary: 'Opening remarks' },
-      { time: 30, title: 'Main content', summary: 'Core discussion' },
-    ];
+    const transcriptOrVerbose = await withRetry(() => transcribeUrl(url, provider), { attempts: 2 });
 
-    // Update clip with transcript/summary (chapters could go to episodes or separate)
-    await supabase.from('clips').update({
-      transcript,
-      // ai_score already set in moderation/upload
-    }).eq('id', clipId);
+    // Phase 3: support verbose_json (timed segments) for jump-to-moment + auto-clips
+    let transcript: string;
+    let segments: any[];
+    if (typeof transcriptOrVerbose === 'string') {
+      transcript = transcriptOrVerbose;
+      segments = [{ start: 0, end: null, text: transcript }];
+    } else {
+      transcript = (transcriptOrVerbose as any).text || '';
+      segments = ((transcriptOrVerbose as any).segments || []).map((s: any) => ({
+        start: s.start ?? 0,
+        end: s.end ?? null,
+        text: s.text ?? '',
+      }));
+    }
 
-    // Background for any further AI (e.g., embeddings for search per 0011)
-    after(async () => {
-      console.log(`[jobs/transcribe] Claude-enhanced job complete for clip ${clipId}. Summary: ${summary}. Chapters generated.`);
-      // TODO: upsert to transcripts table, trigger embeddings, best-of-n curation for rural/personalization.
-    });
+    await supabase.from('clips').update({ transcript }).eq('id', clipId);
 
-    return NextResponse.json({ clipId, transcript, summary, chapters });
+    // Mirror into transcripts table for unified search (rich timed segments).
+    const { error: trErr } = await supabase.from('transcripts').upsert(
+      {
+        content_id: clipId,
+        content_type: 'clip',
+        language: 'en',
+        segments,
+        provider: provider.model,
+      },
+      { onConflict: 'content_id,content_type,language' },
+    );
+    if (trErr) log.warn('[jobs/transcribe] transcripts upsert failed', trErr.message);
+
+    // Phase 3: chunk + embed timed segments for semantic + time-aware search
+    try {
+      const { embedQuery } = await import('@/lib/semantic-search');
+      for (const seg of segments.slice(0, 8)) {
+        if (!seg.text) continue;
+        const vec = await embedQuery(seg.text);
+        if (vec) {
+          try {
+            await supabase.from('content_embeddings').insert({
+              content_type: 'clip',
+              content_id: clipId,
+              chunk: seg.text.slice(0, 900),
+              embedding: vec,
+            });
+          } catch {}
+        }
+      }
+    } catch {}
+
+    // Phase 3 polish: LLM summaries + chapters from transcript (uses same Groq/OpenAI key as Whisper)
+    // Stores chapters in a simple way (for episodes this would upsert to episodes.chapters jsonb + summary).
+    // For clips we log / could attach to clip metadata. Real episodes path re-uses the same after RSS ingest or separate job.
+    try {
+      const chatKey = process.env.GROQ_API_KEY || process.env.OPENAI_API_KEY;
+      if (chatKey && transcript && transcript.length > 150) {
+        const isGroq = !!process.env.GROQ_API_KEY;
+        const endpoint = isGroq
+          ? "https://api.groq.com/openai/v1/chat/completions"
+          : "https://api.openai.com/v1/chat/completions";
+        const model = isGroq ? "llama-3.1-8b-instant" : "gpt-4o-mini";
+
+        const prompt = `From this transcript, produce a short 1-2 sentence summary and 4-8 chapters as JSON array of {t: seconds, label: string}. Transcript:\n\n${transcript.slice(0, 4000)}`;
+
+        const chatRes = await fetch(endpoint, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${chatKey}`, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            model,
+            messages: [{ role: "user", content: prompt }],
+            response_format: { type: "json_object" },
+          }),
+          signal: AbortSignal.timeout(30000),
+        });
+
+        if (chatRes.ok) {
+          const chatJson: any = await chatRes.json();
+          const content = chatJson.choices?.[0]?.message?.content || "{}";
+          // In real: parse and upsert to episode or clip (e.g. episodes.chapters = parsed.chapters; description or new summary field)
+          console.log("[transcribe] LLM summary/chapters generated for", clipId, content.slice(0, 200));
+        }
+      }
+    } catch (e) {
+      // non-fatal
+    }
+
+    return NextResponse.json({ clipId, status: 'done', transcript });
   } catch (err) {
-    console.error('[jobs/transcribe] unexpected error', err);
-    return jsonError('Internal server error', 500);
+    log.error('[jobs/transcribe] unexpected error', err);
+    return jsonError('Transcription failed', 500);
   }
 }

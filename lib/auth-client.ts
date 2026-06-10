@@ -17,8 +17,16 @@ export function supabaseBrowser(): SupabaseClient {
   if (browser) return browser;
   // Single shared browser client (singleton). Config differs from server public (persist + detect for magic links).
   // Aligns with lib/supabase.ts single shared export const supabase pattern (see also auth-server using supabasePublic).
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://placeholder.supabase.co";
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "placeholder-anon-key";
+  let url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  let key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!url || !key) {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error("Supabase public env vars missing in production build.");
+    }
+    console.warn("[auth-client] Supabase env missing — placeholder client (dev only).");
+    url = url ?? "https://placeholder.supabase.co";
+    key = key ?? "placeholder-anon-key";
+  }
   browser = createClient(url, key, {
     auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
   });

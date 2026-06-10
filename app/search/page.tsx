@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
 import InnerPageShell from "../_components/InnerPageShell";
+import TranscriptClipper from "../_components/TranscriptClipper";
 import {
   mergeSearchResults,
   resolveEmbeddingHits,
@@ -139,6 +140,16 @@ export default async function SearchPage({
                 <p style={{ fontSize: "var(--text-xs)", color: "var(--color-text-muted)", marginTop: "var(--space-1)" }}>
                   {r.excerpt}
                 </p>
+              )}
+              {(r.subtitle.toLowerCase().includes("transcript") || r.subtitle.toLowerCase().includes("semantic") || r.subtitle.toLowerCase().includes("clip")) && (
+                <TranscriptClipper
+                  href={r.href}
+                  title={r.title}
+                  startTime={r.startTime}
+                  phrase={r.excerpt}
+                  // epId extraction is best-effort from href for real moment creation; component falls back to link copy
+                  epId={r.id.includes("ep-") ? r.id.split("ep-")[1]?.split("-")[0] : undefined}
+                />
               )}
             </div>
           </Link>

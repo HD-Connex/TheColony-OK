@@ -13,6 +13,7 @@ import { getLiveEvents, eventsToStageItems } from "@/lib/live-events";
 import { formatDate, formatHeroDateline, formatTimeCT, formatLiveWhen, whenLabel } from "@/lib/format";
 import { CONTRIBUTOR_PLANS } from "@/lib/contributor-plans";
 import ClipsUploadForm from "./_components/ClipsUploadForm";
+import ContinueRail from "./_components/ContinueRail";
 
 export const revalidate = 60;
 
@@ -242,6 +243,9 @@ export default async function HomePage() {
 
             <div className="live-section">
               <div className="live-player">
+                {/* Phase 3: continue rail placed on home for visibility */}
+                <ContinueRail />
+
                 <LiveStageMount
                   items={liveItems}
                   initialActiveId={live.live[0]?.id ?? null}

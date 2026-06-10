@@ -24,8 +24,17 @@ export function supabaseConfigured(): boolean {
 
 export function supabasePublic(): SupabaseClient {
   if (pub) return pub;
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://placeholder.supabase.co";
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "placeholder-anon-key";
+  let url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  let key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!url || !key) {
+    // Never run production against placeholder credentials — fail loudly.
+    if (process.env.NODE_ENV === "production") {
+      throw new Error("NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY missing in production.");
+    }
+    console.warn("[supabase] env missing — using placeholder client (dev only).");
+    url = url ?? "https://placeholder.supabase.co";
+    key = key ?? "placeholder-anon-key";
+  }
   pub = createClient(url, key, { auth: { persistSession: false } });
   return pub;
 }

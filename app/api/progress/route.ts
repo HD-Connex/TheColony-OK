@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getUserFromRequest, isUuid } from "@/lib/auth-server";
 import { supabaseAdmin } from "@/lib/supabase";
+import { rateLimit, tooManyRequests } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -36,6 +37,9 @@ function parseProgressBody(body: unknown): ProgressPayload | null {
 export async function POST(req: Request) {
   const user = await getUserFromRequest(req);
   if (!user) return new NextResponse("Unauthorized", { status: 401 });
+
+  const rl = await rateLimit(`progress:${user.id}`, { limit: 60, windowSec: 60 });
+  if (!rl.ok) return tooManyRequests(rl);
 
   let body: unknown;
   try {

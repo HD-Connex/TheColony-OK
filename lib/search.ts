@@ -12,6 +12,8 @@ export interface SearchResult {
   href: string;
   thumbnail?: string | null;
   excerpt?: string;
+  /** Phase 3: start time in seconds for transcript/spoken phrase matches (for jump + clipper) */
+  startTime?: number;
 }
 
 function truncate(text: string, max = 140): string {
@@ -162,7 +164,9 @@ export async function textSearch(query: string, limitPerType = 12): Promise<Sear
   return dedupeByHref(results);
 }
 
-/** Map embedding / transcript chunk hits to navigable search cards. */
+/** Map embedding / transcript chunk hits to navigable search cards.
+ * Phase 3: supports clips (moment clips from transcripts) + timestamp deep links (?t=START).
+ */
 export async function resolveEmbeddingHits(
   hits: EmbeddingSearchResult[],
   subtitle = "Transcript match"
@@ -171,9 +175,10 @@ export async function resolveEmbeddingHits(
 
   const episodeIds = hits.filter((h) => h.content_type === "episode").map((h) => h.content_id);
   const videoIds = hits.filter((h) => h.content_type === "video_episode").map((h) => h.content_id);
+  const clipIds = hits.filter((h) => h.content_type === "clip").map((h) => h.content_id);
 
   const sb = supabasePublic();
-  const [epsRes, vidsRes] = await Promise.all([
+  const [epsRes, vidsRes, clipsRes] = await Promise.all([
     episodeIds.length
       ? sb
           .from("episodes")
@@ -186,6 +191,13 @@ export async function resolveEmbeddingHits(
           .select("id, slug, title, thumbnail_url, series:series!inner(slug, poster_url)")
           .in("id", videoIds)
           .eq("status", "published")
+      : Promise.resolve({ data: [] as unknown[] }),
+    clipIds.length
+      ? sb
+          .from("clips")
+          .select("id, ep_id, storage_path, duration_s, source_phrase, start_s, end_s, episodes:ep_id(slug, title, show_slug)")
+          .in("id", clipIds)
+          .eq("approved", true)
       : Promise.resolve({ data: [] as unknown[] }),
   ]);
 
@@ -209,6 +221,18 @@ export async function resolveEmbeddingHits(
     }>).map((e) => [e.id, e])
   );
 
+  const clipMap = new Map(
+    ((clipsRes.data ?? []) as Array<{
+      id: string;
+      ep_id: string | null;
+      storage_path: string | null;
+      start_s: number | null;
+      end_s: number | null;
+      source_phrase: string | null;
+      episodes?: { slug?: string | null; title?: string; show_slug?: string } | null;
+    }>).map((c) => [c.id, c])
+  );
+
   const results: SearchResult[] = [];
   const seen = new Set<string>();
 
@@ -217,6 +241,8 @@ export async function resolveEmbeddingHits(
     if (seen.has(key)) continue;
     seen.add(key);
 
+    const timeParam = hit.start != null ? `?t=${Math.floor(hit.start)}` : "";
+
     if (hit.content_type === "episode") {
       const ep = epMap.get(hit.content_id);
       if (!ep) continue;
@@ -224,23 +250,43 @@ export async function resolveEmbeddingHits(
         id: `transcript-ep-${ep.id}`,
         title: ep.title,
         subtitle,
-        href: `/podcasts/${ep.show_slug}/${ep.slug || ep.id}`,
+        href: `/podcasts/${ep.show_slug}/${ep.slug || ep.id}${timeParam}`,
         thumbnail: ep.thumbnail_url,
         excerpt: truncate(hit.chunk),
       });
       continue;
     }
 
-    const ep = vidMap.get(hit.content_id);
-    if (!ep?.series?.slug) continue;
-    results.push({
-      id: `transcript-video-${ep.id}`,
-      title: ep.title,
-      subtitle,
-      href: `/shows/${ep.series.slug}/${ep.slug || ep.id}`,
-      thumbnail: ep.thumbnail_url ?? ep.series.poster_url ?? null,
-      excerpt: truncate(hit.chunk),
-    });
+    if (hit.content_type === "video_episode") {
+      const ep = vidMap.get(hit.content_id);
+      if (!ep?.series?.slug) continue;
+      results.push({
+        id: `transcript-video-${ep.id}`,
+        title: ep.title,
+        subtitle,
+        href: `/shows/${ep.series.slug}/${ep.slug || ep.id}${timeParam}`,
+        thumbnail: ep.thumbnail_url ?? ep.series.poster_url ?? null,
+        excerpt: truncate(hit.chunk),
+      });
+      continue;
+    }
+
+    // Phase 3: clip / moment clip from transcript
+    if (hit.content_type === "clip") {
+      const c = clipMap.get(hit.content_id);
+      if (!c?.episodes?.show_slug) continue;
+      const epSlug = c.episodes.slug || c.ep_id;
+      const time = c.start_s != null ? `?t=${Math.floor(c.start_s)}` : timeParam;
+      results.push({
+        id: `transcript-clip-${c.id}`,
+        title: c.source_phrase || hit.chunk.slice(0, 60),
+        subtitle: "Member clip · " + (c.episodes.title || "Moment"),
+        href: `/shows/${c.episodes.show_slug}/${epSlug}${time}`,
+        thumbnail: null,
+        excerpt: truncate(hit.chunk),
+      });
+      continue;
+    }
   }
 
   return results;

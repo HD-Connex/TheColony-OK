@@ -203,9 +203,12 @@ export default function LiveStage({ items: initialItems = [], initialActiveId, c
               height={360}
               style={{ maxWidth: "100%", height: "auto", opacity: 0.8 }}
             />
-            <button type="button" onClick={() => setActiveId(null)} className="btn btn--outline">
-              Watch 24/7 Channel
-            </button>
+            <p className="note">Off air — check the schedule for the next live broadcast.</p>
+            {channel247?.streamUrl && (
+              <button type="button" onClick={() => setActiveId(null)} className="btn btn--outline">
+                Watch 24/7 Channel
+              </button>
+            )}
           </div>
         )}
       </div>
@@ -265,7 +268,7 @@ export default function LiveStage({ items: initialItems = [], initialActiveId, c
                 {demoReelActive && <span className="reel-archived" aria-hidden>archived</span>}
               </motion.button>
             ))}
-            {channel247 && !demoReelActive && (
+            {channel247?.streamUrl && !demoReelActive && (
               <motion.button
                 type="button"
                 onClick={() => setActiveId(null)}

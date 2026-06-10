@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { saveProgress } from "@/lib/viewer";
+// Note: for fully authenticated progress, prefer the /api/progress route (which has user context).
+// viewer.saveProgress now supports an optional userId 4th arg to write to watch_progress table.
 
 const HLS_CDN = "https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js";
 

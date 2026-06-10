@@ -17,6 +17,7 @@ import AuthorityBadge from "@/app/_components/AuthorityBadge";
 import ClipsTeaser from "@/app/_components/ClipsTeaser";
 import ChapterSidebar from "../../_components/ChapterSidebar";
 import { formatDate, formatDurationLabel } from "@/lib/format";
+import { sanitizeHtml } from "@/lib/sanitize";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://thecolonyok.com";
 
@@ -160,7 +161,7 @@ export default async function PerEpisodePage({ params }: { params: Promise<Param
             {episode.description && (
               <section aria-label="About this episode">
                 <SectionBlock number="N°01" title="About this episode">
-                  <div className="article__body pod-ep-body" dangerouslySetInnerHTML={{ __html: episode.description }} />
+                  <div className="article__body pod-ep-body" dangerouslySetInnerHTML={{ __html: sanitizeHtml(episode.description) }} />
                 </SectionBlock>
               </section>
             )}

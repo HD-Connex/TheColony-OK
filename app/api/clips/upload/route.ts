@@ -1,41 +1,49 @@
-// Clip upload endpoint for Phase 2 member clips layer + Phase 3 PWA/TWA readiness.
-// Per vercel:vercel-functions (nodejs runtime for auth/Blob/AI/DB), vercel:vercel-storage (Blob), ruflo-aidefence (safety/pii), TDD, Supabase auth/entitlements (vercel:auth), trigger transcribe (claude-api stub).
-// TWA friendly 30s limit. Returns pending clip for moderation/embeds.
-// Uses after() for background per Vercel Functions skill.
-// Lazy client + guards for worktree build isolation (no top-level env crash).
+// Member clip upload. Auth via Supabase bearer token, real membership check
+// via lib/entitlements, MIME + magic-byte validation, rate limited. Clips land
+// unapproved and wait in the moderation queue (/api/clips/moderate).
 
 import { NextResponse } from 'next/server';
 import { put } from '@vercel/blob';
-import { after } from 'next/server';
 import { supabaseAdmin } from "@/lib/supabase";
+import { getUserFromRequest } from "@/lib/auth-server";
+import { getMembership } from "@/lib/entitlements";
+import { rateLimit, tooManyRequests } from "@/lib/rate-limit";
+import { log } from "@/lib/log";
 
-export const runtime = 'nodejs'; // Full Node per vercel-functions (not edge, for Blob + DB + AI)
+export const runtime = 'nodejs';
+
+const MAX_SIZE = 30 * 1024 * 1024; // ~30s mobile clip at typical bitrate
+
+const ALLOWED_MIME = new Set(['video/mp4', 'video/quicktime', 'video/webm']);
 
 function jsonError(message: string, status = 400) {
   return NextResponse.json({ error: message }, { status });
 }
 
+/** Validate container magic bytes: MP4/MOV `ftyp` box or WebM EBML header. */
+function hasVideoMagicBytes(bytes: Uint8Array): boolean {
+  if (bytes.length < 12) return false;
+  // MP4 / QuickTime: bytes 4-7 are "ftyp"
+  if (bytes[4] === 0x66 && bytes[5] === 0x74 && bytes[6] === 0x79 && bytes[7] === 0x70) {
+    return true;
+  }
+  // WebM / Matroska: EBML header 1A 45 DF A3
+  if (bytes[0] === 0x1a && bytes[1] === 0x45 && bytes[2] === 0xdf && bytes[3] === 0xa3) {
+    return true;
+  }
+  return false;
+}
+
 export async function POST(req: Request) {
   try {
-    const supabase = supabaseAdmin();
+    const user = await getUserFromRequest(req);
+    if (!user) return jsonError('Unauthorized', 401);
 
-    // Auth via Supabase (vercel:auth + project existing pattern)
-    const authHeader = req.headers.get('authorization');
-    if (!authHeader?.startsWith('Bearer ')) {
-      return jsonError('Unauthorized', 401);
-    }
-    const token = authHeader.split(' ')[1];
+    const rl = await rateLimit(`clips-upload:${user.id}`, { limit: 5, windowSec: 3600 });
+    if (!rl.ok) return tooManyRequests(rl);
 
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-    if (authError || !user) {
-      return jsonError('Unauthorized', 401);
-    }
-
-    // Entitlement stub (member or gift/perk per audit + vercel:auth)
-    // In real: const hasAccess = await hasPerkAccess(user.id, 'clips') or member tier check
-    // For MVP, assume authenticated member (tighten with members table later)
-    const isMember = true; // TODO: integrate with lib/tiers or gift/perks
-    if (!isMember) {
+    const membership = await getMembership(user.id);
+    if (!membership.isMember) {
       return jsonError('Member access required for clips', 403);
     }
 
@@ -43,52 +51,47 @@ export async function POST(req: Request) {
     const file = form.get('file') as File | null;
     const epId = form.get('ep_id') as string | null;
 
-    if (!file) {
-      return jsonError('No file provided', 400);
-    }
-
-    // 30s TWA/mobile friendly limit (rough size check; real duration in moderation)
-    const MAX_SIZE = 30 * 1024 * 1024; // ~30s at typical bitrate
+    if (!file) return jsonError('No file provided', 400);
     if (file.size > MAX_SIZE) {
-      return jsonError('Clip too large (max ~30s for TWA friendly)', 400);
+      return jsonError('Clip too large (max ~30s)', 400);
+    }
+    if (!ALLOWED_MIME.has(file.type)) {
+      return jsonError('Unsupported file type — upload mp4, mov, or webm', 415);
     }
 
-    // Safety / PII pre-scan (ruflo-aidefence per skill list)
-    // Stub for now (in prod: await safetyScan(file) or text after transcribe)
-    const isSafe = true; // TODO: integrate pii-detect + safety-scan; block if toxic/PII
-    if (!isSafe) {
-      return jsonError('Content blocked by safety scan', 400);
+    const buffer = new Uint8Array(await file.arrayBuffer());
+    if (!hasVideoMagicBytes(buffer)) {
+      return jsonError('File does not look like a supported video container', 415);
     }
 
-    // Upload to Vercel Blob (per /vercel:vercel-storage directive for upload)
-    // IMPORTANT: BLOB_READ_WRITE_TOKEN must be set in Vercel project env (or .env.local for local).
-    // It is obtained from a Vercel Blob store (Storage tab). Without it, put() will fail at runtime (caught below).
-    // The lazy getSupabase + this try/catch + no top-level reads ensure `npm run build` succeeds even without .env.
     if (!process.env.BLOB_READ_WRITE_TOKEN) {
-      console.warn('[clips/upload] BLOB_READ_WRITE_TOKEN missing at runtime — uploads will 500 until set on Vercel/Supabase Blob.');
+      return jsonError('Clip uploads are temporarily unavailable', 503);
     }
+
     let blobUrl: string;
     try {
-      const blob = await put(`clips/${user.id}/${Date.now()}-${file.name}`, file, {
+      const safeName = file.name.replace(/[^\w.\-]/g, '_').slice(-80);
+      // Buffer accepted by @vercel/blob PutBody; cast keeps the Uint8Array bytes we already validated.
+      const blob = await put(`clips/${user.id}/${Date.now()}-${safeName}`, Buffer.from(buffer), {
         access: 'public',
+        contentType: file.type,
         token: process.env.BLOB_READ_WRITE_TOKEN,
       });
       blobUrl = blob.url;
     } catch (e) {
-      console.error('[clips/upload] Blob upload failed', e);
-      return jsonError('Upload failed (check BLOB_READ_WRITE_TOKEN)', 500);
+      log.error('[clips/upload] Blob upload failed', e);
+      return jsonError('Upload failed', 500);
     }
 
-    // Create pending clip record (RLS will be enforced; service key bypass for server)
-    const { data: clip, error: insertError } = await supabase
+    const { data: clip, error: insertError } = await supabaseAdmin()
       .from('clips')
       .insert({
         user_id: user.id,
         ep_id: epId,
         storage_path: blobUrl,
-        approved: false,
+        approved: false, // waits in moderation queue — no auto-approve
         ai_score: 0,
-        tags: [], // populated by AI/rural later
+        tags: [],
       })
       .select('id, approved')
       .single();
@@ -97,27 +100,13 @@ export async function POST(req: Request) {
       return jsonError('Failed to record clip', 500);
     }
 
-    // Background: trigger transcribe job (Claude via claude-api or vercel:ai-sdk/gateway)
-    // Use after() per vercel-functions skill for post-response work
-    after(async () => {
-      try {
-        // Call existing /api/jobs/transcribe stub or enhance with Claude for summary/chapter
-        // For now, log + would POST to jobs with clip id / blob url
-        // [clips/upload] Background transcribe triggered (no console spam)
-        // TODO: await fetch('/api/jobs/transcribe', { method: 'POST', body: JSON.stringify({ clipId: clip.id, url: blobUrl }) })
-        // Then AI review (best-of-n, score), moderation queue or auto-approve per RICH.
-      } catch (bgErr) {
-        console.error('[clips/upload] Background transcribe error', bgErr);
-      }
-    });
-
     return NextResponse.json({
       id: clip.id,
       url: blobUrl,
-      approved: clip.approved, // false until moderation
+      approved: clip.approved,
     });
   } catch (err) {
-    console.error('[clips/upload] unexpected error', err);
+    log.error('[clips/upload] unexpected error', err);
     return jsonError('Internal server error', 500);
   }
 }

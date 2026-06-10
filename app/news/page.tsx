@@ -96,8 +96,16 @@ function NewsList({ items, showDate }: { items: Article[]; showDate: boolean }) 
   );
 }
 
-export default async function NewsPage() {
-  const items = await getArticles({ limit: 30 }).catch(() => { return []; });
+export default async function NewsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ county?: string }>;
+}) {
+  const { county: countyFilter } = await searchParams;
+  let items = await getArticles({ limit: 30 }).catch(() => { return []; });
+  if (countyFilter) {
+    items = items.filter((a: any) => (a.county || "").toLowerCase() === countyFilter.toLowerCase());
+  }
   const [pinned, ...rest] = items;
   const groups = groupArticles(rest);
   const visibleGroups = GROUP_ORDER.filter((g) => groups[g].length > 0);
@@ -110,6 +118,13 @@ export default async function NewsPage() {
       lede="The day's headlines from Oklahoma — state, national, and local. Filed throughout the day."
       section={false}
     >
+      {/* Phase 3 polish: county filter for local moat */}
+      <form action="/news" method="GET" style={{ marginBottom: "var(--space-3)", display: "flex", gap: 6, alignItems: "center" }}>
+        <input name="county" placeholder="Filter by county (e.g. Oklahoma, Tulsa)" style={{ maxWidth: 260 }} />
+        <button className="btn btn--sm btn--outline" type="submit">Filter</button>
+        {countyFilter && <a href="/news" className="btn btn--sm">Clear</a>}
+      </form>
+
       {/* Aesthetic lead image for news */}
       <div className="section-lead-image">
         <Image

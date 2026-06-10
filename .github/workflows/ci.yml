@@ -26,13 +26,17 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build
-        run: npm run build
-
       - name: Lint
         run: npm run lint
 
       - name: Type check
         run: npx tsc --noEmit --skipLibCheck
-  # Phase 3 CI notes complete: build + lint + type on PR/push to protected branches.
-  # Extend later for e2e, migration checks, Sentry release per vercel-cicd.
+
+      - name: Test (vitest)
+        run: npm test
+
+      - name: Build
+        run: npm run build
+  # Phase 3-06 CI: npm ci + lint + tsc --noEmit + vitest + build on push/PR to main/latest-for-testing.
+  # Tests cover sanitize, rate-limit, safeCompare, entitlements (pure + memory paths).
+  # Add e2e + migration lint + Sentry release tokens later per vercel-cicd guidance.

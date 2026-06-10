@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { getActiveContributorSlugs } from "@/lib/contributors";
 import { getShowsWithEpisodeCounts } from "@/lib/podcasts";
+import { getArticles } from "@/lib/articles";
 
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ??
@@ -72,8 +73,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // graceful in worktree / no DB
   }
 
-  // Future: approved clips could get /clips or per-ep deep links with lastmod from clips.created_at
-  // For now clips are discoverable via episode pages + Live + JSON-LD VideoObject (seo-schema).
+  // Published articles (story detail pages).
+  let articleRoutes: MetadataRoute.Sitemap = [];
+  try {
+    const articles = await getArticles({ limit: 500 });
+    articleRoutes = articles.map((a) => ({
+      url: `${SITE_URL}/stories/${a.slug}`,
+      lastModified: a.published_at ? new Date(a.published_at) : now,
+      changeFrequency: "weekly" as const,
+      priority: 0.7,
+    }));
+  } catch {
+    // graceful in worktree / no DB
+  }
 
-  return [...staticRoutes, ...contributorRoutes, ...showRoutes];
+  return [...staticRoutes, ...contributorRoutes, ...showRoutes, ...articleRoutes];
 }

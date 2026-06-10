@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { tierFromPlanId } from "@/lib/contributor-tiers";
 import { isContributorPlanId } from "@/lib/contributor-plans";
 import { supabaseAdmin } from "@/lib/supabase";
+import { rateLimit, keyFromRequest, tooManyRequests } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -23,6 +24,9 @@ function isEmail(v: string): boolean {
 }
 
 export async function POST(req: Request) {
+  const rl = await rateLimit(keyFromRequest(req, "contrib-apply"), { limit: 3, windowSec: 86400 });
+  if (!rl.ok) return tooManyRequests(rl);
+
   let body: ApplyBody;
   try {
     body = await req.json();

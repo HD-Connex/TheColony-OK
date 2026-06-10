@@ -1,19 +1,23 @@
 /**
- * 24/7 "Colony Live" channel — persistent fallback when no scheduled live_event is active.
- * Stream URL: NEXT_PUBLIC_247_HLS_URL (Mux/Cloudflare HLS ingest).
+ * 24/7 "Colony Live" channel — persistent fallback when no scheduled
+ * live_event is active. Stream source resolves from env config only:
+ * no demo video, no third-party placeholder. When no source is configured
+ * the channel reports streamUrl: null and the player renders an honest
+ * "Off Air" state.
+ *
+ * Source priority:
+ *   1. NEXT_PUBLIC_247_HLS_URL          — direct HLS manifest
+ *   2. NEXT_PUBLIC_MUX_247_PLAYBACK_ID  — Mux playback id (built to HLS URL)
+ *   3. NEXT_PUBLIC_247_MP4_URL          — direct MP4 loop
+ *   4. NEXT_PUBLIC_247_YOUTUBE_URL      — YouTube embed fallback
  */
 
 import { getLiveEvents } from "./live-events";
-import { JAKE_MERRICK_STREAMS_URL } from "./video";
-
-/** Demo replay loop until Mux 247 ingest is wired. */
-export const DEMO_247_MP4 =
-  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
 
 export interface Live247Channel {
   id: "colony-247";
   title: string;
-  streamUrl: string;
+  streamUrl: string | null;
   isLive: boolean;
   currentProgram?: {
     title: string;
@@ -25,7 +29,7 @@ export interface Live247Channel {
   fallbackSlate: string;
 }
 
-function resolve247StreamUrl(): string {
+function resolve247StreamUrl(): string | null {
   if (process.env.NEXT_PUBLIC_247_HLS_URL) {
     return process.env.NEXT_PUBLIC_247_HLS_URL;
   }
@@ -38,14 +42,14 @@ function resolve247StreamUrl(): string {
   if (process.env.NEXT_PUBLIC_247_YOUTUBE_URL) {
     return process.env.NEXT_PUBLIC_247_YOUTUBE_URL;
   }
-  return JAKE_MERRICK_STREAMS_URL;
+  return null;
 }
 
 export const COLONY_247: Live247Channel = {
   id: "colony-247",
-  title: "Colony Live · Jake Merrick Streams",
+  title: "Colony Live 24/7",
   streamUrl: resolve247StreamUrl(),
-  isLive: true,
+  isLive: resolve247StreamUrl() !== null,
   schedule: [
     { time: "00:00", title: "Overnight Field Reports (loop)", durationMin: 360 },
     { time: "06:00", title: "Morning Brief — OKC & Rural", durationMin: 60 },
@@ -55,11 +59,14 @@ export const COLONY_247: Live247Channel = {
 };
 
 export async function getCurrentLiveChannel(): Promise<Live247Channel> {
+  const streamUrl = resolve247StreamUrl();
+
   try {
     const { live } = await getLiveEvents();
     if (live.length > 0) {
       return {
         ...COLONY_247,
+        streamUrl,
         isLive: false,
         currentProgram: {
           title: live[0].title,
@@ -75,7 +82,7 @@ export async function getCurrentLiveChannel(): Promise<Live247Channel> {
 
   return {
     ...COLONY_247,
-    streamUrl: resolve247StreamUrl(),
-    isLive: true,
+    streamUrl,
+    isLive: streamUrl !== null,
   };
 }

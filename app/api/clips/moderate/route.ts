@@ -1,20 +1,13 @@
-// Clip moderation endpoint for Phase 2 layer.
-// Per ruflo-aidefence (safety-scan / pii-detect), vercel:vercel-functions (admin check, DB update), TDD.
-// Admin-only for now (later integrate with contributor approval or role).
-// Calls safety on clip (stub or metadata), updates approved + score.
+// Clip moderation endpoint.
+// Admin-only: real role check via lib/admin-auth (members.role), with a
+// service-token path for machine callers. Every clip requires explicit
+// human approval — there is no auto-approve scan path.
 
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from "@/lib/supabase";
-
-// Stub for ruflo-aidefence safety (in real: import and call with clip metadata or re-scan)
-async function runSafetyScan(clip: any): Promise<{ safe: boolean; score: number; reason?: string }> {
-  // Simulate: if clip has 'toxic' in tags or low score, block. Real impl would use the skill/MCP or @ruflo/aidefence
-  if (clip.tags?.includes('toxic') || (clip.ai_score || 0) < 0) {
-    return { safe: false, score: 0, reason: 'Toxic or PII detected by safety-scan' };
-  }
-  const score = clip.ai_score || 85; // from prior AI
-  return { safe: true, score };
-}
+import { requireAdmin, requireServiceToken } from "@/lib/admin-auth";
+import { rateLimit, keyFromRequest, tooManyRequests } from "@/lib/rate-limit";
+import { log } from "@/lib/log";
 
 export const runtime = 'nodejs';
 
@@ -24,11 +17,13 @@ function jsonError(message: string, status = 400) {
 
 export async function POST(req: Request) {
   try {
-    const supabase = supabaseAdmin();
+    const rl = await rateLimit(keyFromRequest(req, 'clips-moderate'), { limit: 60, windowSec: 60 });
+    if (!rl.ok) return tooManyRequests(rl);
 
-    // Simple admin check (vercel:auth + project patterns; enhance with real roles later)
-    const authHeader = req.headers.get('authorization');
-    if (!authHeader?.includes('admin')) { // placeholder for real admin token/role
+    // Real admin auth: Supabase user with members.role in (admin, editor),
+    // or a machine caller with ADMIN_SERVICE_TOKEN.
+    const admin = await requireAdmin(req, 'editor');
+    if (!admin && !requireServiceToken(req)) {
       return jsonError('Forbidden - admin required', 403);
     }
 
@@ -37,7 +32,7 @@ export async function POST(req: Request) {
       return jsonError('Invalid payload', 400);
     }
 
-    // Fetch clip
+    const supabase = supabaseAdmin();
     const { data: clip, error: fetchErr } = await supabase
       .from('clips')
       .select('*')
@@ -48,29 +43,21 @@ export async function POST(req: Request) {
       return jsonError('Clip not found', 404);
     }
 
-    if (action === 'reject') {
-      await supabase.from('clips').update({ approved: false }).eq('id', clipId);
-      return NextResponse.json({ id: clipId, approved: false });
-    }
-
-    // Approve path: run safety (ruflo-aidefence)
-    const scan = await runSafetyScan(clip);
-    if (!scan.safe) {
-      await supabase.from('clips').update({ approved: false }).eq('id', clipId);
-      return jsonError(scan.reason || 'Blocked by safety-scan / pii-detect', 400);
-    }
-
-    // Update approved + score
-    const { data: updated } = await supabase
+    const approved = action === 'approve';
+    const { data: updated, error: updateErr } = await supabase
       .from('clips')
-      .update({ approved: true, ai_score: scan.score })
+      .update({ approved })
       .eq('id', clipId)
       .select('id, approved, ai_score')
       .single();
 
+    if (updateErr || !updated) {
+      return jsonError('Failed to update clip', 500);
+    }
+
     return NextResponse.json(updated);
   } catch (err) {
-    console.error('[clips/moderate] unexpected error', err);
+    log.error('[clips/moderate] unexpected error', err);
     return jsonError('Internal server error', 500);
   }
 }

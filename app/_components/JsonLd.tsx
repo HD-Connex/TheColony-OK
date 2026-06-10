@@ -9,7 +9,9 @@ export default function JsonLd({ data }: Props) {
   return (
     <script
       type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
+      // Escape `<` so untrusted strings (RSS titles/descriptions) can't break
+      // out of the script tag with a literal </script>.
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(data).replace(/</g, "\\u003c") }}
     />
   );
 }

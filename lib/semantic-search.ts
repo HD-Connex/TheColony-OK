@@ -6,7 +6,7 @@
 import { escapeIlike } from "./ilike";
 import { supabaseAdmin, supabaseConfigured, supabasePublic } from "./supabase";
 
-export type ContentType = "episode" | "video_episode";
+export type ContentType = "episode" | "video_episode" | "clip";
 
 export interface EmbeddingSearchResult {
   id: string;
@@ -14,6 +14,9 @@ export interface EmbeddingSearchResult {
   content_type: ContentType;
   chunk: string;
   similarity: number;
+  /** Timestamp in seconds for transcript matches (from rich segments). */
+  start?: number;
+  end?: number;
 }
 
 export interface SearchEmbeddingsOptions {

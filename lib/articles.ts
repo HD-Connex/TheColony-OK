@@ -166,3 +166,83 @@ export async function getRelatedArticles(slug: string, limit = 3): Promise<Artic
 export async function getTierArticles(_tier: string, limit = 3): Promise<Article[]> {
   return getArticles({ limit });
 }
+
+// ===== ADMIN / EDITOR HELPERS (use supabaseAdmin only; called from gated routes or server components) =====
+
+import { supabaseAdmin } from "./supabase";
+
+export interface AdminArticleInput {
+  slug: string;
+  title: string;
+  dek?: string | null;
+  body?: string | null; // store MD or HTML; we treat as content source
+  body_md?: string | null;
+  status?: "draft" | "review" | "scheduled" | "published" | "archived";
+  tier_required?: string | null;
+  hero_url?: string | null;
+  hero_alt?: string | null;
+  category?: string | null;
+  county?: string | null; // Phase 3 local moat
+  contributor_id?: string | null;
+  published_at?: string | null;
+  review_notes?: string | null;
+}
+
+export async function adminListArticles(opts: { status?: string; limit?: number } = {}) {
+  const { status, limit = 50 } = opts;
+  const sb = supabaseAdmin();
+  let q = sb.from("articles").select(`${ARTICLE_COLS}, ${CONTRIBUTOR_JOIN}, body_md, review_notes`).order("updated_at", { ascending: false }).limit(limit);
+  if (status) q = q.eq("status", status);
+  const { data, error } = await q;
+  if (error) return [];
+  return (data ?? []).map((r: any) => enrichArticle(normalizeRow(r)));
+}
+
+export async function adminGetArticle(idOrSlug: string) {
+  const sb = supabaseAdmin();
+  const isUuid = /^[0-9a-f-]{36}$/i.test(idOrSlug);
+  const { data } = await sb
+    .from("articles")
+    .select(`${ARTICLE_COLS}, ${CONTRIBUTOR_JOIN}, body_md, review_notes`)
+    .eq(isUuid ? "id" : "slug", idOrSlug)
+    .maybeSingle();
+  return data ? enrichArticle(normalizeRow(data as any)) : null;
+}
+
+export async function adminUpsertArticle(input: AdminArticleInput & { id?: string }) {
+  const sb = supabaseAdmin();
+  const payload: any = {
+    slug: input.slug,
+    title: input.title,
+    dek: input.dek ?? null,
+    body: input.body ?? input.body_md ?? null,
+    body_md: input.body_md ?? input.body ?? null,
+    status: input.status ?? "draft",
+    tier_required: input.tier_required ?? "free",
+    hero_url: input.hero_url ?? null,
+    hero_alt: input.hero_alt ?? null,
+    category: input.category ?? null,
+    county: input.county ?? null,
+    contributor_id: input.contributor_id ?? null,
+    published_at: input.published_at ?? (input.status === "published" ? new Date().toISOString() : null),
+    review_notes: input.review_notes ?? null,
+    updated_at: new Date().toISOString(),
+  };
+
+  if (input.id) {
+    const { data, error } = await sb.from("articles").update(payload).eq("id", input.id).select().single();
+    if (error) throw error;
+    return data;
+  } else {
+    const { data, error } = await sb.from("articles").insert(payload).select().single();
+    if (error) throw error;
+    return data;
+  }
+}
+
+export async function adminDeleteArticle(id: string) {
+  const sb = supabaseAdmin();
+  const { error } = await sb.from("articles").delete().eq("id", id);
+  if (error) throw error;
+  return { ok: true };
+}

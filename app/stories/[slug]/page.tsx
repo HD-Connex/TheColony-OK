@@ -10,6 +10,7 @@ import { formatDate } from "@/lib/format";
 import { tierLocked } from "@/lib/tiers";
 import { storyHero, hostPhoto } from "@/lib/media-map";
 import { Paywall } from "../../_components/Paywall";
+import { sanitizeHtml } from "@/lib/sanitize";
 
 export const revalidate = 120;
 
@@ -62,7 +63,8 @@ export default async function StoryPage({ params }: PageProps) {
 
   const related = await getRelatedArticles(slug, 3).catch((e) => { console.error(e); return []; });
   const locked = tierLocked(article.tier_required);
-  const paragraphs = bodyParagraphs(article.description);
+  const rawParagraphs = bodyParagraphs(article.description);
+  const paragraphs = rawParagraphs.map((p) => sanitizeHtml(p));
   const author = (article.contributor?.name ?? "The Colony Staff").toUpperCase();
   const canonicalUrl = `${SITE_URL}/stories/${article.slug}`;
 

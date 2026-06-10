@@ -34,41 +34,92 @@ export function isActiveSubscriptionStatus(status: Stripe.Subscription.Status): 
   return status === "active" || status === "trialing";
 }
 
-// --- Ported/enhanced from thecolony-ok (adapted to Supabase/members for local OK perks, gifts, usage) ---
-
-/** best-of-n pricing (env ids for launch; update via dashboard) */
+/** Price IDs (env-configured in the Stripe dashboard). */
 export const PRICING = {
-  BASIC_MONTHLY: process.env.STRIPE_PRICE_MEMBER || process.env.STRIPE_PRICE_SETTLER || 'price_basic_mo',
-  PREMIUM_OK_ANNUAL: process.env.STRIPE_PRICE_PATRIOT || 'price_premium_ok_yr',
-  LIFETIME: process.env.STRIPE_PRICE_FOUNDER || 'price_lifetime',
-  GIFT_BUNDLE: process.env.STRIPE_PRICE_GIFT || 'price_gift_49',
+  BASIC_MONTHLY: process.env.STRIPE_PRICE_MEMBER || process.env.STRIPE_PRICE_SETTLER || null,
+  PREMIUM_OK_ANNUAL: process.env.STRIPE_PRICE_PATRIOT || null,
+  LIFETIME: process.env.STRIPE_PRICE_FOUNDER || null,
+  GIFT_BUNDLE: process.env.STRIPE_PRICE_GIFT || null,
 } as const;
 
-/** Gift redeem (Layer 8 cycle complete, adapted to current members) */
-export async function redeemGift(code: string, userId: string) {
-  // TODO: implement with Supabase members + perk_grants table if added
-  // Gift redeem stub (port from legacy thecolony-ok) — no console in prod path
-  void code; void userId;
+/**
+ * Phase 3: Gift redemption using gift_codes table (created in 0020).
+ * Marks code used (atomic-ish), grants member status via members upsert (same as Stripe webhook).
+ * Supports one-time or limited-use codes.
+ */
+export async function redeemGift(code: string, userId: string): Promise<{ ok: boolean; error?: string }> {
+  if (!code || !userId) return { ok: false, error: "invalid" };
+
+  const sb = (await import("./supabase")).supabaseAdmin();
+  const upper = code.trim().toUpperCase();
+
+  // Find valid unused (or under max) code
+  const { data: gift, error: gErr } = await sb
+    .from("gift_codes")
+    .select("code, tier, max_uses, uses, expires_at")
+    .eq("code", upper)
+    .maybeSingle();
+
+  if (gErr || !gift) return { ok: false, error: "invalid_code" };
+  if (gift.expires_at && new Date(gift.expires_at) < new Date()) return { ok: false, error: "expired" };
+  if (gift.uses >= gift.max_uses) return { ok: false, error: "redeemed" };
+
+  // Increment uses (simple; for high contention add RPC)
+  const { error: incErr } = await sb
+    .from("gift_codes")
+    .update({ uses: gift.uses + 1 })
+    .eq("code", upper)
+    .eq("uses", gift.uses); // optimistic
+
+  if (incErr) return { ok: false, error: "redeem_failed" };
+
+  // Grant membership (mirror Stripe webhook behavior)
+  const tier = gift.tier === "founder" ? "founder" : "member";
+  await sb.from("members").upsert(
+    {
+      user_id: userId,
+      is_member: true,
+      status: "active",
+      tier,
+      updated_at: new Date().toISOString(),
+    },
+    { onConflict: "user_id" },
+  );
+
   return { ok: true };
 }
 
-/** Verify access for paywall / perk (real, adapted; use current isActive + members) */
-export async function hasPerkAccess(userId: string | null, perk: string, context?: { county?: string; episodeId?: string }) {
+/**
+ * Perk / paywall access — delegates to the membership source of truth
+ * (members table, synced by the Stripe webhook). Perk granularity beyond
+ * member/non-member can layer on later via a perk_grants table.
+ */
+export async function hasPerkAccess(
+  userId: string | null,
+  perk: string,
+  context?: { county?: string; episodeId?: string },
+): Promise<boolean> {
+  void perk; void context;
   if (!userId) return false;
-  // TODO: query members + perk_grants for county match etc. See legacy thecolony-ok for full.
-  return true; // placeholder - integrate with current membership
+  const { isActiveMember } = await import("./entitlements");
+  return isActiveMember(userId);
 }
 
-/** Log usage (for tracking, limits, analytics) */
-export async function logUsage(userId: string | null, type: string, metadata?: any) {
+/** Log a usage event for analytics / limits (usage_events table, migration 0016). */
+export async function logUsage(
+  userId: string | null,
+  type: string,
+  metadata?: Record<string, unknown>,
+): Promise<void> {
   if (!userId) return;
-  // TODO: log to Supabase usage or analytics
-  // Usage logged (port from legacy) — no console in prod path
-  void userId; void type; void metadata;
-}
-
-/** Webhook handler stub (full in api route) - sync sub status, grant perks on invoice paid etc. */
-export async function handleStripeEvent(event: Stripe.Event) {
-  // ... switch on type: customer.subscription.updated -> update user status + grants
-  // Stripe event handled (full impl in webhook, ported logic from thecolony-ok) — silent in prod
+  try {
+    const { supabaseAdmin } = await import("./supabase");
+    await supabaseAdmin().from("usage_events").insert({
+      user_id: userId,
+      event_type: type,
+      metadata: metadata ?? {},
+    });
+  } catch {
+    // Analytics must never break the request path.
+  }
 }

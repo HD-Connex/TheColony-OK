@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import type Stripe from "stripe";
 import { supabaseAdmin } from "@/lib/supabase";
 import { isActiveSubscriptionStatus, stripe, tierForPriceId } from "@/lib/stripe";
+import { sendReceiptEmail, sendCancelEmail, sendWelcomeEmail } from "@/lib/email";
 
 export const runtime = "nodejs";
 
@@ -49,16 +50,25 @@ async function linkCheckoutSession(session: Stripe.Checkout.Session) {
     typeof session.customer === "string" ? session.customer : session.customer?.id;
   if (!userId || !customerId) return;
 
+  const email = session.customer_email ?? session.customer_details?.email ?? null;
+
   const sb = supabaseAdmin();
   await sb.from("members").upsert(
     {
       user_id: userId,
-      email: session.customer_email ?? session.customer_details?.email ?? null,
+      email,
       stripe_customer_id: customerId,
       updated_at: new Date().toISOString(),
     },
     { onConflict: "user_id" },
   );
+
+  // Fire receipt + welcome (best-effort; do not block webhook ack)
+  if (email) {
+    const amount = session.amount_total ? `$${(session.amount_total / 100).toFixed(2)}` : null;
+    await sendReceiptEmail(email, { amount, tier: "member" });
+    await sendWelcomeEmail(email, { tier: "member" });
+  }
 }
 
 async function syncSubscription(sub: Stripe.Subscription) {
@@ -102,6 +112,15 @@ async function syncSubscription(sub: Stripe.Subscription) {
 
   const isMember = active && paidTier === "member";
 
+  // Try to get a usable email for notifications
+  let notifyEmail: string | null = (member as any)?.email || null;
+  if (!notifyEmail) {
+    try {
+      const cust = await stripe().customers.retrieve(customerId);
+      if (!cust.deleted) notifyEmail = (cust as any).email ?? null;
+    } catch {}
+  }
+
   await sb
     .from("members")
     .update({
@@ -115,4 +134,14 @@ async function syncSubscription(sub: Stripe.Subscription) {
       updated_at: new Date().toISOString(),
     })
     .eq("user_id", member.user_id);
+
+  // Email side-effects (non-blocking). Never block the 200 to Stripe.
+  if (notifyEmail) {
+    if (sub.status === "canceled" || !active) {
+      await sendCancelEmail(notifyEmail, { tier: paidTier || undefined, endedAt: periodEnd ? new Date(periodEnd * 1000).toISOString() : undefined });
+    } else if (active && isMember) {
+      const amount = null;
+      await sendReceiptEmail(notifyEmail, { amount, tier: "member", periodEnd: periodEnd ? new Date(periodEnd * 1000).toISOString() : undefined });
+    }
+  }
 }

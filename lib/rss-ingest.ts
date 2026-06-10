@@ -1,6 +1,7 @@
 import "server-only";
 import { XMLParser } from "fast-xml-parser";
 import { supabaseAdmin } from "./supabase";
+import { withRetry } from "./jobs";
 
 export interface RssItem {
   title: string;
@@ -152,12 +153,15 @@ export async function ingestPodcastFeeds(): Promise<IngestResult> {
   for (const show of shows ?? []) {
     if (!show.rss_url) continue;
     try {
-      const res = await fetch(show.rss_url, {
-        headers: { "user-agent": "TheColonyOK/1.0 RSS" },
-        next: { revalidate: 0 },
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const xml = await res.text();
+      const xml = await withRetry(async () => {
+        const res = await fetch(show.rss_url, {
+          headers: { "user-agent": "TheColonyOK/1.0 RSS" },
+          next: { revalidate: 0 },
+          signal: AbortSignal.timeout(20_000),
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.text();
+      }, { attempts: 2 });
       const items = parseRssItems(xml);
 
       let showNew = 0;
