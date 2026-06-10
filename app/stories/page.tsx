@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import FilterBar from "../_components/FilterBar";
 import InnerPageShell from "../_components/InnerPageShell";
 import StoryCard from "../_components/StoryCard";
@@ -51,6 +52,17 @@ export default async function StoriesPage({
       tone="paper"
     >
       <FilterBar options={filterOptions} activeKey={activeKey} />
+
+      {/* Aesthetic lead image for stories */}
+      <div style={{ marginBottom: "var(--space-4)", borderBottom: "var(--rule-hairline) solid var(--color-border)" }}>
+        <Image
+          src="/assets/images/stories/oklahoma-budget-crisis.jpg"
+          alt="Investigative reporting from Oklahoma"
+          width={1200}
+          height={400}
+          style={{ width: "100%", height: "auto", display: "block", filter: "grayscale(0.1) contrast(1.05)" }}
+        />
+      </div>
 
       {filtered.length === 0 ? (
         <p className="empty-state">No stories published yet.</p>

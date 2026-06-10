@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import Image from "next/image";
 import Breadcrumbs from "../_components/Breadcrumbs";
 import PageHeader from "../_components/PageHeader";
 import CheckoutButton from "../_components/CheckoutButton";
@@ -11,6 +12,9 @@ export const metadata: Metadata = {
     "Join The Colony. Ad-free, private, uncensored conservative & Christian media starting at the founding price of $4.99/mo.",
   alternates: { canonical: "/pricing" },
 };
+
+/* Aesthetic image for pricing life (added for visual appeal) */
+const PRICING_HERO = "/assets/images/heroes/lead-hero.jpg";
 
 const FEATURES = [
   "All investigative articles — no paywall",
@@ -84,6 +88,17 @@ export default function PricingPage() {
                 Full access to every article, every podcast episode, every live broadcast — plus member-only briefings and
                 bonus episodes — for less than $5 a month.
               </p>
+
+              {/* Aesthetic image to bring life to pricing */}
+              <div style={{ marginTop: "var(--space-4)", border: "var(--rule-hairline) solid var(--color-border)" }}>
+                <Image
+                  src="/assets/images/heroes/lead-hero.jpg"
+                  alt="The Colony OK independent press"
+                  width={900}
+                  height={320}
+                  style={{ width: "100%", height: "auto", display: "block", filter: "grayscale(0.1) contrast(1.05)" }}
+                />
+              </div>
               <ul className="membership-cta__features">
                 {FEATURES.map((feature) => (
                   <li className="membership-cta__feature" key={feature}>

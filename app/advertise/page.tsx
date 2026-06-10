@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import InnerPageShell from "../_components/InnerPageShell";
 import SectionBlock from "../_components/SectionBlock";
 
@@ -43,6 +44,18 @@ export default function AdvertisePage() {
             Verified by Plausible. Direct, organic — no syndicated traffic.
           </p>
         </div>
+
+        {/* Aesthetic image for advertise reach */}
+        <div style={{ marginTop: "var(--space-4)", border: "var(--rule-hairline) solid var(--color-border)" }}>
+          <Image
+            src="/assets/images/og-home.jpg"
+            alt="The Colony OK media reach and audience"
+            width={900}
+            height={300}
+            style={{ width: "100%", height: "auto", display: "block", filter: "grayscale(0.15) contrast(1.05)" }}
+          />
+        </div>
+
         <div className="stat-row__cell">
           <div className="stat-row__value">12</div>
           <div className="stat-row__label">▼ Podcast Episodes</div>

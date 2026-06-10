@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import Image from "next/image";
 import InnerPageShell from "../_components/InnerPageShell";
 import SectionBlock from "../_components/SectionBlock";
 import StoryCard from "../_components/StoryCard";
@@ -109,6 +110,17 @@ export default async function NewsPage() {
       lede="The day's headlines from Oklahoma — state, national, and local. Filed throughout the day."
       section={false}
     >
+      {/* Aesthetic lead image for news */}
+      <div style={{ marginBottom: "var(--space-4)", borderBottom: "var(--rule-hairline) solid var(--color-border)" }}>
+        <Image
+          src="/assets/images/heroes/lead-hero.jpg"
+          alt="Daily news and dispatches from Oklahoma"
+          width={1200}
+          height={380}
+          style={{ width: "100%", height: "auto", display: "block", filter: "grayscale(0.1) contrast(1.05)" }}
+        />
+      </div>
+
       {items.length === 0 ? (
         <p className="empty-state">No headlines yet.</p>
       ) : (

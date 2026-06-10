@@ -26,7 +26,7 @@
 
   --color-text-primary: var(--color-paper);
   --color-text-secondary: #b8b1a0;
-  --color-text-muted: #7a7568;
+  --color-text-muted: #4a4538; /* Improved contrast on paper/cream backgrounds (was #7a7568) */
   --color-text-inverse: var(--color-ink);
   --color-text-ink: var(--color-ink);
   --color-text-ink-soft: #3a3530;

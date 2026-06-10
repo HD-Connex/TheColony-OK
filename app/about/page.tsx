@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import Image from "next/image";
 import InnerPageShell from "../_components/InnerPageShell";
 
 export const metadata: Metadata = {
@@ -45,6 +46,16 @@ export default function AboutPage() {
         </p>
 
         <h2>The Team</h2>
+        {/* Aesthetic team life image */}
+        <div style={{ margin: "var(--space-4) 0", border: "var(--rule-hairline) solid var(--color-border)" }}>
+          <Image
+            src="/assets/images/hosts/jake-merrick.jpg"
+            alt="The Colony OK team and masthead"
+            width={800}
+            height={300}
+            style={{ width: "100%", height: "auto", display: "block", filter: "grayscale(0.1) contrast(1.05)" }}
+          />
+        </div>
         <p>
           Editorial leadership:{" "}
           <Link href="/journalists">Sarah Mitchell, Marcus Webb, Rachel Torres, Pastor Dan Hollis, Wes Carter</Link> (5 on masthead post-seed). Founding

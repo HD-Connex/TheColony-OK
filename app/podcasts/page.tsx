@@ -114,6 +114,17 @@ export default async function PodcastsIndexPage() {
           ) : (
             <PodcastSearchGrid shows={podcast.shows} />
           )}
+
+          {/* Aesthetic network visual for life */}
+          <div style={{ marginTop: "var(--space-4)", borderTop: "var(--rule-hairline) solid var(--color-border)" }}>
+            <Image
+              src="/assets/images/podcasts/colony-report.jpg"
+              alt="The Colony podcast network"
+              width={900}
+              height={300}
+              style={{ width: "100%", height: "auto", display: "block", filter: "grayscale(0.1) contrast(1.05)" }}
+            />
+          </div>
         </div>
       </section>
     </main>

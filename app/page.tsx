@@ -319,6 +319,17 @@ export default async function HomePage() {
               </Link>
             </header>
 
+            {/* Aesthetic lead image for life (brutalist filter per DS) */}
+            <div className="section-lead-image" style={{ marginBottom: "var(--space-4)", borderBottom: "var(--rule-medium) solid var(--color-border)" }}>
+              <Image
+                src="/assets/images/heroes/story-lead.jpg"
+                alt="Oklahoma investigations and rural reporting"
+                width={1200}
+                height={400}
+                style={{ width: "100%", height: "auto", display: "block", filter: "grayscale(0.1) contrast(1.05)" }}
+              />
+            </div>
+
             <div className="grid-3">
               {newsItems.map((a) => (
                 <article className="card card--article" key={a.id}>

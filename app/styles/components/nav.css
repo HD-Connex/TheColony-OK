@@ -9,7 +9,7 @@
 
 .nav {
   display: grid;
-  grid-template-columns: auto 1fr auto auto;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: var(--space-6);
   padding-block: var(--space-4);
@@ -155,4 +155,71 @@
   .nav__actions { display: none; }
   .nav__hamburger { display: block; }
   .nav { grid-template-columns: auto 1fr auto; }
+}
+
+/* ─── Desktop Dropdowns (menu tabs displayed, grouped 2-3 like pages) ───
+   High contrast: paper bg + ink text on header ink bg.
+   No hamburger on desktop (controlled in JS + media).
+   Brutalist: zero radius, heavy rules, mono text, alarm accents.
+*/
+.nav__dropdown {
+  position: relative;
+}
+
+.nav__dropdown-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35ch;
+}
+
+.nav__caret {
+  font-size: 0.7em;
+  opacity: 0.8;
+}
+
+.nav__dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 180px;
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+  border: var(--rule-medium) solid var(--color-alarm);
+  padding: var(--space-1) 0;
+  z-index: var(--z-nav);
+  box-shadow: none;
+}
+
+.nav__dropdown-item {
+  display: block;
+  padding: var(--space-2) var(--space-4);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: var(--track-wide);
+  color: var(--color-ink);
+  border-bottom: var(--rule-hairline) solid var(--color-border-paper);
+  white-space: nowrap;
+}
+
+.nav__dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.nav__dropdown-item:hover,
+.nav__dropdown-item.active {
+  background-color: var(--color-ink);
+  color: var(--color-paper);
+}
+
+.nav__dropdown-item.active {
+  border-left: var(--rule-medium) solid var(--color-alarm);
+  padding-left: calc(var(--space-4) - var(--rule-medium));
+}
+
+/* Desktop nav polish: tabs visible, high contrast dropdowns */
+.nav__links {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
 }

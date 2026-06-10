@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import Image from "next/image";
 import Breadcrumbs from "../_components/Breadcrumbs";
 import PageHeader from "../_components/PageHeader";
 import JsonLd from "../_components/JsonLd";
@@ -122,6 +123,17 @@ export default async function LivePage({
               </Link>
 
               <ClipsTeaser count={15} />
+
+              {/* Aesthetic life image for live section */}
+              <div style={{ marginTop: "var(--space-4)", borderTop: "var(--rule-hairline) solid var(--color-border)" }}>
+                <Image
+                  src="/assets/images/slates/colony-247-slate.jpg"
+                  alt="The Colony 24/7 live feed"
+                  width={800}
+                  height={300}
+                  style={{ width: "100%", height: "auto", display: "block", filter: "grayscale(0.15) contrast(1.1)" }}
+                />
+              </div>
             </div>
           </section>
 
