@@ -279,14 +279,18 @@ export default function LiveStage({ items: initialItems = [], initialActiveId, c
       </div>
       )}
 
-      <div className="live-interactivity">
-        <LiveChat liveEventId={is247 ? null : activeId} isMember={isMember} currentUser={user} />
-        {activePoll && (
-          <LivePoll poll={activePoll} isMember={isMember} currentUserId={user?.id ?? null} />
-        )}
-      </div>
+      {!compact && (
+        <>
+          <div className="live-interactivity">
+            <LiveChat liveEventId={is247 ? null : activeId} isMember={isMember} currentUser={user} />
+            {activePoll && (
+              <LivePoll poll={activePoll} isMember={isMember} currentUserId={user?.id ?? null} />
+            )}
+          </div>
 
-      <p className="fine-print">Low-latency HLS • PiP supported • Reduced motion respected</p>
+          <p className="fine-print">Low-latency HLS • PiP supported • Reduced motion respected</p>
+        </>
+      )}
     </div>
   );
 }
