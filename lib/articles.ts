@@ -12,6 +12,7 @@ export interface Article {
   hero_url?: string | null;
   hero_alt?: string | null;
   category?: string | null;
+  county?: string | null;
   status?: string;
   member_only?: boolean;
   dek?: string | null;
@@ -33,7 +34,7 @@ type ArticleRow = Omit<Article, "description" | "tier_required" | "hero_url" | "
 };
 
 export const ARTICLE_COLS =
-  "id,slug,title,dek,body,published_at,member_only,hero_url,hero_alt,category,status";
+  "id,slug,title,dek,body,published_at,member_only,hero_url,hero_alt,category,county,status";
 
 const CONTRIBUTOR_JOIN =
   "contributor:contributors!contributor_id(slug,name,tier,headshot_url,location)";
@@ -74,15 +75,18 @@ function enrichArticle(row: ArticleRow): Article {
   };
 }
 
-export async function getArticles(opts: { limit?: number } = {}): Promise<Article[]> {
-  const { limit = 8 } = opts;
+export async function getArticles(opts: { limit?: number; county?: string } = {}): Promise<Article[]> {
+  const { limit = 8, county } = opts;
   const sb = supabasePublic();
-  const joined = await sb
+  let q = sb
     .from("articles")
     .select(`${ARTICLE_COLS}, ${CONTRIBUTOR_JOIN}`)
     .eq("status", "published")
     .order("published_at", { ascending: false })
     .limit(limit);
+  if (county) q = q.eq("county", county);
+
+  const joined = await q;
 
   const rows = joined.error
     ? (
@@ -165,6 +169,28 @@ export async function getRelatedArticles(slug: string, limit = 3): Promise<Artic
 
 export async function getTierArticles(_tier: string, limit = 3): Promise<Article[]> {
   return getArticles({ limit });
+}
+
+/** Get distinct counties with story counts for /counties page. */
+export async function getCountiesWithCounts(): Promise<{ county: string; count: number }[]> {
+  const sb = supabasePublic();
+  const { data, error } = await sb
+    .from("articles")
+    .select("county", { count: "exact" })
+    .eq("status", "published")
+    .not("county", "is", null);
+
+  if (error || !data) return [];
+
+  const counts = data.reduce((acc: Record<string, number>, row: any) => {
+    const c = row.county as string;
+    if (c) acc[c] = (acc[c] || 0) + 1;
+    return acc;
+  }, {});
+
+  return Object.entries(counts)
+    .map(([county, count]) => ({ county, count: count as number }))
+    .sort((a, b) => b.count - a.count);
 }
 
 // ===== ADMIN / EDITOR HELPERS (use supabaseAdmin only; called from gated routes or server components) =====

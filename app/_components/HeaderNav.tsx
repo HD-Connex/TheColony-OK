@@ -91,6 +91,10 @@ export default function HeaderNav() {
           News
         </Link>
 
+        <Link className={`nav__link ${isActive("/counties") ? "nav__link--active" : ""}`} href="/counties">
+          Counties
+        </Link>
+
         <Dropdown id="community" label="Community" items={communityItems} />
       </div>
 
@@ -136,6 +140,9 @@ export default function HeaderNav() {
           </Link>
           <Link className="nav__link" href="/news" onClick={closeAll}>
             Daily News
+          </Link>
+          <Link className="nav__link" href="/counties" onClick={closeAll}>
+            Counties
           </Link>
           <Link className="nav__link" href="/journalists" onClick={closeAll}>
             Journalists
