@@ -61,6 +61,18 @@ export default function MembershipAccount() {
         )}
       </div>
 
+      {isMember && (
+        <div className="account-card press-pass">
+          <div className="foil" style={{ fontSize: "1.5rem", letterSpacing: "0.1em" }}>PRESS PASS</div>
+          <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", marginTop: "var(--space-2)" }}>
+            MEMBER N° {user.id.slice(0, 4).toUpperCase()} · SINCE {new Date(user.created_at || Date.now()).getFullYear()}
+          </div>
+          <div style={{ fontSize: "var(--text-xs)", color: "var(--color-text-secondary)", marginTop: "var(--space-1)" }}>
+            THE COLONY OK · READER-FUNDED
+          </div>
+        </div>
+      )}
+
       <div className="account-card">
         <h2>Privacy</h2>
         <p>

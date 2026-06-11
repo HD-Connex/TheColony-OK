@@ -95,3 +95,12 @@
   font-size: var(--text-sm);
   color: var(--color-ink);
 }
+
+/* Press Pass credential in account (heirloom foil) */
+.press-pass {
+  border: var(--rule-medium) solid var(--color-brass);
+  background: var(--color-paper);
+  padding: var(--space-4);
+  text-align: center;
+  font-family: var(--font-mono);
+}
