@@ -16,6 +16,7 @@
 @import "./components/breadcrumbs.css";
 @import "./components/per-ep-page.css";
 @import "./components/system-pages.css";
+@import "./components/premium.css";
 
 /* ─── Layout (legacy main.css) ─── */
 .container {

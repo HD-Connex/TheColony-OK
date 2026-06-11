@@ -1,0 +1,131 @@
+/* ─── Heirloom Press premium layer ───
+    Print-craft details: grain, foil, double rules, drop caps, press marks.
+    Foil is reserved for membership/credential/impact marks only. */
+
+/* Custom selection — ink on brass, sitewide */
+::selection {
+  background: var(--color-brass);
+  color: var(--color-ink);
+}
+
+/* Paper grain — apply to any .section--paper / paper-background block */
+.grain {
+  position: relative;
+}
+.grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: var(--grain-opacity);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Foil text — brass sheen on ink backgrounds; static brass fallback when unsupported */
+.foil {
+  color: var(--color-brass);
+}
+@supports (background-clip: text) or (-webkit-background-clip: text) {
+  .foil {
+    background: var(--foil-gradient);
+    background-size: 220% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: foil-sheen 6s ease-in-out infinite;
+  }
+}
+@keyframes foil-sheen {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .foil { animation: none; }
+}
+
+/* Double hairline rule — premium divider between major sections */
+.rule-double {
+  border: none;
+  border-top: var(--rule-double) var(--color-rule-soft);
+  margin: var(--space-12) 0;
+}
+.rule-double--ink {
+  border-top-color: var(--color-rule);
+}
+
+/* Drop cap — first paragraph of article body */
+.article-body > p:first-of-type::first-letter {
+  font-family: var(--font-editorial);
+  font-weight: 600;
+  font-size: 4.4em;
+  line-height: 0.78;
+  float: left;
+  padding-right: 0.08em;
+  margin-top: 0.04em;
+  color: var(--color-alarm);
+}
+
+/* Pull quote — editorial serif, hung rules */
+.pullquote {
+  font-family: var(--font-editorial);
+  font-style: italic;
+  font-size: var(--text-2xl);
+  line-height: var(--leading-snug);
+  letter-spacing: var(--track-tight);
+  margin: var(--space-12) 0;
+  padding: var(--space-6) 0;
+  border-top: var(--rule-heavy) solid currentColor;
+  border-bottom: var(--rule-hairline) solid currentColor;
+}
+.pullquote cite {
+  display: block;
+  margin-top: var(--space-3);
+  font-family: var(--font-mono);
+  font-style: normal;
+  font-size: var(--text-xs);
+  letter-spacing: var(--track-wider);
+  text-transform: uppercase;
+}
+
+/* —30— end-of-story press mark */
+.end-mark {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin: var(--space-16) 0 var(--space-8);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  letter-spacing: var(--track-wider);
+  color: var(--color-text-muted);
+}
+.end-mark::before,
+.end-mark::after {
+  content: "";
+  flex: 1;
+  border-top: var(--rule-hairline) solid var(--color-rule-soft);
+}
+
+/* Duotone photo development — navy plate that develops to full color */
+.develop {
+  filter: grayscale(1) sepia(0.28) hue-rotate(180deg) saturate(2.4) brightness(0.92);
+  transition: filter 600ms ease;
+}
+.card:hover .develop,
+.develop.is-developed {
+  filter: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .develop { filter: none; transition: none; }
+}
+
+/* Scroll-drawn hairline — width animates in via .is-inview (IntersectionObserver in SiteClient) */
+.rule-draw {
+  border: none;
+  border-top: var(--rule-medium) solid var(--color-rule-soft);
+  width: 0;
+  transition: width 700ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.rule-draw.is-inview { width: 100%; }
+@media (prefers-reduced-motion: reduce) {
+  .rule-draw { width: 100%; transition: none; }
+}
