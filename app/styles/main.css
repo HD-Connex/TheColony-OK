@@ -17,6 +17,7 @@
 @import "./components/per-ep-page.css";
 @import "./components/system-pages.css";
 @import "./components/premium.css";
+@import "./components/blog.css";
 
 /* ─── Layout (legacy main.css) ─── */
 .container {

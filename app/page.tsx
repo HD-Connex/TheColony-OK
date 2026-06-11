@@ -14,6 +14,8 @@ import { formatDate, formatHeroDateline, formatTimeCT, formatLiveWhen, whenLabel
 import { CONTRIBUTOR_PLANS } from "@/lib/contributor-plans";
 import ClipsUploadForm from "./_components/ClipsUploadForm";
 import ContinueRail from "./_components/ContinueRail";
+import BuildingHubNotice from "./_components/BuildingHubNotice";
+import { getFeaturedBlogPost } from "@/lib/blog-posts";
 
 export const revalidate = 60;
 
@@ -47,6 +49,8 @@ export default async function HomePage() {
   const todayLabel = new Date()
     .toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })
     .toUpperCase();
+
+  const featuredBlog = getFeaturedBlogPost();
 
   return (
     <>
@@ -114,6 +118,8 @@ export default async function HomePage() {
             </aside>
           </div>
         </section>
+
+        {featuredBlog && <BuildingHubNotice post={featuredBlog} />}
 
         {ticker.length > 0 && (
           <div className="ticker" aria-label="Latest news">

@@ -19,22 +19,17 @@ export async function GET(req: Request) {
 
   // Top content
   const [{ data: arts }, { data: eps }] = await Promise.all([
-    sb.from("articles").select("slug,title,dek,published_at").eq("status", "published").gte("published_at", since).order("published_at", { ascending: false }).limit(5),
+    sb.from("articles").select("slug,title,dek,published_at,county").eq("status", "published").gte("published_at", since).order("published_at", { ascending: false }).limit(5),
     sb.from("episodes").select("id,title,description,published_at").gte("published_at", since).order("published_at", { ascending: false }).limit(3),
   ]);
 
-  const items = [
-    ...(arts || []).map((a: any) => ({ title: a.title, url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://thecolonyok.com"}/stories/${a.slug}`, dek: a.dek })),
+  const itemsBase = [
     ...(eps || []).map((e: any) => ({ title: e.title, url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://thecolonyok.com"}/podcasts/${e.id}`, dek: e.description })),
-  ].slice(0, 7);
-
-  if (items.length === 0) {
-    return NextResponse.json({ ok: true, skipped: "no new content" });
-  }
+  ];
 
   const { data: subs } = await sb
     .from("newsletter_subscribers")
-    .select("email, token")
+    .select("email, token, counties")
     .is("confirmed_at", "not.null")
     .is("unsubscribed_at", "null")
     .limit(5000);
@@ -43,11 +38,23 @@ export async function GET(req: Request) {
   let sent = 0;
 
   for (const sub of subs || []) {
+    const userCounties = (sub as any).counties as string[] | null;
+    let userArts = arts || [];
+    if (userCounties && userCounties.length > 0) {
+      userArts = userArts.filter((a: any) => a.county && userCounties.includes(a.county));
+    }
+    const userItems = [
+      ...userArts.map((a: any) => ({ title: a.title, url: `${site}/stories/${a.slug}`, dek: a.dek })),
+      ...itemsBase,
+    ].slice(0, 7);
+
+    if (userItems.length === 0) continue;
+
     const unsub = `${site}/newsletter/unsubscribe?token=${sub.token}`;
     try {
       await sendNewsletterDigest(sub.email, {
         subject: "The Briefing — This Week in Oklahoma",
-        items,
+        items: userItems,
         unsubscribeUrl: unsub,
       });
       sent++;
