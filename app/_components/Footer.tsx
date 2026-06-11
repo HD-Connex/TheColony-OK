@@ -122,6 +122,10 @@ export default function Footer() {
             </Link>
           </div>
         </div>
+
+        <div className="colophon grain" style={{ textAlign: 'center', fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)', paddingBlock: 'var(--space-6)', borderTop: 'var(--rule-hairline) solid var(--color-border)' }}>
+          Printed in the spirit of the broadsheet • handset in the digital foundry • no algorithms, no ads, no apologies.
+        </div>
       </div>
     </footer>
   );
