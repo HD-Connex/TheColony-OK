@@ -43,6 +43,13 @@ export function supabasePublic(): SupabaseClient {
 // (export const supabase = createClient... singleton per P5 requirement; delegates to avoid top-level env crashes on import during build)
 export const supabase = supabasePublic();
 
+// ─── Recommended: import the official @supabase/ssr helpers directly where needed ───
+// Server (Server Components / Route Handlers): import { createClient } from '@/utils/supabase/server'
+// Client (Client Components): import { createClient } from '@/utils/supabase/client'
+//
+// We intentionally do NOT re-export the server client from this shared lib
+// (lib/supabase.ts is imported from both server and client contexts in the app).
+
 // ─── Domain types ───
 
 export interface Show {

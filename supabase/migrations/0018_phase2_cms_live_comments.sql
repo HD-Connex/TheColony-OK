@@ -1,6 +1,3 @@
--- Phase 2 parity: Admin CMS foundations, live ingest, comments moderation, articles editorial polish.
--- Run after 0017. Idempotent alters + new tables.
-
 -- 1. Enhance articles for full editorial workflow (status already good; ensure 'review' supported + body_md for clean MD source).
 ALTER TABLE public.articles
   ADD COLUMN IF NOT EXISTS body_md TEXT,
@@ -37,13 +34,59 @@ DROP POLICY IF EXISTS "comments_public_read" ON public.threaded_comments;
 CREATE POLICY "comments_public_read_approved" ON public.threaded_comments
   FOR SELECT USING (approved = true);
 
--- Owner can still insert (pending approval if we set default false in future UI).
--- Admin/service can update approved + delete via server (requireAdmin).
-
 COMMENT ON TABLE public.threaded_comments IS 'Threaded comments on stories/episodes/live/etc. Member-gated write; admin moderation via approved flag + /admin.';
 
--- 4. Basic members lookup helper view/index (for admin members tab; RLS keeps it safe).
-CREATE INDEX IF NOT EXISTS members_role_status_idx ON public.members (role, is_member, status);
+-- 4. Basic members lookup helper – skipped because 'role' column does not exist in public.members.
+-- If needed later, adjust index to match actual columns (e.g., is_member, status).
 
--- Note: full admin CMS uses supabaseAdmin() (service role) for all writes + privileged reads.
--- Public RLS remains for site surfaces.
+-- 5. Tips / newsletter signups / lead submissions table (idempotent column adds).
+-- Ensure table exists, then add missing columns.
+CREATE TABLE IF NOT EXISTS public.tips (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid()
+);
+ALTER TABLE public.tips
+  ADD COLUMN IF NOT EXISTS kind TEXT,
+  ADD COLUMN IF NOT EXISTS email TEXT,
+  ADD COLUMN IF NOT EXISTS body TEXT,
+  ADD COLUMN IF NOT EXISTS contact TEXT,
+  ADD COLUMN IF NOT EXISTS metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
+  ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT now();
+
+-- For existing rows, set a default 'tip' for kind (nullable originally, then make NOT NULL if desired)
+UPDATE public.tips SET kind = 'tip' WHERE kind IS NULL;
+ALTER TABLE public.tips ALTER COLUMN kind SET NOT NULL;
+-- Add check constraint after column is populated
+ALTER TABLE public.tips ADD CONSTRAINT tips_kind_check CHECK (kind IN ('tip', 'newsletter'));
+
+-- Create indexes (idempotent)
+CREATE INDEX IF NOT EXISTS tips_kind_created_idx ON public.tips (kind, created_at DESC);
+CREATE INDEX IF NOT EXISTS tips_email_idx ON public.tips (email) WHERE email IS NOT NULL;
+
+ALTER TABLE public.tips ENABLE ROW LEVEL SECURITY;
+
+COMMENT ON TABLE public.tips IS 'Anonymous tips + newsletter signups. Body is sanitized on ingest. Ack emails sent via Resend after insert.';
+
+-- 6. Newsletter pipeline (double opt-in + weekly digest) – idempotent.
+CREATE TABLE IF NOT EXISTS public.newsletter_subscribers (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid()
+);
+ALTER TABLE public.newsletter_subscribers
+  ADD COLUMN IF NOT EXISTS email TEXT UNIQUE,
+  ADD COLUMN IF NOT EXISTS token UUID NOT NULL DEFAULT gen_random_uuid(),
+  ADD COLUMN IF NOT EXISTS confirmed_at TIMESTAMPTZ,
+  ADD COLUMN IF NOT EXISTS unsubscribed_at TIMESTAMPTZ,
+  ADD COLUMN IF NOT EXISTS source TEXT,
+  ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT now();
+
+-- Ensure email is NOT NULL and unique (if added later, set NOT NULL)
+ALTER TABLE public.newsletter_subscribers ALTER COLUMN email SET NOT NULL;
+
+-- Create indexes
+CREATE INDEX IF NOT EXISTS newsletter_email_idx ON public.newsletter_subscribers(email);
+CREATE INDEX IF NOT EXISTS newsletter_confirmed_idx ON public.newsletter_subscribers(confirmed_at) WHERE confirmed_at IS NOT NULL AND unsubscribed_at IS NULL;
+CREATE INDEX IF NOT EXISTS newsletter_token_idx ON public.newsletter_subscribers(token);
+
+ALTER TABLE public.newsletter_subscribers ENABLE ROW LEVEL SECURITY;
+
+COMMENT ON TABLE public.newsletter_subscribers IS 'Double opt-in newsletter subs. Weekly digest cron sends to confirmed non-unsubbed rows. Token for confirm/unsub actions.';

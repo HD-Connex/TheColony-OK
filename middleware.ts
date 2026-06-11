@@ -1,20 +1,35 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import { type NextRequest } from 'next/server';
+import { createClient } from './utils/supabase/middleware';
 
 /**
- * Middleware runs on the Edge. It is a *first line* only.
- * NEVER rely on it alone for authorization — always re-validate with
- * server-only requireAdmin(req) (or requireServiceToken) inside the
- * actual route handler or server component. Middleware can be bypassed
- * or have stale env; the DB role check in lib/admin-auth.ts is truth.
+ * Supabase SSR middleware for session refresh (cookies).
+ * This ensures auth sessions stay fresh across server components and route handlers.
+ *
+ * We also keep the existing /admin gate comment: real authorization is still enforced
+ * server-side with requireAdmin() — middleware is never trusted alone.
  */
-export function middleware(request: NextRequest) {
-  // Future: could add lightweight headers or redirect hints here,
-  // but real gate (members.role >= admin) lives in each handler.
-  return NextResponse.next();
+export async function middleware(request: NextRequest) {
+  // Run Supabase session/cookie handler (returns response with refreshed cookies if needed)
+  const supabaseResponse = createClient(request);
+
+  // Existing logic / matcher still applies for /admin paths.
+  // Additional protected paths can be added here in the future if desired.
+  return supabaseResponse;
 }
 
-// Only run middleware for /admin tree. This activates the gate surface.
+// Run on relevant paths (auth, admin, protected areas). Expand as needed.
+// Keep /admin matcher active for the gate surface.
 export const config = {
-  matcher: ['/admin/:path*'],
+  matcher: [
+    /*
+     * Match all request paths except:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - public files (images, etc.)
+     */
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    // Explicitly include admin for the existing gate
+    '/admin/:path*',
+  ],
 };

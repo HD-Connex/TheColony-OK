@@ -47,20 +47,37 @@
   font-size: var(--text-xs);
   letter-spacing: var(--track-wide);
   text-transform: uppercase;
-  color: var(--color-text-secondary);
+  color: var(--color-paper);
+  transition: color var(--transition-fast);
 }
 
 .ticker__item::before {
   content: '▼';
-  color: var(--color-alarm);
+  color: var(--color-paper);
   font-size: 0.7em;
+  opacity: 0.9;
 }
 
-.ticker__item a:hover { color: var(--color-paper); }
+.ticker__item:hover {
+  color: var(--color-alarm);
+}
+
+.ticker__item a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.ticker__item a:hover { 
+  color: var(--color-alarm); 
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
 
 .ticker__filed {
   color: var(--color-text-muted);
   font-size: 0.85em;
+  font-weight: normal;
+  opacity: 0.85;
 }
 
 @media (prefers-reduced-motion: reduce) {
