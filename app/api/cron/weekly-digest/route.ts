@@ -18,13 +18,26 @@ export async function GET(req: Request) {
   const since = new Date(Date.now() - 1000 * 3600 * 24 * 8).toISOString(); // last ~8 days
 
   // Top content
-  const [{ data: arts }, { data: eps }] = await Promise.all([
+  const [{ data: arts }, { data: eps }, { data: topClips }] = await Promise.all([
     sb.from("articles").select("slug,title,dek,published_at,county").eq("status", "published").gte("published_at", since).order("published_at", { ascending: false }).limit(5),
     sb.from("episodes").select("id,title,description,published_at").gte("published_at", since).order("published_at", { ascending: false }).limit(3),
+    // Phase 3: top clips for Citizen Dispatch UGC in digest (high upvotes, recent approved). Pre-cleared moments + member clips.
+    sb.from("clips").select("id, transcript, source_phrase, upvotes, dispatch_type, created_at").eq("approved", true).gte("created_at", since).order("upvotes", { ascending: false }).limit(3),
   ]);
 
+  const site = process.env.NEXT_PUBLIC_SITE_URL || "https://thecolonyok.com";
   const itemsBase = [
-    ...(eps || []).map((e: any) => ({ title: e.title, url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://thecolonyok.com"}/podcasts/${e.id}`, dek: e.description })),
+    ...(eps || []).map((e: any) => ({ title: e.title, url: `${site}/podcasts/${e.id}`, dek: e.description })),
+    // Top clips (Rumble-style dispatch feed highlights) — surfaced for subscribers/members
+    ...(topClips || []).map((c: any) => {
+      const t = c.transcript || c.source_phrase || 'Member Dispatch';
+      const typ = c.dispatch_type === 'citizen_dispatch' ? 'Citizen Dispatch' : 'Member Clip';
+      return {
+        title: `Top ${typ}: ${t}`.slice(0, 90),
+        url: `${site}/clips`,
+        dek: `${c.upvotes || 0} upvotes • ${typ} • ${new Date(c.created_at).toLocaleDateString()}`,
+      };
+    }),
   ];
 
   const { data: subs } = await sb
@@ -33,8 +46,6 @@ export async function GET(req: Request) {
     .is("confirmed_at", "not.null")
     .is("unsubscribed_at", "null")
     .limit(5000);
-
-  const site = process.env.NEXT_PUBLIC_SITE_URL || "https://thecolonyok.com";
   let sent = 0;
 
   for (const sub of subs || []) {

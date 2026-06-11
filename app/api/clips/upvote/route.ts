@@ -2,7 +2,10 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 import { rateLimit, keyFromRequest, tooManyRequests } from "@/lib/rate-limit";
 
-/** Simple upvote for community clips (member or public). Increments denormalized count. */
+/** Simple upvote for community clips (member or public). Increments denormalized count.
+ * Phase 3: public view + upvote on /clips Citizen Dispatch feed (RLS approved=true allows anon select; upvote intentionally no auth gate).
+ * Create/upload remain member-only (enforced in moment/upload via getMembership from lib/entitlements + getUserFromRequest).
+ */
 export async function POST(req: Request) {
   const rl = await rateLimit(keyFromRequest(req, "clip-upvote"), { limit: 50, windowSec: 3600 });
   if (!rl.ok) return tooManyRequests(rl);

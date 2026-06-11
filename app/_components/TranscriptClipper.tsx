@@ -15,7 +15,7 @@ interface Props {
  * - Shows time badge
  * - "Jump" is the link itself
  * - "Create shareable clip" calls /api/clips/moment (if epId + time available) or falls back to enhanced link copy.
- * Creates a community clip record (pre-cleared for internal transcript moments).
+ * Creates a "Citizen Dispatch" community clip record (pre-cleared auto-approved transcript moment for Rumble-style /clips feed).
  */
 export default function TranscriptClipper({ href, title, startTime, phrase, epId }: Props) {
   const [status, setStatus] = useState<"idle" | "creating" | "done" | "err">("idle");
@@ -73,7 +73,7 @@ export default function TranscriptClipper({ href, title, startTime, phrase, epId
         onClick={createMomentClip}
         disabled={status === "creating"}
         className="btn btn--sm btn--primary"
-        title="Create pre-cleared community clip from this spoken phrase (member)"
+        title="Create Citizen Dispatch (pre-cleared transcript moment clip, member only)"
       >
         {status === "creating" ? "Creating..." : "Create shareable clip"}
       </button>

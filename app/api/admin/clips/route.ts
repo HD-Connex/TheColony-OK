@@ -13,7 +13,7 @@ export async function GET(req: Request) {
   const sb = supabaseAdmin();
   const { data } = await sb
     .from("clips")
-    .select("id, user_id, ep_id, duration_s, approved, created_at, storage_path")
+    .select("id, user_id, ep_id, duration_s, approved, created_at, storage_path, dispatch_type, transcript, source_phrase, upvotes, county, start_s")
     .eq("approved", approved)
     .order("created_at", { ascending: false })
     .limit(30);

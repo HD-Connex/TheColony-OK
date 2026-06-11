@@ -28,6 +28,7 @@ export default function HeaderNav() {
   const communityItems: NavItem[] = [
     { href: "/journalists", label: "Journalists" },
     { href: "/contributors/join", label: "Masthead" },
+    { href: "/clips", label: "Citizen Dispatches" }, // Phase 3: Rumble-style member UGC feed (pre-cleared moments + clips)
     { href: "/backroom", label: "The Backroom" }, // Phase 2: Off the Record members link (gated on page)
   ];
 
@@ -164,6 +165,9 @@ export default function HeaderNav() {
           </Link>
           <Link className="nav__link" href="/contributors/join" onClick={closeAll}>
             Masthead
+          </Link>
+          <Link className="nav__link" href="/clips" onClick={closeAll}>
+            Citizen Dispatches
           </Link>
           <Link className="nav__link" href="/backroom" onClick={closeAll}>
             The Backroom

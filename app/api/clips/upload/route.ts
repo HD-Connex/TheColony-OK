@@ -92,6 +92,7 @@ export async function POST(req: Request) {
         approved: false, // waits in moderation queue — no auto-approve
         ai_score: 0,
         tags: [],
+        dispatch_type: 'upload', // Phase 3: member UGC (not pre-cleared Citizen Dispatch); requires mod before appearing in /clips feed
       })
       .select('id, approved')
       .single();

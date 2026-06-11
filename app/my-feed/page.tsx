@@ -96,6 +96,11 @@ export default function MyFeedPage() {
         {counties.length === 0 && (
           <p>Set your counties in <Link href="/my-counties">My Counties</Link> to see personalized feed.</p>
         )}
+
+        {/* Phase 3: link to Citizen Dispatch member feed from personalized area */}
+        <p className="fine-print" style={{ marginTop: 'var(--space-8)' }}>
+          Community clips &amp; moments: <Link href="/clips">Citizen Dispatches</Link> (Rumble-style feed with upvotes).
+        </p>
       </div>
     </InnerPageShell>
   );

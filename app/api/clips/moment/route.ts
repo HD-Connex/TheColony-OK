@@ -45,6 +45,7 @@ export async function POST(req: Request) {
       transcript: clipTitle, // short title in transcript for now
       approved: true, // platform-native auto-clip, pre-cleared
       ai_score: 95, // high trust for internal clipper
+      dispatch_type: 'citizen_dispatch', // Phase 3: marks as Citizen Dispatch UGC (pre-cleared transcript moment for Rumble-style feed)
     })
     .select("id, start_s")
     .single();

@@ -202,13 +202,28 @@ export default function AdminDashboard({ currentUserRole }: Props) {
       {tab === "clips" && (
         <section>
           <h2 className="section-title">Clips Moderation Queue</h2>
-          <p>Pending clips (approved=false). Use existing /api/clips/moderate (editor+) or future bulk UI.</p>
+          <p>Pending clips (approved=false). Citizen Dispatch moments are pre-cleared (approved=true via transcript clipper) and skip queue. Use existing /api/clips/moderate (editor+) or future bulk UI. Dispatch type from 0023 migration.</p>
           <ul>
-            {clips.slice(0, 10).map((c: any) => (
-              <li key={c.id}>{c.id} — user {c.user_id} • {c.duration_s}s</li>
-            ))}
+            {clips.slice(0, 15).map((c: any) => {
+              const isDispatch = c.dispatch_type === 'citizen_dispatch';
+              const label = c.transcript || c.source_phrase || c.id;
+              return (
+                <li key={c.id} style={{ marginBottom: 6, fontSize: 'var(--text-sm)' }}>
+                  <code>{c.id.slice(0,8)}…</code> — user {c.user_id?.slice(0,8)} • {c.duration_s || '?'}s
+                  {c.county ? ` • ${c.county}` : ''}
+                  {c.start_s != null ? ` @${c.start_s}s` : ''}
+                  {' '}<strong>{c.upvotes || 0}↑</strong>
+                  {isDispatch ? ' ' : ' '}
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', background: isDispatch ? '#f4e9c8' : '#eee', padding: '0 4px' }}>
+                    {c.dispatch_type || 'upload'}
+                  </span>
+                  <div style={{ fontSize: '10px', opacity: 0.7, marginTop: 2 }}>{String(label).slice(0, 80)}</div>
+                </li>
+              );
+            })}
           </ul>
           <a href="/api/clips/moderate" target="_blank" className="btn btn--outline">Open moderate endpoint</a>
+          <p className="fine-print" style={{ marginTop: 8 }}>Pre-cleared Citizen Dispatches (dispatch_type=citizen_dispatch) appear directly in /clips feed (approved=true). Uploads wait here.</p>
         </section>
       )}
 
