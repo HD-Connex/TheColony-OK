@@ -99,6 +99,17 @@
   --rule-heavy: 4px;
   --rule-slab: 8px;
 
+  /* ─── Heirloom Press premium layer ─── */
+  --color-brass: #c2a14d;          /* foil on ink */
+  --color-brass-deep: #8a6d2f;     /* foil on paper (4.5:1 on cream) */
+  --color-brass-soft: rgba(194, 161, 77, 0.35);
+  --foil-gradient: linear-gradient(115deg, #8a6d2f 0%, #d9bc6f 38%, #f4e3ae 50%, #d9bc6f 62%, #8a6d2f 100%);
+
+  --font-editorial: var(--font-serif, "Fraunces"), "Georgia", "Times New Roman", serif;
+
+  --rule-double: double 4px;       /* double hairline for premium dividers */
+  --grain-opacity: 0.05;
+
   --shadow-sm: none;
   --shadow-md: none;
   --shadow-lg: none;

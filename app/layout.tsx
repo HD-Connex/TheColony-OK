@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Script from "next/script";
-import { Archivo_Black, Inter_Tight, JetBrains_Mono } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
+import { Archivo_Black, Inter_Tight, JetBrains_Mono, Fraunces } from "next/font/google";
 import "./styles/main.css";
 import Header from "./_components/Header";
 import Footer from "./_components/Footer";
@@ -35,6 +36,15 @@ const fontMono = JetBrains_Mono({
   display: "swap",
 });
 
+const fontSerif = Fraunces({
+  subsets: ["latin"],
+  weight: "variable",
+  style: ["normal", "italic"],
+  variable: "--font-serif",
+  display: "swap",
+  axes: ["opsz"],
+});
+
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
@@ -65,7 +75,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${fontDisplay.variable} ${fontSans.variable} ${fontMono.variable}`}>
+    <html lang="en" className={`${fontDisplay.variable} ${fontSans.variable} ${fontMono.variable} ${fontSerif.variable}`}>
       <head>
         {/* Phase 3-05: Removed external Google Fonts links (now via next/font above).
             Kept other preconnects for Stripe/YouTube/Rumble/Plausible perf. */}
@@ -85,6 +95,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           data-domain="thecolonyok.com"
           src="https://plausible.io/js/script.outbound-links.tagged-events.js"
         />
+        <Analytics />
       </body>
     </html>
   );
