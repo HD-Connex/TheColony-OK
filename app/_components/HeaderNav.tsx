@@ -85,6 +85,10 @@ export default function HeaderNav() {
           Stories
         </Link>
 
+        <Link className={`nav__link ${isActive("/blog") ? "nav__link--active" : ""}`} href="/blog">
+          Blog
+        </Link>
+
         <Dropdown id="media" label="Media" items={mediaItems} />
 
         <Link className={`nav__link ${isActive("/news") ? "nav__link--active" : ""}`} href="/news">
@@ -93,6 +97,10 @@ export default function HeaderNav() {
 
         <Link className={`nav__link ${isActive("/counties") ? "nav__link--active" : ""}`} href="/counties">
           Counties
+        </Link>
+
+        <Link className={`nav__link ${isActive("/my-feed") ? "nav__link--active" : ""}`} href="/my-feed">
+          My Feed
         </Link>
 
         <Dropdown id="community" label="Community" items={communityItems} />
@@ -129,6 +137,9 @@ export default function HeaderNav() {
           <Link className="nav__link" href="/stories" onClick={closeAll}>
             Stories
           </Link>
+          <Link className="nav__link" href="/blog" onClick={closeAll}>
+            Blog
+          </Link>
           <Link className="nav__link" href="/shows" onClick={closeAll}>
             Shows
           </Link>
@@ -143,6 +154,9 @@ export default function HeaderNav() {
           </Link>
           <Link className="nav__link" href="/counties" onClick={closeAll}>
             Counties
+          </Link>
+          <Link className="nav__link" href="/my-feed" onClick={closeAll}>
+            My Feed
           </Link>
           <Link className="nav__link" href="/journalists" onClick={closeAll}>
             Journalists

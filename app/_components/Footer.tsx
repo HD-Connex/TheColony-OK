@@ -56,6 +56,9 @@ export default function Footer() {
               <Link className="footer__link" href="/counties">
                 Counties
               </Link>
+              <Link className="footer__link" href="/my-feed">
+                My Feed
+              </Link>
               <Link className="footer__link" href="/live">
                 Watch Live
               </Link>
