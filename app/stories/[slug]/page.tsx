@@ -12,6 +12,7 @@ import { storyHero, hostPhoto } from "@/lib/media-map";
 import { Paywall } from "../../_components/Paywall";
 import PullQuote from "../../_components/PullQuote";
 import EndMark from "../../_components/EndMark";
+import ImpactSeal from "../../_components/ImpactSeal";
 import { sanitizeHtml } from "@/lib/sanitize";
 
 export const revalidate = 120;
@@ -116,6 +117,7 @@ export default async function StoryPage({ params }: PageProps) {
                 )}
                 <h1 className="article__title">{article.title}</h1>
                 {article.dek && <p className="article__dek">{article.dek}</p>}
+                {(article as any).impact && <ImpactSeal text={(article as any).impact} />}
                 <div className="article__byline">
                   {(() => {
                     const avatarSrc = article.contributor

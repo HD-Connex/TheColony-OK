@@ -70,3 +70,28 @@
   color: var(--color-text-muted);
   border-color: var(--color-text-muted);
 }
+
+/* ImpactSeal — foil "story impact" badge (heirloom press) */
+.impact-seal {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-3);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--track-wider);
+  text-transform: uppercase;
+  border: var(--rule-medium) solid var(--color-brass);
+  color: var(--color-brass);
+  background: var(--color-paper);
+}
+
+.impact-seal__foil {
+  font-weight: var(--weight-bold);
+}
+
+.impact-seal__text {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--color-ink);
+}
