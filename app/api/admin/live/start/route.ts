@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/admin-auth";
-import { createLiveStream } from "@/lib/mux";
+import { createLiveStream, addSimulcastTargets } from "@/lib/mux";
 import { supabaseAdmin } from "@/lib/supabase";
 
 /**
@@ -11,9 +11,25 @@ export async function POST(req: Request) {
   const auth = await requireAdmin(req, "editor");
   if (!auth) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
+  let simulcastTargets: Array<{ url: string; stream_key: string }> = [];
+  try {
+    const body = await req.json();
+    if (Array.isArray(body?.simulcast_targets)) {
+      simulcastTargets = body.simulcast_targets
+        .filter((t: any) => t && typeof t.url === 'string' && typeof t.stream_key === 'string')
+        .map((t: any) => ({ url: t.url.trim(), stream_key: t.stream_key.trim() }));
+    }
+  } catch {
+    // no body or invalid — proceed without simulcast
+  }
+
   try {
     const stream = await createLiveStream();
     const sb = supabaseAdmin();
+
+    if (simulcastTargets.length > 0) {
+      await addSimulcastTargets(stream.id, simulcastTargets);
+    }
 
     // Find an idle/preview event or create a generic one
     const { data: existing } = await sb
@@ -48,6 +64,7 @@ export async function POST(req: Request) {
       ok: true,
       live_stream_id: stream.id,
       playback_id: playback?.id,
+      simulcast_attached: simulcastTargets.length,
       // stream_key intentionally omitted from normal JSON response for safety; it's in DB for ingest
     });
   } catch (e: any) {

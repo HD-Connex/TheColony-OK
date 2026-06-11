@@ -37,6 +37,11 @@ export default function AdminDashboard({ currentUserRole }: Props) {
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
 
+  // Simulcast targets (Phase 3/4 functional wiring)
+  const [simulcastTargets, setSimulcastTargets] = useState<Array<{ url: string; stream_key: string }>>([]);
+  const [simulUrl, setSimulUrl] = useState("");
+  const [simulKey, setSimulKey] = useState("");
+
   const isAdminOrEditor = currentUserRole === "admin" || currentUserRole === "editor";
 
   async function loadArticles() {
@@ -109,12 +114,36 @@ export default function AdminDashboard({ currentUserRole }: Props) {
 
   async function goLive() {
     setMsg(null);
-    const res = await fetch("/api/admin/live/start", { method: "POST" });
+    const payload: any = {};
+    if (simulcastTargets.length > 0) {
+      payload.simulcast_targets = simulcastTargets;
+    }
+    const res = await fetch("/api/admin/live/start", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
     const json = await res.json();
     if (res.ok) {
-      setMsg(`Live stream created. Stream key (admin eyes only): ${json.stream_key ? "stored" : "check DB"}`);
+      const attached = json.simulcast_attached ?? 0;
+      const baseMsg = `Live stream created. Stream key (admin eyes only): check DB`;
+      setMsg(attached > 0 ? `${baseMsg} • ${attached} simulcast target(s) attached` : baseMsg);
+      setSimulcastTargets([]);
       loadLive();
     } else setMsg(json.error || "Failed to start live");
+  }
+
+  function addSimulcastTarget() {
+    const url = simulUrl.trim();
+    const key = simulKey.trim();
+    if (!url || !key) return;
+    setSimulcastTargets((prev) => [...prev, { url, stream_key: key }]);
+    setSimulUrl("");
+    setSimulKey("");
+  }
+
+  function removeSimulcastTarget(idx: number) {
+    setSimulcastTargets((prev) => prev.filter((_, i) => i !== idx));
   }
 
   return (
@@ -179,28 +208,43 @@ export default function AdminDashboard({ currentUserRole }: Props) {
           <button onClick={goLive} className="btn btn--alarm">GO LIVE (create Mux stream + store key)</button>
           <p className="fine-print">Creates real Mux live stream. Stream key + playback stored on live_events. Webhook flips status + auto-creates VOD replay episode on end.</p>
 
-          {/* Phase 3 polish: Simulcast UI */}
+          {/* Functional simulcast UI (wired to /api/admin/live/start + lib/mux addSimulcastTargets) */}
           <div style={{ marginTop: 12, border: "2px solid #111", padding: 8, background: "#fff" }}>
-            <h3 style={{ margin: 0, fontSize: "var(--text-sm)" }}>Multi-platform simulcast (P3)</h3>
-            <p className="fine-print">Free simulcast to YouTube/Rumble/X/FB (provide their RTMP ingest url + stream key). Full show + clips stay member-only on site.</p>
-            <div style={{ display: "flex", gap: 6, margin: "6px 0" }}>
-              <input id="simul-url" placeholder="rtmp://ingest.youtube.com/..." style={{ flex: 1 }} />
-              <input id="simul-key" placeholder="stream-key-from-platform" style={{ flex: 1 }} />
-              <button
-                onClick={async () => {
-                  const url = (document.getElementById("simul-url") as HTMLInputElement)?.value?.trim();
-                  const key = (document.getElementById("simul-key") as HTMLInputElement)?.value?.trim();
-                  if (!url || !key) return alert("Provide url and key");
-                  // For demo: re-trigger go live or call a dedicated attach. Here we just log + re-use goLive flow (extend start route in real).
-                  alert("Simulcast target noted. In full: pass to /api/admin/live/start or addSimulcastTargets. Targets will be attached on next Go Live.");
-                  console.log("[admin] simulcast target", { url, key });
-                }}
-                className="btn btn--outline"
-              >
-                Attach target (demo)
+            <h3 style={{ margin: 0, fontSize: "var(--text-sm)" }}>Multi-platform simulcast</h3>
+            <p className="fine-print">Provide RTMP ingest + stream key for YouTube/Rumble/X/FB etc. Targets are attached when you click GO LIVE (Mux handles the rest). Full show stays member-only on site.</p>
+
+            <div style={{ display: "flex", gap: 6, margin: "6px 0", flexWrap: "wrap" }}>
+              <input
+                value={simulUrl}
+                onChange={(e) => setSimulUrl(e.target.value)}
+                placeholder="rtmp://ingest.youtube.com/..."
+                style={{ flex: 1, minWidth: 220 }}
+              />
+              <input
+                value={simulKey}
+                onChange={(e) => setSimulKey(e.target.value)}
+                placeholder="stream-key-from-platform"
+                style={{ flex: 1, minWidth: 180 }}
+              />
+              <button onClick={addSimulcastTarget} className="btn btn--sm btn--outline" type="button">
+                Add target
               </button>
             </div>
-            <small className="fine-print">Production: extend admin live start to accept array of targets and call mux.addSimulcastTargets after stream creation.</small>
+
+            {simulcastTargets.length > 0 && (
+              <div style={{ margin: "6px 0" }}>
+                <div className="fine-print" style={{ marginBottom: 4 }}>Pending targets (will be sent with next GO LIVE):</div>
+                <ul style={{ fontSize: "var(--text-xs)", margin: 0, paddingLeft: 16 }}>
+                  {simulcastTargets.map((t, i) => (
+                    <li key={i} style={{ marginBottom: 2 }}>
+                      {t.url} <button onClick={() => removeSimulcastTarget(i)} className="btn btn--sm" style={{ padding: "0 4px", marginLeft: 4 }}>×</button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            <small className="fine-print">Targets are attached via Mux createSimulcastTarget at stream creation time. Clear after successful GO LIVE.</small>
           </div>
 
           <ul style={{ marginTop: 8 }}>

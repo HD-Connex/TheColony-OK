@@ -62,9 +62,9 @@ export default function TranscriptClipper({ href, title, startTime, phrase, epId
   }
 
   return (
-    <div style={{ marginTop: 4, display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
+    <div className="grain" style={{ marginTop: 4, padding: "4px 6px", border: "1px solid var(--color-brass)", display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap", background: "var(--color-paper)" }}>
       {timeLabel && (
-        <span style={{ fontSize: "var(--text-xs)", background: "var(--color-paper)", border: "1px solid var(--color-ink)", padding: "1px 4px" }}>
+        <span className="badge" style={{ fontSize: "var(--text-xs)", fontFamily: "var(--font-mono)" }}>
           at {timeLabel}
         </span>
       )}
@@ -75,12 +75,12 @@ export default function TranscriptClipper({ href, title, startTime, phrase, epId
         className="btn btn--sm btn--primary"
         title="Create Citizen Dispatch (pre-cleared transcript moment clip, member only)"
       >
-        {status === "creating" ? "Creating..." : "Create shareable clip"}
+        <span className="foil" style={{ fontSize: "inherit" }}>{status === "creating" ? "Creating..." : "Create shareable clip"}</span>
       </button>
       {status === "done" && clipLink && (
-        <span style={{ fontSize: "var(--text-xs)", color: "var(--color-alarm)" }}>Copied! {clipLink.slice(0, 50)}…</span>
+        <span style={{ fontSize: "var(--text-xs)", color: "var(--color-alarm)", fontFamily: "var(--font-mono)" }}>Copied! {clipLink.slice(0, 50)}…</span>
       )}
-      {status === "err" && <span style={{ fontSize: "var(--text-xs)", color: "red" }}>Failed — try again or use link</span>}
+      {status === "err" && <span style={{ fontSize: "var(--text-xs)", color: "var(--color-alarm)" }}>Failed — try again or use link</span>}
     </div>
   );
 }

@@ -234,6 +234,11 @@ export default async function HomePage() {
           </div>
         </section>
 
+        {/* ContinueRail dropped on homepage (polish from Phase 3/4) — shows for users with progress (DB or localStorage) */}
+        <div className="container">
+          <ContinueRail />
+        </div>
+
         <section className="section">
           <div className="container">
             <header className="section-header">

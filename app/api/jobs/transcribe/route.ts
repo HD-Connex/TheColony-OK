@@ -181,8 +181,15 @@ export async function POST(req: Request) {
         if (chatRes.ok) {
           const chatJson: any = await chatRes.json();
           const content = chatJson.choices?.[0]?.message?.content || "{}";
-          // In real: parse and upsert to episode or clip (e.g. episodes.chapters = parsed.chapters; description or new summary field)
-          console.log("[transcribe] LLM summary/chapters generated for", clipId, content.slice(0, 200));
+          let parsed: any = {};
+          try { parsed = JSON.parse(content); } catch {}
+          // Store summary on the clip (reuses source_phrase for visibility in feeds; for episodes use episodes.summary / chapters jsonb)
+          if (parsed.summary) {
+            const { error: sumErr } = await supabase.from('clips').update({ source_phrase: String(parsed.summary).slice(0, 280) }).eq('id', clipId);
+            if (sumErr) { /* non-fatal for summary storage */ }
+          }
+          // chapters could be stored in transcripts.segments or a dedicated chapters field
+          console.log("[transcribe] LLM summary/chapters generated for", clipId, { summary: parsed.summary, chapters: parsed.chapters?.length || 0 });
         }
       }
     } catch (e) {
