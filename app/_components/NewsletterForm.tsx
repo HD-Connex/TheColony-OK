@@ -9,7 +9,10 @@ export default function NewsletterForm() {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
     const email = String(fd.get("email") ?? "").trim();
-    const county = String(fd.get("county") ?? "").trim() || undefined;
+    const countyRaw = String(fd.get("county") ?? "").trim();
+    const county = countyRaw || undefined;
+    // Support both single county (string) and counties (array) per Phase 1 county feeds + 0021 migration
+    const counties = county ? [county] : undefined;
     if (!email) return;
 
     setStatus("sending");
@@ -17,7 +20,7 @@ export default function NewsletterForm() {
       const res = await fetch("/api/newsletter/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, source: "homepage", county }),
+        body: JSON.stringify({ email, source: "homepage", county, counties }),
       });
       if (res.ok) {
         setStatus("ok");

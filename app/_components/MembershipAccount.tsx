@@ -80,6 +80,20 @@ export default function MembershipAccount() {
           Request a full data export or deletion anytime at privacy@thecolonyok.com.
         </p>
       </div>
+
+      {/* County feeds nav link (Phase 1 Heirloom Press); also links My Counties for prefs */}
+      {isMember && (
+        <div className="account-card">
+          <h2>Local Feeds</h2>
+          <p style={{ marginBottom: "var(--space-2)" }}>
+            Tailor your experience by Oklahoma county for newsletters and stories.
+          </p>
+          <div style={{ display: "flex", gap: "var(--space-2)", flexWrap: "wrap" }}>
+            <Link className="btn btn--outline btn--sm" href="/counties">Browse Counties</Link>
+            <Link className="btn btn--primary btn--sm" href="/my-counties">My Counties (preferences)</Link>
+          </div>
+        </div>
+      )}
     </>
   );
 }
