@@ -22,6 +22,7 @@ export default function StoryCard({ a, variant = "default" }: { a: Article; vari
           alt={a.hero_alt ?? `${a.title} — Oklahoma investigative journalism`}
           fill
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          className="develop"
           style={{ objectFit: "cover" }}
           loading="lazy"
         />
