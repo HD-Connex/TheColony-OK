@@ -118,6 +118,49 @@
   .develop { filter: none; transition: none; }
 }
 
+/* ─── Phase 2: The Backroom elite private club plate (Off the Record)
+   Ink background, double brass rule, foil/mono header, grain overlay.
+   Reuses .foil .grain from heirloom layer. Visible to all in nav; gated inside. */
+.backroom-plate {
+  background-color: var(--color-ink);
+  color: var(--color-paper);
+  border: var(--rule-medium) solid var(--color-alarm);
+  position: relative;
+}
+.backroom-plate::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-top: var(--rule-double) solid var(--color-brass);
+  border-bottom: var(--rule-double) solid var(--color-brass);
+  pointer-events: none;
+  opacity: 0.9;
+}
+.backroom-thread-item:hover {
+  background-color: var(--color-ink) !important;
+  color: var(--color-paper) !important;
+  padding-left: var(--space-5);
+}
+.backroom-thread-item:active {
+  transform: translateX(1px);
+}
+
+/* Brass variant for Paywall (Off the Record live gate) */
+.paywall--brass {
+  border: var(--rule-slab) solid var(--color-brass);
+  background-color: var(--color-ink);
+  color: var(--color-paper);
+}
+.paywall--brass h3 {
+  color: var(--color-brass);
+  font-family: var(--font-mono);
+  letter-spacing: var(--track-wider);
+  text-transform: uppercase;
+}
+.paywall--brass .paywall__disclaimer {
+  opacity: 0.85;
+}
+
 /* Scroll-drawn hairline — width animates in via .is-inview (IntersectionObserver in SiteClient) */
 .rule-draw {
   border: none;

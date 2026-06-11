@@ -10,8 +10,14 @@ import { type StageItem } from "../_components/LiveStage";
 import LivePlatformTabs from "../_components/LivePlatformTabs";
 import ClipsTeaser from "../_components/ClipsTeaser";
 import LiveChat from "../_components/LiveChat";
-import { getLiveEvents, eventsToStageItems, tierLocked, tierLabel, type LiveEvent } from "@/lib/live-events";
+import { Paywall } from "../_components/Paywall";
+import { getLiveEvents, eventsToStageItems, tierLocked, tierLabel, type LiveEvent, isMembersOnly } from "@/lib/live-events";
 import { whenLabel, formatLiveWhen } from "@/lib/format";
+
+// Phase 2 server SSR check (new @supabase/ssr) + entitlements for primary live visibility gating in page shell.
+import { cookies } from "next/headers";
+import { createClient } from "@/utils/supabase/server";
+import { isActiveMember } from "@/lib/entitlements";
 
 export const revalidate = 60;
 
@@ -38,6 +44,15 @@ export default async function LivePage({
   const isOnAir = live.length > 0;
   const countdownTarget =
     nextLive?.scheduled_start ?? new Date(Date.now() + 4 * 3_600_000).toISOString();
+
+  // Phase 2: SSR + new Supabase client + entitlements for "Off the Record" visibility check on primary live.
+  // (Client-side LiveStage also gates on switch using useAuth isMember for full queue support.)
+  const cookieStore = await cookies();
+  const supabaseSsr = createClient(cookieStore);
+  const { data: { user } } = await supabaseSsr.auth.getUser();
+  const isActiveMemberUser = user ? await isActiveMember(user.id) : false;
+  const primaryLive = live[0];
+  const primaryIsOffRecord = primaryLive ? isMembersOnly(primaryLive) : false;
 
   return (
     <>
@@ -127,7 +142,8 @@ export default async function LivePage({
               <ClipsTeaser count={15} />
 
               {/* Live chat in sidebar container (global or event) to keep player clean and text contained */}
-              <LiveChat liveEventId={live[0]?.id ?? null} isMember={false} currentUser={null} />
+              {/* Phase 2: use server-computed isActiveMemberUser (from SSR) for chat gate; client will align via useAuth */}
+              <LiveChat liveEventId={live[0]?.id ?? null} isMember={isActiveMemberUser} currentUser={null} />
 
               {/* Aesthetic life image for live section */}
               <div className="section-lead-image">
@@ -141,6 +157,20 @@ export default async function LivePage({
               </div>
             </div>
           </section>
+
+          {/* Phase 2 Off the Record page-level gate (brass Paywall) for primary live when visibility=members and !active member.
+              Complements client LiveStage gate (which handles realtime active switching + queue). Non-members see this + paywall in player via LiveStage. */}
+          {primaryIsOffRecord && !isActiveMemberUser && (
+            <div className="container" style={{ marginTop: 'var(--space-8)' }}>
+              <Paywall
+                title="Off the Record"
+                message="Off the Record is for members only."
+                brass
+                perk="OFF_THE_RECORD_LIVE"
+                returnUrl="/live"
+              />
+            </div>
+          )}
 
           {upcoming.length > 0 && (
             <section className="section" aria-label="Upcoming broadcasts">

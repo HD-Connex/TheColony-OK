@@ -28,12 +28,12 @@ function matchesCategory(article: Article, cat: string | undefined): boolean {
 export default async function StoriesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ cat?: string }>;
+  searchParams: Promise<{ cat?: string; county?: string }>;
 }) {
-  const { cat } = await searchParams;
+  const { cat, county } = await searchParams;
   const activeKey = CATEGORIES.some((c) => c.key === cat) ? cat! : "all";
 
-  const articles = await getArticles({ limit: 24 }).catch((e) => { console.error("Failed loading stories", e); return []; });
+  const articles = await getArticles({ limit: 24, county }).catch((e) => { console.error("Failed loading stories", e); return []; });
   const filtered = articles.filter((a) => matchesCategory(a, activeKey));
 
   const filterOptions = CATEGORIES.map((c) => ({

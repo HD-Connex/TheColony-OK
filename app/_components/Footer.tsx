@@ -96,6 +96,9 @@ export default function Footer() {
               <Link className="footer__link" href="/contributors/join">
                 Join the Masthead
               </Link>
+              <Link className="footer__link" href="/backroom">
+                The Backroom (Members)
+              </Link>
             </div>
           </div>
           <div>

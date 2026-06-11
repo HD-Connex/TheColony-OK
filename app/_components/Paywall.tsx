@@ -10,22 +10,24 @@
 import React from 'react'
 import Link from 'next/link'
 
-export function Paywall({ perk = 'PER_EP_EXCLUSIVE', episodeTitle, returnUrl }: { perk?: string; episodeTitle?: string; returnUrl?: string }) {
+export function Paywall({ perk = 'PER_EP_EXCLUSIVE', episodeTitle, returnUrl, title: customTitle, message, brass = false }: { perk?: string; episodeTitle?: string; returnUrl?: string; title?: string; message?: string; brass?: boolean }) {
   const ctaUrl = `/checkout?perk=${perk}&return=${encodeURIComponent(returnUrl || '/podcasts')}`
-  const title = episodeTitle ? `Member Exclusive: ${episodeTitle}` : 'Member Exclusive'
+  const title = customTitle || (episodeTitle ? `Member Exclusive: ${episodeTitle}` : 'Member Exclusive')
+
+  const paywallClass = `paywall${brass ? ' paywall--brass' : ''}`
 
   return (
-    <div className="paywall" role="region" aria-label={title}>
-      <h3>{title}</h3>
+    <div className={paywallClass} role="region" aria-label={title}>
+      <h3 className={brass ? 'foil' : undefined}>{title}</h3>
       <p>
-        Unlock with The Colony membership. Includes live chat, per-ep exclusives, rural OK events,
-        ad-free access, and agent perks. Reader-funded independent press for Oklahoma.
+        {message || 'Unlock with The Colony membership. Includes live chat, per-ep exclusives, rural OK events, ad-free access, and agent perks. Reader-funded independent press for Oklahoma.'}
       </p>
       <Link href={ctaUrl} className="btn btn--primary btn--lg">
         Subscribe or Gift (Local OK Perks)
       </Link>
       <p className="paywall__disclaimer">100% supports Oklahoma rural journalism. Cancel anytime. Gift codes redeem instantly.</p>
       {/* Edge: usage tracked server; no client bypass. Deep link return preserved. */}
+      {/* Phase 2: brass variant for Off the Record / members live gating */}
     </div>
   )
 }

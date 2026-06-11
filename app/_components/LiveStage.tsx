@@ -13,6 +13,7 @@ import { useAuth, supabaseBrowser } from "@/lib/auth-client";
 import { refreshStageItems } from "@/lib/live-events";
 import { getActivePollClient } from "@/lib/live-polls";
 import YouTubeDemoReel from "./YouTubeDemoReel";
+import { Paywall } from "./Paywall"; // Phase 2: brass Off the Record Paywall for members visibility live events
 /** Unified stage item — used by /live and homepage (old API). */
 export interface StageItem {
   id: string;
@@ -23,6 +24,7 @@ export interface StageItem {
   when?: string;
   locked?: boolean;
   tierLabel?: string;
+  visibility?: 'public' | 'members'; // Phase 2 Off the Record member live
 }
 
 interface LiveStageProps {
@@ -149,6 +151,9 @@ export default function LiveStage({ items: initialItems = [], initialActiveId, c
   const playbackIsLive = is247 ? true : !!active?.isLive;
   const isEmbed = playbackSrc ? !/\.m3u8(\?|$)/.test(playbackSrc) && !playbackSrc.endsWith(".mp4") : false;
   const tierBlocked = !is247 && active?.locked && !isMember;
+  // Phase 2: "Off the Record" visibility gating — members only lives show brass Paywall (reuse Paywall + .foil/.brass styling)
+  const isMembersOnlyLive = !is247 && active?.visibility === 'members';
+  const offRecordBlocked = isMembersOnlyLive && !isMember;
 
   return (
     <div className="live-stage" data-247={is247}>
@@ -181,6 +186,17 @@ export default function LiveStage({ items: initialItems = [], initialActiveId, c
               setActiveId(null);
             }}
           />
+        ) : offRecordBlocked ? (
+          // Phase 2 brass Paywall for Off the Record (members live). Styled via prop; foil on h3.
+          <div className="live-player__gate live-player__gate--brass">
+            <Paywall
+              title="Off the Record"
+              message="Off the Record is for members only."
+              brass
+              perk="OFF_THE_RECORD_LIVE"
+              returnUrl="/live"
+            />
+          </div>
         ) : tierBlocked ? (
           <div className="live-player__gate">
             <p>▼ {active?.tierLabel ?? "Members"} only</p>
@@ -259,6 +275,7 @@ export default function LiveStage({ items: initialItems = [], initialActiveId, c
                 {ev.title}{" "}
                 <span className="status">{ev.isLive ? "live" : "replay"}</span>
                 {ev.locked && <span className="badge badge--members">{ev.tierLabel}</span>}
+                {ev.visibility === 'members' && <span className="badge badge--members">OFF THE RECORD</span>}
                 {ev.id === activeId && (
                   <span className="pulse" aria-hidden>
                     ● NOW

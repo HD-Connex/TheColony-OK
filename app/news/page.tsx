@@ -102,10 +102,7 @@ export default async function NewsPage({
   searchParams: Promise<{ county?: string }>;
 }) {
   const { county: countyFilter } = await searchParams;
-  let items = await getArticles({ limit: 30 }).catch(() => { return []; });
-  if (countyFilter) {
-    items = items.filter((a: any) => (a.county || "").toLowerCase() === countyFilter.toLowerCase());
-  }
+  const items = await getArticles({ limit: 30, county: countyFilter }).catch(() => { return []; });
   const [pinned, ...rest] = items;
   const groups = groupArticles(rest);
   const visibleGroups = GROUP_ORDER.filter((g) => groups[g].length > 0);

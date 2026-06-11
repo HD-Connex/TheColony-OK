@@ -28,6 +28,7 @@ export default function HeaderNav() {
   const communityItems: NavItem[] = [
     { href: "/journalists", label: "Journalists" },
     { href: "/contributors/join", label: "Masthead" },
+    { href: "/backroom", label: "The Backroom" }, // Phase 2: Off the Record members link (gated on page)
   ];
 
   const Dropdown = ({ id, label, items }: { id: string; label: string; items: NavItem[] }) => {
@@ -163,6 +164,9 @@ export default function HeaderNav() {
           </Link>
           <Link className="nav__link" href="/contributors/join" onClick={closeAll}>
             Masthead
+          </Link>
+          <Link className="nav__link" href="/backroom" onClick={closeAll}>
+            The Backroom
           </Link>
           <Link className="btn btn--primary btn--full" href="/pricing" onClick={closeAll}>
             Join — $4.99/month

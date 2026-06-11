@@ -14,10 +14,11 @@ export interface LiveEvent {
   mux_playback_id: string | null;
   video_url: string | null;
   tier_required: string;
+  visibility: 'public' | 'members'; // Phase 2 Off the Record: 'members' = gated live
 }
 
 const COLS =
-  "id,series_id,title,description,status,scheduled_start,actual_start,ended_at,mux_playback_id,video_url,tier_required";
+  "id,series_id,title,description,status,scheduled_start,actual_start,ended_at,mux_playback_id,video_url,tier_required,visibility";
 
 export interface LiveBundle {
   live: LiveEvent[];
@@ -66,6 +67,11 @@ export async function getLiveEventsClient(): Promise<LiveBundle> {
 
 export { tierLocked, tierLabel };
 
+/** Visibility helper for Off the Record gating (Phase 2) */
+export function isMembersOnly(e: LiveEvent | { visibility?: string | null }): boolean {
+  return (e as any)?.visibility === 'members';
+}
+
 /** Map server LiveEvent rows to StageItem props for LiveStage (shared by /live + home). */
 export function eventsToStageItems(
   events: LiveEvent[],
@@ -79,6 +85,7 @@ export function eventsToStageItems(
   when: string;
   locked: boolean;
   tierLabel: string;
+  visibility?: 'public' | 'members'; // Phase 2: Off the Record gating
 }> {
   return events.map((e) => {
     const pb = playbackFor(e);
@@ -91,6 +98,7 @@ export function eventsToStageItems(
       when: whenLabel(e),
       locked: tierLocked(e.tier_required),
       tierLabel: tierLabel(e.tier_required),
+      visibility: e.visibility,
     };
   });
 }
