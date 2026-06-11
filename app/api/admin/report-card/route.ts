@@ -13,12 +13,22 @@ export async function GET(req: Request) {
     return new NextResponse("Unauthorized", { status: 401 });
   }
   const sb = supabaseAdmin();
-  const [{ data: officials }, { data: issues }, { data: grades }] = await Promise.all([
-    sb.from("officials").select("*").order("county").order("name"),
-    sb.from("scorecard_issues").select("*").order("sort_order"),
-    sb.from("grades").select("*").order("updated_at", { ascending: false }),
-  ]);
-  return NextResponse.json({ officials: officials ?? [], issues: issues ?? [], grades: grades ?? [] });
+  let officials: any[] = [];
+  let issues: any[] = [];
+  let grades: any[] = [];
+  try {
+    const [{ data: o }, { data: i }, { data: g }] = await Promise.all([
+      sb.from("officials").select("*").order("county").order("name"),
+      sb.from("scorecard_issues").select("*").order("sort_order"),
+      sb.from("grades").select("*").order("updated_at", { ascending: false }),
+    ]);
+    officials = o ?? [];
+    issues = i ?? [];
+    grades = g ?? [];
+  } catch (e: any) {
+    console.error("[admin/report-card] load error (tables may be missing - apply 0024 migration)", e?.message);
+  }
+  return NextResponse.json({ officials, issues, grades });
 }
 
 export async function POST(req: Request) {

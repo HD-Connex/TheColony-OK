@@ -184,11 +184,9 @@ export async function POST(req: Request) {
           let parsed: any = {};
           try { parsed = JSON.parse(content); } catch {}
           // Store summary on the clip (reuses source_phrase for visibility in feeds; for episodes use episodes.summary / chapters jsonb)
-          if (parsed.summary) {
-            const { error: sumErr } = await supabase.from('clips').update({ source_phrase: String(parsed.summary).slice(0, 280) }).eq('id', clipId);
-            if (sumErr) { /* non-fatal for summary storage */ }
-          }
           // chapters could be stored in transcripts.segments or a dedicated chapters field
+          // Note: summary is generated but not overwriting clip.source_phrase (preserves original spoken phrase for moments).
+          // For future: store in episodes.summary / a metadata jsonb, or dedicated summary column.
           console.log("[transcribe] LLM summary/chapters generated for", clipId, { summary: parsed.summary, chapters: parsed.chapters?.length || 0 });
         }
       }
