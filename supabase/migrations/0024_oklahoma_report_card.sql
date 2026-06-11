@@ -55,6 +55,11 @@ alter table public.scorecard_issues enable row level security;
 alter table public.grades enable row level security;
 
 -- Public read policies (civic tool — anyone can see the grades)
+-- Use DROP IF EXISTS for idempotency (prevents 42710 "policy already exists" on re-runs / manual re-apply)
+DROP POLICY IF EXISTS "officials_public_read" ON public.officials;
+DROP POLICY IF EXISTS "scorecard_issues_public_read" ON public.scorecard_issues;
+DROP POLICY IF EXISTS "grades_public_read" ON public.grades;
+
 create policy "officials_public_read" on public.officials for select using (true);
 create policy "scorecard_issues_public_read" on public.scorecard_issues for select using (true);
 create policy "grades_public_read" on public.grades for select using (true);
