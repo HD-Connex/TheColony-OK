@@ -1,95 +1,69 @@
-// Supabase clients. Two separate clients so we never accidentally use the
-// service-role key in a public-facing context.
-//
-// - `supabaseAdmin()` — server-side, service-role, bypasses RLS. Used by cron.
-// - `supabasePublic()` — server-side, anon key, respects RLS. Used by public reads.
-
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 
 let admin: SupabaseClient | null = null;
 let pub: SupabaseClient | null = null;
 
+/**
+ * Admin (service role) client — bypasses RLS for writes, crons, admin APIs, seed.
+ * Throws if credentials missing (callers should only use in privileged contexts).
+ * Cached singleton.
+ */
 export function supabaseAdmin(): SupabaseClient {
   if (admin) return admin;
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!url || !key) throw new Error("Missing SUPABASE_URL or SERVICE_ROLE_KEY");
+  if (!url || !key) {
+    throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY");
+  }
   admin = createClient(url, key, { auth: { persistSession: false } });
   return admin;
 }
 
-export function supabaseConfigured(): boolean {
-  return Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
-}
-
+/**
+ * Public (anon / publishable) client — respects RLS for public reads.
+ * Supports both NEXT_PUBLIC_SUPABASE_ANON_KEY (legacy/compat) and
+ * NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY (modern Supabase project naming).
+ * In prod: throws on missing (loud failure for misconfig).
+ * In dev: warns + returns a no-op placeholder client so the app can still boot for local work.
+ * Cached singleton. Matches usage across lib/* (articles, podcasts, series, search, etc).
+ */
 export function supabasePublic(): SupabaseClient {
   if (pub) return pub;
-  let url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  let key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key =
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
   if (!url || !key) {
-    // Never run production against placeholder credentials — fail loudly.
     if (process.env.NODE_ENV === "production") {
-      throw new Error("NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY missing in production.");
+      throw new Error(
+        "NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY (or PUBLISHABLE_KEY) missing for public client."
+      );
     }
-    console.warn("[supabase] env missing — using placeholder client (dev only).");
-    url = url ?? "https://placeholder.supabase.co";
-    key = key ?? "placeholder-anon-key";
+    console.warn(
+      "[supabase] Public client env missing (NEXT_PUBLIC_SUPABASE_URL + ANON or PUBLISHABLE key) — using placeholder (dev degraded mode)."
+    );
+    // Safe placeholder so pages/components using supabasePublic() don't explode before hydration or in partial envs.
+    pub = createClient("https://placeholder.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsYWNlaG9sZGVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTAwMDAwMDAsImV4cCI6MjAwMDAwMDAwMH0.placeholder", {
+      auth: { persistSession: false },
+    });
+    return pub;
   }
   pub = createClient(url, key, { auth: { persistSession: false } });
   return pub;
 }
 
-// Single shared public client (anon key) — created once via the cached supabasePublic() factory.
-// (export const supabase = createClient... singleton per P5 requirement; delegates to avoid top-level env crashes on import during build)
+/** True when the public Supabase client can be created (URL + anon/publishable key present). */
+export function supabaseConfigured(): boolean {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key =
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+  return Boolean(url && key);
+}
+
+/**
+ * Convenience singleton export for legacy / docs compatibility ("export const supabase = supabasePublic()").
+ * Prefer explicit supabasePublic() or supabaseAdmin() calls for clarity.
+ * (Created lazily on first access via the function.)
+ */
 export const supabase = supabasePublic();
-
-// ─── Recommended: import the official @supabase/ssr helpers directly where needed ───
-// Server (Server Components / Route Handlers): import { createClient } from '@/utils/supabase/server'
-// Client (Client Components): import { createClient } from '@/utils/supabase/client'
-//
-// We intentionally do NOT re-export the server client from this shared lib
-// (lib/supabase.ts is imported from both server and client contexts in the app).
-
-// ─── Domain types ───
-
-export interface Show {
-  id: string;
-  slug: string;
-  title: string;
-  host: string;
-  description: string | null;
-  cover_url: string | null;
-  rss_url: string;
-  active: boolean;
-  last_polled: string | null;
-  last_status: string | null;
-  fail_count: number;
-  created_at: string;
-}
-
-export interface Episode {
-  id: string;
-  show_id: string;
-  show_slug: string;
-  guid: string;
-  title: string;
-  description: string | null;
-  audio_url: string | null;
-  duration_s: number | null;
-  pub_date: string;
-  episode_no: number | null;
-  cover_url: string | null;
-  slug: string;
-  host_name?: string | null;
-  published_at?: string | null;
-  created_at: string;
-  // Podcast video support (Phase 6 / priority 1): optional video "version" of episode
-  // (like Spotify video podcasts). Ingested via RSS (video mime enclosure or itunes:video),
-  // admin, or seed. chapters as jsonb array for seekable markers.
-  video_url?: string | null;
-  mux_playback_id?: string | null;
-  thumbnail_url?: string | null;
-  chapters?: Array<{ t: number; label: string }> | null;
-}
-
-export type EpisodeInsert = Omit<Episode, "id" | "created_at">;

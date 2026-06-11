@@ -6,7 +6,7 @@
 // - No background sync in MVP (add later for upload queue)
 // - TWA friendly: standalone already in manifest; offline UI graceful
 
-const CACHE_NAME = 'thecolony-v3-clips';
+const CACHE_NAME = 'thecolony-v4-reportcard-fixes';  // Bumped to bust stale caches after CSS/middleware fixes + report-card deploys (prevents serving old unstyled HTML).
 const APP_SHELL = [
   '/',
   '/live',

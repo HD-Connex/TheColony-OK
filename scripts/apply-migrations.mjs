@@ -51,24 +51,28 @@ const KEY_TABLES = [
   'threaded_comments',
   'contributors',
   'contributor_applications',
+  // Phase 4 report-card tables (from 0024 migration)
+  'officials',
+  'scorecard_issues',
+  'grades',
 ];
 
-const MIGRATION_FILES = [
-  '0001_live_events.sql',
-  '0003_episode_data_refinements.sql',
-  '0004_realtime_chat_polls.sql',
-  '0005_realtime_publication.sql',
-  '0006_members_stripe.sql',
-  '0007_video_catalog.sql',
-  '0008_watch_progress.sql',
-  '0009_articles_stub.sql',
-  '0010_articles_contributors.sql',
-  '0010_member_features.sql',
-  '0011_ai_search.sql',
-  '0012_contributor_applications.sql',
-  '0013_contributors_table.sql',
-  '0014_clips_and_threaded_comments_rls.sql',
-];
+// Dynamic discovery so we never miss new migrations (e.g. 0024 report-card, future ones).
+// Scans supabase/migrations for *.sql, sorts by filename (version prefix), applies only new ones.
+import fs from 'fs';
+import path from 'path';
+
+const migrationsDir = path.resolve(process.cwd(), 'supabase', 'migrations');
+let MIGRATION_FILES = [];
+try {
+  MIGRATION_FILES = fs
+    .readdirSync(migrationsDir)
+    .filter((f) => f.endsWith('.sql'))
+    .sort();  // lexical sort works for 00xx_ names
+} catch (e) {
+  console.error('[apply-migrations] Could not read migrations dir, falling back to empty list:', e);
+  MIGRATION_FILES = [];
+}
 
 async function ensureMigrationTable(client) {
   await client.query(`

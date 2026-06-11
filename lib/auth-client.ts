@@ -13,12 +13,16 @@ import { useCallback, useEffect, useState } from "react";
 
 let browser: SupabaseClient | null = null;
 
+function getPublicKey(): string | undefined {
+  return process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+}
+
 export function supabaseBrowser(): SupabaseClient {
   if (browser) return browser;
   // Single shared browser client (singleton). Config differs from server public (persist + detect for magic links).
   // Aligns with lib/supabase.ts single shared export const supabase pattern (see also auth-server using supabasePublic).
   let url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  let key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  let key = getPublicKey();
   if (!url || !key) {
     if (process.env.NODE_ENV === "production") {
       throw new Error("Supabase public env vars missing in production build.");
