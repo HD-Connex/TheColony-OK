@@ -10,6 +10,8 @@ import { formatDate } from "@/lib/format";
 import { tierLocked } from "@/lib/tiers";
 import { storyHero, hostPhoto } from "@/lib/media-map";
 import { Paywall } from "../../_components/Paywall";
+import PullQuote from "../../_components/PullQuote";
+import EndMark from "../../_components/EndMark";
 import { sanitizeHtml } from "@/lib/sanitize";
 
 export const revalidate = 120;
@@ -163,11 +165,12 @@ export default async function StoryPage({ params }: PageProps) {
                 )}
               </figure>
 
-              <div className="article__body">
+              <div className="article__body article-body">
                 {paragraphs.map((p, i) => (
                   <p key={i}>{p}</p>
                 ))}
               </div>
+              <EndMark />
               {locked && (
                 <Paywall
                   perk="STORY_EXCLUSIVE"
