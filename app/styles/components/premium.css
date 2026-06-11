@@ -129,3 +129,26 @@
 @media (prefers-reduced-motion: reduce) {
   .rule-draw { width: 100%; transition: none; }
 }
+
+/* Orchestrated load reveal for masthead/folio/hero (add .is-loaded on html via SiteClient) */
+.site-header,
+.folio,
+.article__hero-image,
+.card__image {
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 400ms ease, transform 400ms ease;
+}
+.is-loaded .site-header,
+.is-loaded .folio,
+.is-loaded .article__hero-image,
+.is-loaded .card__image {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .site-header,
+  .folio,
+  .article__hero-image,
+  .card__image { transition: none; opacity: 1; transform: none; }
+}

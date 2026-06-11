@@ -6,7 +6,7 @@ export default function Footer() {
   return (
     <footer className="site-footer">
       <div className="container">
-        <div className="newsletter">
+        <div className="newsletter grain">
           <div className="newsletter__heading">
             <span className="newsletter__eyebrow">▼ The Briefing</span>
             <h3 className="newsletter__title">A Letter From Oklahoma. Every Morning.</h3>
@@ -20,7 +20,7 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="footer__masthead">
+        <div className="footer__masthead grain">
           <div className="footer__mark">
             <Image
               src="/assets/images/logo-dark.jpg"
