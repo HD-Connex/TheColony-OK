@@ -9,7 +9,8 @@ import { supabaseAdmin } from "@/lib/supabase";
  */
 
 export async function GET(req: Request) {
-  if (!requireAdmin(req)) {
+  const auth = await requireAdmin(req);
+  if (!auth) {
     return new NextResponse("Unauthorized", { status: 401 });
   }
   const sb = supabaseAdmin();
@@ -32,7 +33,8 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
-  if (!requireAdmin(req)) {
+  const auth = await requireAdmin(req);
+  if (!auth) {
     return new NextResponse("Unauthorized", { status: 401 });
   }
 
