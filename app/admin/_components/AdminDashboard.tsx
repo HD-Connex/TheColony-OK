@@ -25,12 +25,15 @@ interface Application {
 }
 
 export default function AdminDashboard({ currentUserRole }: Props) {
-  const [tab, setTab] = useState<"articles" | "contributors" | "live" | "clips" | "members">("articles");
+  const [tab, setTab] = useState<"articles" | "contributors" | "live" | "clips" | "members" | "report-card">("articles");
   const [articles, setArticles] = useState<Article[]>([]);
   const [apps, setApps] = useState<Application[]>([]);
   const [liveEvents, setLiveEvents] = useState<any[]>([]);
   const [clips, setClips] = useState<any[]>([]);
   const [members, setMembers] = useState<any[]>([]);
+  const [reportOfficials, setReportOfficials] = useState<any[]>([]);
+  const [reportIssues, setReportIssues] = useState<any[]>([]);
+  const [reportGrades, setReportGrades] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
 
@@ -72,12 +75,21 @@ export default function AdminDashboard({ currentUserRole }: Props) {
     setMembers(json.members || []);
   }
 
+  async function loadReportCard() {
+    const res = await fetch("/api/admin/report-card");
+    const json = await res.json();
+    setReportOfficials(json.officials || []);
+    setReportIssues(json.issues || []);
+    setReportGrades(json.grades || []);
+  }
+
   useEffect(() => {
     if (tab === "articles") loadArticles();
     if (tab === "contributors") loadApps();
     if (tab === "live") loadLive();
     if (tab === "clips") loadClips();
     if (tab === "members") loadMembers();
+    if (tab === "report-card") loadReportCard();
   }, [tab]);
 
   async function approveApp(id: string) {
@@ -108,7 +120,7 @@ export default function AdminDashboard({ currentUserRole }: Props) {
   return (
     <div className="admin-cms">
       <nav className="admin-tabs" style={{ display: "flex", gap: "8px", margin: "16px 0", borderBottom: "3px solid #111", paddingBottom: 8 }}>
-        {["articles", "contributors", "live", "clips", "members"].map((t) => (
+        {["articles", "contributors", "live", "clips", "members", "report-card"].map((t) => (
           <button
             key={t}
             onClick={() => setTab(t as any)}
@@ -235,6 +247,118 @@ export default function AdminDashboard({ currentUserRole }: Props) {
               <li key={m.user_id}>{m.email || m.user_id} — {m.tier || "free"} {m.is_member ? "✓ member" : ""} role:{m.role}</li>
             ))}
           </ul>
+        </section>
+      )}
+
+      {tab === "report-card" && (
+        <section>
+          <h2 className="section-title">Report Card (Phase 4)</h2>
+          <p className="fine-print">Public civic grades. Officials + issues + A–F grades with evidence. Data is readable by anyone after 0024 migration; edits here are admin-only.</p>
+          <button onClick={loadReportCard} className="btn btn--outline" style={{ marginBottom: 8 }}>Refresh</button>
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginTop: 12 }}>
+            {/* Officials */}
+            <div style={{ border: "1px solid #111", padding: 8 }}>
+              <strong>Officials</strong>
+              <ul style={{ fontSize: "var(--text-sm)", margin: "8px 0" }}>
+                {reportOfficials.slice(0, 12).map((o: any) => (
+                  <li key={o.id}>{o.name} — {o.office} ({o.county || "—"})</li>
+                ))}
+              </ul>
+              <form
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  setMsg(null);
+                  const fd = new FormData(e.currentTarget);
+                  const payload = {
+                    name: fd.get("name"),
+                    office: fd.get("office"),
+                    county: fd.get("county"),
+                    party: fd.get("party") || null,
+                  };
+                  const res = await fetch("/api/admin/report-card", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ action: "create_official", payload }),
+                  });
+                  if (res.ok) {
+                    setMsg("Official added.");
+                    (e.target as HTMLFormElement).reset();
+                    loadReportCard();
+                  } else setMsg("Failed to add official");
+                }}
+              >
+                <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
+                  <input name="name" placeholder="Name" required style={{ flex: 1, minWidth: 120 }} />
+                  <input name="office" placeholder="Office" required style={{ flex: 1, minWidth: 120 }} />
+                  <input name="county" placeholder="County" style={{ width: 110 }} />
+                  <input name="party" placeholder="Party" style={{ width: 80 }} />
+                  <button className="btn btn--sm" type="submit">Add</button>
+                </div>
+              </form>
+            </div>
+
+            {/* Grades */}
+            <div style={{ border: "1px solid #111", padding: 8 }}>
+              <strong>Recent Grades</strong>
+              <ul style={{ fontSize: "var(--text-sm)", margin: "8px 0" }}>
+                {reportGrades.slice(0, 8).map((g: any) => (
+                  <li key={g.id}>{g.grade} · official {String(g.official_id).slice(0,8)}… issue {String(g.issue_id).slice(0,8)}…</li>
+                ))}
+              </ul>
+              <form
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  setMsg(null);
+                  const fd = new FormData(e.currentTarget);
+                  const payload = {
+                    official_id: fd.get("official_id"),
+                    issue_id: fd.get("issue_id"),
+                    grade: fd.get("grade"),
+                    notes: fd.get("notes") || null,
+                    evidence_url: fd.get("evidence_url") || null,
+                    source: fd.get("source") || null,
+                  };
+                  const res = await fetch("/api/admin/report-card", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ action: "upsert_grade", payload }),
+                  });
+                  if (res.ok) {
+                    setMsg("Grade saved.");
+                    (e.target as HTMLFormElement).reset();
+                    loadReportCard();
+                  } else setMsg("Failed to save grade");
+                }}
+              >
+                <div style={{ display: "grid", gap: 4, gridTemplateColumns: "1fr 1fr" }}>
+                  <select name="official_id" required>
+                    <option value="">Official…</option>
+                    {reportOfficials.map((o: any) => (
+                      <option key={o.id} value={o.id}>{o.name} ({o.county || "?"})</option>
+                    ))}
+                  </select>
+                  <select name="issue_id" required>
+                    <option value="">Issue…</option>
+                    {reportIssues.map((i: any) => (
+                      <option key={i.id} value={i.id}>{i.title}</option>
+                    ))}
+                  </select>
+                  <select name="grade" required>
+                    {["A","B","C","D","F","N/A"].map((g) => <option key={g} value={g}>{g}</option>)}
+                  </select>
+                  <input name="source" placeholder="Source (e.g. OK Senate bill 123)" />
+                  <input name="evidence_url" placeholder="https://evidence..." style={{ gridColumn: "1 / -1" }} />
+                  <textarea name="notes" placeholder="Notes (optional)" style={{ gridColumn: "1 / -1", minHeight: 40 }} />
+                  <button className="btn btn--sm" type="submit" style={{ gridColumn: "1 / -1" }}>Save / Update Grade</button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <p className="fine-print" style={{ marginTop: 8 }}>
+            After adding officials/grades, the public /report-card and /report-card/[county] pages will reflect them (public read via RLS).
+          </p>
         </section>
       )}
 

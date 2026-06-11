@@ -30,6 +30,7 @@ export default async function CountiesPage() {
             <div className="card__body">
               <h3 className="card__title" style={{ margin: 0 }}>{county} County</h3>
               <p className="card__excerpt" style={{ margin: "var(--space-2) 0 0" }}>{count} stor{count === 1 ? "y" : "ies"}</p>
+              <div className="fine-print" style={{ marginTop: 4 }}><Link href={`/report-card/${encodeURIComponent(county)}`}>Report Card →</Link></div>
             </div>
           </Link>
         ))}

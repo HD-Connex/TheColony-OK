@@ -4,7 +4,7 @@ import Image from "next/image";
 import InnerPageShell from "../_components/InnerPageShell";
 import SectionBlock from "../_components/SectionBlock";
 import StoryCard from "../_components/StoryCard";
-import { getArticles, type Article } from "@/lib/articles";
+import { getArticles, type Article, getCountiesWithCounts } from "@/lib/articles";
 import {
   formatDateShort,
   formatNewsTime,
@@ -102,7 +102,10 @@ export default async function NewsPage({
   searchParams: Promise<{ county?: string }>;
 }) {
   const { county: countyFilter } = await searchParams;
-  const items = await getArticles({ limit: 30, county: countyFilter }).catch(() => { return []; });
+  const [items, countyOptions] = await Promise.all([
+    getArticles({ limit: 30, county: countyFilter }).catch(() => { return []; }),
+    getCountiesWithCounts(),
+  ]);
   const [pinned, ...rest] = items;
   const groups = groupArticles(rest);
   const visibleGroups = GROUP_ORDER.filter((g) => groups[g].length > 0);
@@ -115,11 +118,18 @@ export default async function NewsPage({
       lede="The day's headlines from Oklahoma — state, national, and local. Filed throughout the day."
       section={false}
     >
-      {/* Phase 3 polish: county filter for local moat */}
-      <form action="/news" method="GET" style={{ marginBottom: "var(--space-3)", display: "flex", gap: 6, alignItems: "center" }}>
-        <input name="county" placeholder="Filter by county (e.g. Oklahoma, Tulsa)" style={{ maxWidth: 260 }} />
+      {/* Phase 1 remaining polish: real county filter using getCountiesWithCounts (select, preserves current) */}
+      <form action="/news" method="GET" style={{ marginBottom: "var(--space-3)", display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
+        <label htmlFor="county" className="fine-print" style={{ marginRight: 4 }}>County:</label>
+        <select id="county" name="county" defaultValue={countyFilter || ""} style={{ maxWidth: 220 }}>
+          <option value="">All counties</option>
+          { countyOptions.map(c => (
+            <option key={c.county} value={c.county}>{c.county} ({c.count})</option>
+          )) }
+        </select>
         <button className="btn btn--sm btn--outline" type="submit">Filter</button>
         {countyFilter && <a href="/news" className="btn btn--sm">Clear</a>}
+        <small className="fine-print" style={{ marginLeft: 8 }}>Also browse <a href="/counties">all counties</a></small>
       </form>
 
       {/* Aesthetic lead image for news */}

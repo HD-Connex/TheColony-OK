@@ -195,3 +195,71 @@
   .article__hero-image,
   .card__image { transition: none; opacity: 1; transform: none; }
 }
+
+/* Phase 4: Oklahoma Report Card — letterpress/foil public record plates (county-tied civic transparency) */
+.report-card-plate {
+  border: 2px solid var(--color-brass);
+  background: var(--color-paper);
+  position: relative;
+}
+.report-card-plate::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22300%22><filter id=%22n%22><feTurbulence type=%22fractalNoise%22 baseFrequency=%220.9%22 numOctaves=%223%22 stitchTiles=%22stitch%22/></filter><rect width=%22300%22 height=%22300%22 filter=%22url(%23n)%22 opacity=%220.035%22/></svg>');
+  background-size: 280px 280px;
+  mix-blend-mode: multiply;
+  opacity: var(--grain-opacity, 0.6);
+}
+.report-card-header {
+  font-family: var(--font-mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-ink);
+  border-bottom: 1px solid var(--color-brass);
+}
+.report-card-header .foil {
+  color: var(--color-brass);
+}
+.official-meta {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  opacity: 0.8;
+}
+.grade {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  padding: 2px 8px;
+  border: 1px solid var(--color-ink);
+  display: inline-block;
+  min-width: 2.25rem;
+  text-align: center;
+  line-height: 1.1;
+}
+.grade--a,
+.grade--b {
+  border-color: var(--color-brass);
+  color: var(--color-ink);
+}
+.grade--f {
+  border-color: var(--color-alarm);
+  color: var(--color-alarm);
+}
+.grade--c,
+.grade--d {
+  border-color: var(--color-rule);
+}
+.evidence {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  display: inline-block;
+  border-top: 1px solid var(--color-rule);
+  padding-top: var(--space-1);
+  margin-top: var(--space-2);
+  color: var(--color-ink);
+  text-decoration: underline;
+}
+.evidence:hover {
+  color: var(--color-alarm);
+}

@@ -30,6 +30,7 @@ export default function HeaderNav() {
     { href: "/contributors/join", label: "Masthead" },
     { href: "/clips", label: "Citizen Dispatches" }, // Phase 3: Rumble-style member UGC feed (pre-cleared moments + clips)
     { href: "/backroom", label: "The Backroom" }, // Phase 2: Off the Record members link (gated on page)
+    { href: "/report-card", label: "Report Card" }, // Phase 4: Oklahoma Report Card (public civic grades)
   ];
 
   const Dropdown = ({ id, label, items }: { id: string; label: string; items: NavItem[] }) => {
@@ -171,6 +172,9 @@ export default function HeaderNav() {
           </Link>
           <Link className="nav__link" href="/backroom" onClick={closeAll}>
             The Backroom
+          </Link>
+          <Link className="nav__link" href="/report-card" onClick={closeAll}>
+            Report Card
           </Link>
           <Link className="btn btn--primary btn--full" href="/pricing" onClick={closeAll}>
             Join — $4.99/month

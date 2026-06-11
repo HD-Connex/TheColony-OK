@@ -3,7 +3,7 @@ import Image from "next/image";
 import FilterBar from "../_components/FilterBar";
 import InnerPageShell from "../_components/InnerPageShell";
 import StoryCard from "../_components/StoryCard";
-import { getArticles, type Article } from "@/lib/articles";
+import { getArticles, type Article, getCountiesWithCounts } from "@/lib/articles";
 
 export const metadata: Metadata = {
   title: "Stories",
@@ -33,7 +33,10 @@ export default async function StoriesPage({
   const { cat, county } = await searchParams;
   const activeKey = CATEGORIES.some((c) => c.key === cat) ? cat! : "all";
 
-  const articles = await getArticles({ limit: 24, county }).catch((e) => { console.error("Failed loading stories", e); return []; });
+  const [articles, countyOptions] = await Promise.all([
+    getArticles({ limit: 24, county }).catch((e) => { console.error("Failed loading stories", e); return []; }),
+    getCountiesWithCounts(),
+  ]);
   const filtered = articles.filter((a) => matchesCategory(a, activeKey));
 
   const filterOptions = CATEGORIES.map((c) => ({
@@ -52,6 +55,20 @@ export default async function StoriesPage({
       tone="paper"
     >
       <FilterBar options={filterOptions} activeKey={activeKey} />
+
+      {/* Phase 1 remaining polish: county filter (select from real counts) — complements cat filter */}
+      <form action="/stories" method="GET" style={{ margin: "var(--space-3) 0", display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
+        <input type="hidden" name="cat" value={activeKey} />
+        <label htmlFor="county" className="fine-print" style={{ marginRight: 4 }}>County:</label>
+        <select id="county" name="county" defaultValue={county || ""} style={{ maxWidth: 220 }}>
+          <option value="">All counties</option>
+          {countyOptions.map(c => (
+            <option key={c.county} value={c.county}>{c.county} ({c.count})</option>
+          ))}
+        </select>
+        <button className="btn btn--sm btn--outline" type="submit">Filter</button>
+        {(county || activeKey !== "all") && <a href="/stories" className="btn btn--sm">Clear all</a>}
+      </form>
 
       {/* Aesthetic lead image for stories */}
       <div className="section-lead-image">
