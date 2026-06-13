@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import Breadcrumbs from "../../_components/Breadcrumbs";
 import PageHeader from "../../_components/PageHeader";
 import JsonLd from "../../_components/JsonLd";
+import { STOCK } from "@/lib/media-map";
 
 export const metadata: Metadata = {
   title: "The Colony vs BlazeTV | Oklahoma Roots + Local Depth",
@@ -15,7 +16,7 @@ export const metadata: Metadata = {
       "National caliber with Oklahoma authenticity. Compare pricing, privacy, local depth, and community vs BlazeTV.",
     images: [
       {
-        url: "/assets/images/hosts/dan-hollis.jpg",
+        url: STOCK.hostDefault,
         width: 1200,
         height: 630,
         alt: "The Colony vs BlazeTV — Dan Hollis on Oklahoma editorial",
@@ -32,14 +33,14 @@ const vsBlazeSchema = {
       name: "The Colony vs BlazeTV — Why Local Wins",
       description:
         "Side-by-side comparison: Colony rural OK depth, member community, and reader-funded journalism vs BlazeTV national personalities.",
-      thumbnailUrl: ["https://thecolonyok.com/assets/images/hosts/dan-hollis.jpg"],
+      thumbnailUrl: [STOCK.hostDefault],
       uploadDate: "2026-06-08",
       contentUrl: "https://thecolonyok.com/podcasts/colony-report/real-video-ep",
     },
     {
       "@type": "Person",
       name: "Dan Hollis",
-      image: "https://thecolonyok.com/assets/images/hosts/dan-hollis.jpg",
+      image: STOCK.hostDefault,
       jobTitle: "Host",
       worksFor: { "@type": "Organization", name: "The Colony OK" },
     },
@@ -151,7 +152,7 @@ export default function VsBlazePage() {
                 <p className="bio-card__role">Reader-funded Oklahoma press</p>
                 <ul className="bio-card__list">
                   <li>Founding tiers from $4.99/mo with transparent reader funding</li>
-                  <li>Local rural shows: The Colony Report (flagship), Faith &amp; Freedom, Patriot Hour, OK Underground, Energy OK (Ag Report beats seeded)</li>
+                  <li>Local rural shows: The Colony Report (flagship), Faith &amp; Freedom, Patriot Hour, OK Underground, Energy OK (Ag Report beats seeded per supabase/seed-content.sql + 5 series)</li>
                   <li>Member clips and county forums — continuous community vs weekly chats</li>
                   <li>Full hub integration + PWA/TWA mobile with offline smart packs</li>
                   <li>

@@ -83,7 +83,11 @@ export default async function JournalistsPage() {
               </article>
             ))
           ) : (
-            <p className="empty-state">No journalists listed yet.</p>
+            // PHASE 8 AUDIT P1: Journalists empty-state updated to user-friendly (no seeded lang). 
+            // Reconciles count = contributors.length || 5 (already matches seed: Sarah, Marcus, Rachel, Dan, Wes). 
+            // If contributors seeded, grid shows data (confirmed via lib/contributors + seed). Reuses .empty-state.
+            // "5 ON STAFF" in eyebrow from count. Layout: grid + tier examples preserved.
+            <p className="empty-state">No journalists listed yet — check back soon or reach the masthead via tip line.</p>
           )}
         </div>
 

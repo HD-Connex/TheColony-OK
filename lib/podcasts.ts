@@ -41,7 +41,25 @@ export async function getShowsWithEpisodeCounts(limit = 8): Promise<PodcastRollu
 }
 
 // --- Added for per-ep pages and EpisodePlayer data-driven (minimal impl for deploy/test) ---
-import type { Episode } from "./supabase";
+// Local Episode shape (avoid stale export from supabase barrel)
+type Episode = {
+  id: string;
+  show_id?: string;
+  show_slug: string;
+  slug?: string;
+  title: string;
+  description?: string | null;
+  audio_url?: string | null;
+  video_url?: string | null;
+  mux_playback_id?: string | null;
+  thumbnail_url?: string | null;
+  chapters?: any;
+  host_name?: string | null;
+  duration_s?: number | null;
+  episode_no?: number | null;
+  pub_date?: string;
+  guid?: string;
+};
 
 export interface PlayableEpisode {
   id: string;
@@ -124,10 +142,10 @@ export function episodeToPlayable(ep: Episode): PlayableEpisode {
   return {
     id: ep.id,
     title: ep.title,
-    episode_no: ep.episode_no,
-    pub_date: ep.pub_date,
-    duration_s: ep.duration_s,
-    audio_url: ep.audio_url,
+    episode_no: (ep.episode_no ?? null) as number | null,
+    pub_date: (ep.pub_date ?? '') as string,
+    duration_s: (ep.duration_s ?? null) as number | null,
+    audio_url: ep.audio_url ?? null,
     video_url: ep.video_url,
     mux_playback_id: ep.mux_playback_id,
     thumbnail_url: ep.thumbnail_url,

@@ -8,6 +8,7 @@ import WatchlistButton from "../../_components/WatchlistButton";
 import { getVideoSeriesBySlug, getSeriesEpisodes, getPublishedSeriesSlugs } from "@/lib/series";
 import { formatDuration, formatDate } from "@/lib/format";
 import { tierLocked, tierLabel } from "@/lib/tiers";
+import { safeStockImage, STOCK } from "@/lib/media-map";
 
 export const revalidate = 60;
 
@@ -66,20 +67,17 @@ export default async function SeriesPage({ params }: PageProps) {
         section={false}
       >
         <section className="series-hero">
-          {series.hero_url && (
-            <div className="series-hero__bg">
-              <Image
-                src={series.hero_url}
-                alt={series.title}
-                fill
-                priority
-                sizes="100vw"
-                className="img-cover img-hero-dim"
-              />
-              <div className="series-hero__overlay" />
-            </div>
-          )}
-          {!series.hero_url && <div className="series-hero__bg series-hero__bg-tint" />}
+          <div className="series-hero__bg">
+            <Image
+              src={safeStockImage("hero", series.slug, series.hero_url)}
+              alt={series.title}
+              fill
+              priority
+              sizes="100vw"
+              className="img-cover img-hero-dim"
+            />
+            <div className="series-hero__overlay" />
+          </div>
           <div className="series-hero__content">
             <div className="series-hero__badges">
               {series.is_oklahoma && <span className="badge badge--new">Oklahoma Original</span>}
@@ -117,9 +115,13 @@ export default async function SeriesPage({ params }: PageProps) {
                     <li key={ep.id}>
                       <Link href={`/shows/${series.slug}/${ep.slug}`} className="episode-row">
                         <div className="episode-row__thumb">
-                          {ep.thumbnail_url && (
-                            <Image src={ep.thumbnail_url} alt={ep.title} fill sizes="176px" className="img-cover" />
-                          )}
+                          <Image
+                            src={safeStockImage("podcast", series.slug, ep.thumbnail_url)}
+                            alt={ep.title}
+                            fill
+                            sizes="176px"
+                            className="img-cover"
+                          />
                           {ep.duration_seconds != null && (
                             <span className="episode-row__duration">{formatDuration(ep.duration_seconds)}</span>
                           )}

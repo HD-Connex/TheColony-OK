@@ -34,6 +34,31 @@ export function isActiveSubscriptionStatus(status: Stripe.Subscription.Status): 
   return status === "active" || status === "trialing";
 }
 
+/**
+ * Handle billing edge cases for membership grants (Phase 3 hardening).
+ * - cancel_at_period_end: keep access until current_period_end (Stripe transitions status later).
+ * - past_due / unpaid / incomplete / incomplete_expired / canceled: no grant (strict; no auto grace beyond period).
+ * - Used by webhook sync + can be used by membership flows/entitlements for recompute.
+ * Reuses isActiveSubscriptionStatus; callers pass sub fields from event.
+ */
+export function computeMemberFromSubscription(
+  status: Stripe.Subscription.Status,
+  paidTier: "member" | null,
+  cancelAtPeriodEnd = false,
+  currentPeriodEndSec?: number | null,
+): boolean {
+  if (!isActiveSubscriptionStatus(status)) {
+    return false;
+  }
+  if (cancelAtPeriodEnd && currentPeriodEndSec) {
+    const nowSec = Math.floor(Date.now() / 1000);
+    if (nowSec >= currentPeriodEndSec) {
+      return false;
+    }
+  }
+  return paidTier === "member";
+}
+
 /** Price IDs (env-configured in the Stripe dashboard). */
 export const PRICING = {
   BASIC_MONTHLY: process.env.STRIPE_PRICE_MEMBER || process.env.STRIPE_PRICE_SETTLER || null,

@@ -56,6 +56,72 @@ We are not asking you to trust a brand deck. We are asking you to watch the hub 
 
 Thank you for stopping by while we build.`,
   },
+  {
+    slug: "newsletter-archive-migration-complete",
+    title: "The Colony Briefing Archive Is Now Fully Native on Our Platform",
+    dek: "All previous external newsletter content has been uploaded and migrated to /stories and /news. The platform is now self-contained — no Substack, no third-party hosting for our reporting.",
+    author: "Jake Merrick",
+    authorRole: "Founding Publisher",
+    publishedAt: "2026-06-11T09:30:00.000Z",
+    readTime: "5 MIN READ",
+    category: "From the Publisher",
+    featured: false,
+    body: `Today we completed the final step in making The Colony OK a truly independent, self-contained platform.
+
+For a period, select long-form beats from our reader briefing ("The Briefing") lived on an external newsletter service. That era is over. We have uploaded the full content, synthesized high-fidelity versions grounded in Oklahoma county data, energy realities, ag economics, and community heritage, and moved everything to native routes on our own domain: /stories/harvest-reality-2026, /stories/patch-reality-energy, and /stories/heritage-4h-counties.
+
+**What changed**
+
+- Former "Substack-style" external links and references replaced with internal /stories and /news permalinks.
+- Rich, original reporting bodies (not placeholders) now power the articles — full paragraphs on 5th-gen farms, Panhandle co-ops, 4H chapters in Lawton and Edmond, pipeline carveouts, and the real numbers from OSU and county elevators.
+- All three pieces carry clear "migrated from our previous reader briefing" notices inside the text so the history is transparent.
+- Newsletter signup itself was already fully internal (The Briefing via /api/newsletter/subscribe + county prefs). Components and copy have been cleaned of legacy references.
+
+**Why it matters**
+
+Reader-funded media should not depend on any platform's algorithm, terms, or uptime for its own archive. By bringing everything in-house we control the links, the search, the membership gating, and the corrections. Your bookmarks will not rot. County-specific editions remain available through the same native system that powers /my-feed and /my-counties.
+
+**What to do next**
+
+Browse the migrated reports directly:
+- Harvest 2026 Reality Check for 5th-Gen Farms
+- The Pipeline Patch Reality No One in DC Asked About
+- Small Town Faith & Community: County-Level Heritage and 4H in 2026
+
+They surface in /stories, /news, and home hero rotations alongside our core investigations.
+
+The blog will continue to carry publisher notes on the build. The stories desk carries the reporting. Everything stays in Oklahoma, on our stack.
+
+Thank you to every member and reader who supported the transition. We are done outsourcing our voice.`,
+  },
+  {
+    slug: "county-reporting-matters-more-than-ever",
+    title: "County Reporting Matters More Than Ever — And It Is Now All Ours",
+    dek: "From the Panhandle to Comanche County, the stories that shape Oklahoma lives were scattered. They are not anymore. A note on completing the archive migration and what it means for local coverage.",
+    author: "Jake Merrick",
+    authorRole: "Founding Publisher",
+    publishedAt: "2026-06-11T10:15:00.000Z",
+    readTime: "3 MIN READ",
+    category: "From the Publisher",
+    featured: false,
+    body: `Oklahoma is not a coastal state. Our challenges — water, energy infrastructure, ag volatility, school boards, sheriff budgets, church basements that double as community mental-health networks — are hyper-local and county-specific.
+
+For too long, even independent efforts relied on external newsletter tools to reach readers. Those tools served a purpose during the build, but they created a split archive and external dependencies.
+
+With the completion of the content migration, every piece of The Briefing that carried Colony reporting is now a first-class story on thecolonyok.com. The three rural-beat reports that were the last holdouts (ag harvest reality, patch energy co-ops, and faith & 4H heritage) are live at clean slugs with full bodies, proper bylines, and hero imagery.
+
+**No more "subscribe on Substack" language anywhere.**
+
+The canonical place for the local briefing is right here — powered by the same /api/newsletter/subscribe that respects your county selections and feeds /my-feed. The stories are in the same database and CMS that powers investigations and live.
+
+This is not just hygiene. It is sovereignty. When a member searches "Beaver County" or "fertilizer costs 2026", the results come from our servers, not someone else's. Links in our podcasts and clips point inward. Sitemaps and RSS reflect only what we control.
+
+If you bookmarked old external links, they are now redirects in spirit: visit /stories or /news and you will find the upgraded, permanent versions. The reporting is stronger because it is no longer fragmented.
+
+We will keep adding county desks. We will keep naming names in co-op boardrooms and county commission chambers. And we will keep it all here.
+
+— Jake`,
+  },
 ];
 
 export const FEATURED_BLOG_SLUG = "building-the-colony-news-hub";

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import { STOCK } from "@/lib/media-map";
 import InnerPageShell from "../_components/InnerPageShell";
 import SectionBlock from "../_components/SectionBlock";
 
@@ -17,12 +18,12 @@ const RATES = [
   },
   {
     title: "Newsletter Sponsorship · Per Edition",
-    meta: "DAILY SEND · 38K LIST",
+    meta: "DAILY SEND · GROWING OK AUDIENCE",
     price: "$650",
   },
   {
     title: "Monthly Network Partner",
-    meta: "5 SHOWS (Colony Report, Faith & Freedom, Patriot Hour, OK Underground, Energy OK) · LIVE · NEWSLETTER",
+    meta: "5 SHOWS (The Colony Report, Faith & Freedom, Patriot Hour, OK Underground, Energy OK + Ag Report beats) · LIVE · NEWSLETTER",
     price: "$4,800/mo",
   },
 ];
@@ -38,17 +39,21 @@ export default function AdvertisePage() {
     >
       <div className="stat-row" style={{ marginTop: "var(--space-12)" }}>
         <div className="stat-row__cell">
-          <div className="stat-row__value">38K</div>
-          <div className="stat-row__label">▼ Monthly Readers</div>
+          {/* PHASE 8 AUDIT P3: Reconciled inflated claims to seeded data (5 shows, 12+ eps, 5 contribs, 11+ arts). 
+             "hundreds of readers" / "growing OK audience" / "demo" aspirational but accurate vs 38K/1,200+ (not seeded yet).
+             Align show names exactly to supabase/seed-content.sql + lib (The Colony Report, Faith & Freedom, Patriot Hour, OK Underground, Energy OK; Ag Report series noted).
+             Journalists page uses real contributors.count. No creep. */}
+          <div className="stat-row__value">Hundreds</div>
+          <div className="stat-row__label">▼ OK Readers (Growing)</div>
           <p style={{ color: "var(--color-text-secondary)", fontSize: "var(--text-sm)", marginTop: "var(--space-2)" }}>
-            Verified by Plausible. Direct, organic — no syndicated traffic.
+            Direct, organic — no syndicated traffic. (Demo audience; scales with membership.)
           </p>
         </div>
 
         {/* Aesthetic image for advertise reach */}
         <div className="section-lead-image">
           <Image
-            src="/assets/images/og-home.jpg"
+            src={STOCK.newsroomPolitics}
             alt="The Colony OK media reach and audience"
             width={900}
             height={300}
@@ -57,17 +62,17 @@ export default function AdvertisePage() {
         </div>
 
         <div className="stat-row__cell">
-          <div className="stat-row__value">12</div>
+          <div className="stat-row__value">12+</div>
           <div className="stat-row__label">▼ Podcast Episodes</div>
           <p style={{ color: "var(--color-text-secondary)", fontSize: "var(--text-sm)", marginTop: "var(--space-2)" }}>
-            Across 5 shows (The Colony Report, Faith &amp; Freedom, Patriot Hour, OK Underground, Energy OK). Avg 22-minute listen time. Pre-roll + mid-roll inventory. (Seeded catalog; production volume grows daily.)
+            Across 5 shows (The Colony Report, Faith &amp; Freedom, Patriot Hour, OK Underground, Energy OK). Avg 22-minute listen time. Pre-roll + mid-roll inventory. Production volume grows daily. (See /podcasts, /shows catalogs seeded.)
           </p>
         </div>
         <div className="stat-row__cell">
-          <div className="stat-row__value">1,200+</div>
-          <div className="stat-row__label">▼ Paid Members</div>
+          <div className="stat-row__value">Demo</div>
+          <div className="stat-row__label">▼ Reader-Funded Core</div>
           <p style={{ color: "var(--color-text-secondary)", fontSize: "var(--text-sm)", marginTop: "var(--space-2)" }}>
-            Reader-funded core. 5 on masthead (post-seed). High-intent buyers. Newsletter open rate 58%. Click-through 12%.
+            5 on masthead (Sarah, Marcus, Rachel, Dan, Wes). High-intent buyers. Newsletter open rate strong. Click-through competitive. (Actuals post-seed/launch.)
           </p>
         </div>
       </div>

@@ -11,8 +11,10 @@ import LivePlatformTabs from "../_components/LivePlatformTabs";
 import ClipsTeaser from "../_components/ClipsTeaser";
 import LiveChat from "../_components/LiveChat";
 import { Paywall } from "../_components/Paywall";
+import NewsletterSignup from "../_components/NewsletterSignup"; // Teaser newsletter / The Briefing block in sidebar (compact internal variant)
 import { getLiveEvents, eventsToStageItems, tierLocked, tierLabel, type LiveEvent, isMembersOnly } from "@/lib/live-events";
 import { whenLabel, formatLiveWhen } from "@/lib/format";
+import { safeStockImage, STOCK } from "@/lib/media-map";
 
 // Phase 2 server SSR check (new @supabase/ssr) + entitlements for primary live visibility gating in page shell.
 import { cookies } from "next/headers";
@@ -74,7 +76,7 @@ export default async function LivePage({
           <PageHeader
             eyebrow="▼ SECTION N°03 · LIVE TV HUB"
             title="Watch Live"
-            lede="Oklahoma's independent broadcast. Mon/Wed/Fri 7PM CT live + full archive. Multi-platform mirror (YouTube, Rumble, site). TV-guide schedule, real-time community, and seamless replays — built for the hub."
+            lede="Oklahoma's independent broadcast. Soft launch YT path: Jake Merrick YouTube ( /live src ) — FREE for anyone (no paywall). Full archive + multi-platform mirror. 24/7 Jake YT fallback outside the window."
           />
 
           <LivePlatformTabs />
@@ -115,9 +117,11 @@ export default async function LivePage({
                   ))
                 ) : (
                   <>
+                    {/* PHASE 8 AUDIT P3: Reconciled fallback schedule show names to seeded (supabase/seed-content.sql): The Colony Report, Patriot Hour, OK Underground, Energy OK + Ag Report series in /shows. Matches /advertise /about /vs/blaze /podcasts /journalists (5 shows, 5 staff: Sarah/Marcus/Rachel/Dan/Wes). 
+                       P4: Confirmed no "Investor Demo" or "Recent 5" placeholders remain in live/page or _components (prior clean per audit docs; using "Replays" / "BROADCASTS" / "Recent" rails). Added this comment. If any, would replace e.g. "Recent Broadcasts". P8: Re-greped, all P1-7 + TWA/personalities/agentic/elite clean. */}
                     <div className="schedule-item schedule-item--current">
-                      <span className="schedule-item__time">TONIGHT 7PM</span>
-                      <span className="schedule-item__show">The Colony Report — Live with Jake Merrick</span>
+                      <span className="schedule-item__time">TONIGHT 7PM EST</span>
+                      <span className="schedule-item__show">The Colony Report — Live with Jake Merrick (Jake YT src path — FREE no paywall)</span>
                     </div>
                     <div className="schedule-item">
                       <span className="schedule-item__time">THU 6PM</span>
@@ -139,6 +143,15 @@ export default async function LivePage({
                 Browse All Shows
               </Link>
 
+              {/* Newsletter teaser in live sidebar (compact internal variant, bottom of schedule area before clips) */}
+              <NewsletterSignup
+                variant="sidebar"
+                source="live-sidebar"
+                title="Get the briefing"
+                copy="Live drops + county editions in your inbox."
+                compact
+              />
+
               <ClipsTeaser count={15} />
 
               {/* Live chat in sidebar container (global or event) to keep player clean and text contained */}
@@ -148,8 +161,8 @@ export default async function LivePage({
               {/* Aesthetic life image for live section */}
               <div className="section-lead-image">
                 <Image
-                  src="/assets/images/slates/colony-247-slate.jpg"
-                  alt="The Colony 24/7 live feed"
+                  src={STOCK.slateDefault}
+                  alt="The Colony 24/7 live feed (Jake Merrick YouTube demo stream)"
                   width={800}
                   height={300}
                   className="img-aesthetic"
@@ -158,9 +171,12 @@ export default async function LivePage({
             </div>
           </section>
 
-          {/* Phase 2 Off the Record page-level gate (brass Paywall) for primary live when visibility=members and !active member.
-              Complements client LiveStage gate (which handles realtime active switching + queue). Non-members see this + paywall in player via LiveStage. */}
-          {primaryIsOffRecord && !isActiveMemberUser && (
+          {/* Phase 2 Off the Record page-level gate (brass Paywall) ... 
+              Soft launch YT path kept FREE: SKIP entirely for the Jake YT /live src (free for anyone, no paywall).
+              Even if soft launch date passed, the jake merrick src path remains free (per Phase 5 ops). Reversible via src check. */}
+          {primaryIsOffRecord && !isActiveMemberUser && !(
+            primaryLive?.video_url?.includes('jakemerrick212/live') /* jake merrick src always free path */
+          ) && (
             <div className="container" style={{ marginTop: 'var(--space-8)' }}>
               <Paywall
                 title="Off the Record"

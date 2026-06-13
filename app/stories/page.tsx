@@ -3,7 +3,10 @@ import Image from "next/image";
 import FilterBar from "../_components/FilterBar";
 import InnerPageShell from "../_components/InnerPageShell";
 import StoryCard from "../_components/StoryCard";
+import NewsletterSignup from "../_components/NewsletterSignup"; // Newsletter / The Briefing block (after filters/headers)
+import ContinueRail from "../_components/ContinueRail"; // Reuse enhanced ContinueRail for discovery breadth on stories list (site-wide)
 import { getArticles, type Article, getCountiesWithCounts } from "@/lib/articles";
+import { safeStockImage } from "@/lib/media-map";
 
 export const metadata: Metadata = {
   title: "Stories",
@@ -70,10 +73,19 @@ export default async function StoriesPage({
         {(county || activeKey !== "all") && <a href="/stories" className="btn btn--sm">Clear all</a>}
       </form>
 
+      {/* Newsletter signup / The Briefing block: after filters/headers in stories (inline variant for flow) */}
+      <NewsletterSignup
+        variant="inline"
+        source="stories-page"
+        title="Subscribe for the local briefing"
+        copy="Long-form investigations + county editions delivered free."
+        compact
+      />
+
       {/* Aesthetic lead image for stories */}
       <div className="section-lead-image">
         <Image
-          src="/assets/images/stories/oklahoma-budget-crisis.jpg"
+          src={safeStockImage("story")}
           alt="Investigative reporting from Oklahoma"
           width={1200}
           height={400}
@@ -82,7 +94,11 @@ export default async function StoriesPage({
       </div>
 
       {filtered.length === 0 ? (
-        <p className="empty-state">No stories published yet.</p>
+        // PHASE 8 AUDIT P1: Updated empty-state to user-friendly message (no "seeded" language, per instructions).
+        // Reuses exact .empty-state class + pattern from existing (news, journalists, topics, counties, watch, clips, backroom).
+        // Matches task example: "No published stories yet — check back soon or be the first to contribute via tip line."
+        // Brutalist tone; preserves layout (p inside InnerPageShell grid flow). SEO: description/eyebrow already strong.
+        <p className="empty-state">No published stories yet — check back soon or be the first to contribute via tip line.</p>
       ) : (
         <div className="grid-3">
           {filtered.map((a) => (
@@ -90,6 +106,9 @@ export default async function StoriesPage({
           ))}
         </div>
       )}
+
+      {/* Site-wide ContinueRail reuse (stories index) for discovery breadth */}
+      <ContinueRail compact />
     </InnerPageShell>
   );
 }

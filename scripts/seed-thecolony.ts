@@ -18,6 +18,7 @@
 // @ts-nocheck — scripts-only (pg optional dep for DIRECT_URL path; types not in main app bundle; pre-existing seeding subagent debt resolved for build cleanliness in elite closer)
 
 import { readFileSync } from 'fs';
+import { STOCK } from "../lib/media-map";
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import pg from 'pg';
@@ -95,7 +96,7 @@ async function seedViaSupabaseClient() {
     { id: 'a2222222-2222-4222-8222-222222222222', slug: 'faith-and-freedom', title: 'Faith & Freedom', host: 'Pastor Dan Hollis', description: 'Scripture meets the public square.', cover_url: '/assets/images/podcasts/faith-freedom.jpg', rss_url: null, active: true },
     { id: 'a3333333-3333-4333-8333-333333333333', slug: 'patriot-hour', title: 'Patriot Hour', host: 'Marcus Webb', description: 'One hour. Zero spin.', cover_url: '/assets/images/podcasts/patriot-hour.jpg', rss_url: null, active: true },
     { id: 'a4444444-4444-4444-8444-444444444444', slug: 'oklahoma-underground', title: 'OK Underground', host: 'Rachel Torres', description: 'Field reports from the counties.', cover_url: '/assets/images/podcasts/oklahoma-underground.jpg', rss_url: null, active: true },
-    { id: 'a5555555-5555-4555-8555-555555555555', slug: 'energy-ok', title: 'Energy OK', host: 'Jake Merrick', description: 'Oil, gas, wind, pipelines, rural jobs.', cover_url: null, rss_url: null, active: true },
+    { id: 'a5555555-5555-4555-8555-555555555555', slug: 'energy-ok', title: 'Energy OK', host: 'Jake Merrick', description: 'Oil, gas, wind, pipelines, rural jobs.', cover_url: STOCK.energyOil, rss_url: null, active: true },
   ];
   for (const row of showRows) {
     await sb.from('shows').upsert(row, { onConflict: 'slug' });
@@ -104,8 +105,8 @@ async function seedViaSupabaseClient() {
 
   // Sample episodes (use a few with mux/video/chapters for lib/podcasts + EpisodePlayer)
   const epRows = [
-    { show_slug: 'colony-report', slug: 'real-video-ep', title: 'The Real Video Episode — OK Investigations', description: 'Video + chapters demo.', audio_url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3', video_url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4', mux_playback_id: null, thumbnail_url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg', chapters: [{ t: 0, label: 'Cold Open' }, { t: 180, label: 'Field Report' }], host_name: 'Jake Merrick', duration_s: 1800, episode_no: 42, pub_date: new Date(Date.now() - 86400000).toISOString(), guid: 'seed:colony-report:real-video-ep' },
-    { show_slug: 'patriot-hour', slug: 'ep-207-federal-overreach', title: 'Ep. 207 — Federal Overreach', description: 'Constitutional lens on mandates.', audio_url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3', video_url: null, mux_playback_id: 'muxseedpatriot01', thumbnail_url: null, chapters: null, host_name: 'Marcus Webb', duration_s: 3600, episode_no: 207, pub_date: new Date(Date.now() - 5*86400000).toISOString(), guid: 'seed:patriot-hour:ep-207' },
+    { show_slug: 'colony-report', slug: 'real-video-ep', title: 'The Real Video Episode — OK Investigations', description: 'Video + chapters demo.', audio_url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3', video_url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4', mux_playback_id: null, thumbnail_url: STOCK.energyOil, chapters: [{ t: 0, label: 'Cold Open' }, { t: 180, label: 'Field Report' }], host_name: 'Jake Merrick', duration_s: 1800, episode_no: 42, pub_date: new Date(Date.now() - 86400000).toISOString(), guid: 'seed:colony-report:real-video-ep' },
+    { show_slug: 'patriot-hour', slug: 'ep-207-federal-overreach', title: 'Ep. 207 — Federal Overreach', description: 'Constitutional lens on mandates.', audio_url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3', video_url: null, mux_playback_id: 'muxseedpatriot01', thumbnail_url: STOCK.newsroomPolitics, chapters: null, host_name: 'Marcus Webb', duration_s: 3600, episode_no: 207, pub_date: new Date(Date.now() - 5*86400000).toISOString(), guid: 'seed:patriot-hour:ep-207' },
   ];
   for (const r of epRows) {
     // Resolve show_id
@@ -120,8 +121,8 @@ async function seedViaSupabaseClient() {
 
   // Also upsert a couple series for /shows (lib/series) — SQL path is authoritative
   await sb.from('series').upsert([
-    { id: 'd1111111-1111-4111-8111-111111111111', slug: 'colony-report', title: 'The Colony Report', tagline: 'Oklahoma truth daily.', type: 'podcast', status: 'published', pillar: 'truth', is_oklahoma: true, tier_required: 'free', sort_weight: 100 },
-    { id: 'd3333333-3333-4333-8333-333333333333', slug: 'patriot-hour', title: 'Patriot Hour', tagline: 'One hour. Zero spin.', type: 'show', status: 'published', pillar: 'freedom', is_oklahoma: false, tier_required: 'settler', sort_weight: 80 },
+    { id: 'd1111111-1111-4111-8111-111111111111', slug: 'colony-report', title: 'The Colony Report', tagline: 'Oklahoma truth daily.', type: 'podcast', status: 'published', pillar: 'truth', is_oklahoma: true, tier_required: 'free', sort_weight: 100, poster_url: STOCK.podcastDefault },
+    { id: 'd3333333-3333-4333-8333-333333333333', slug: 'patriot-hour', title: 'Patriot Hour', tagline: 'One hour. Zero spin.', type: 'show', status: 'published', pillar: 'freedom', is_oklahoma: false, tier_required: 'settler', sort_weight: 80, poster_url: STOCK.podcastDefault },
   ], { onConflict: 'slug' });
   console.log('OK   upserted sample series (direct Supabase client)');
 

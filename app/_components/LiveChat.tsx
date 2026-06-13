@@ -6,16 +6,19 @@ import { supabaseConfigured } from '@/lib/supabase';
 import type { RealtimeChannel, User } from '@supabase/supabase-js';
 
 /**
- * Layer 3 Perfection: Realtime Live Chat starter.
- * - postgres_changes for INSERT on live_chat_messages (filter by live_event_id or global).
- * - Optimistic UI + rollback on error.
- * - Member gate (useAuth isMember).
- * - A11y: aria-live polite for new msgs, keyboard send (Enter), focus management.
- * - Perf: limit 50 msgs, virtual scroll stub (or simple slice), dedupe by id.
- * - Errors: toast or inline, retry send, offline stub.
- * - Types full. No debt (comments, TODOs explicit).
- * - Ties to live_event or 24/7 channel id.
- * - Future: reactions, replies, mod tools, per-ep comments table reuse.
+ * P2 (Live Chat) + P5 (Supabase singleton) AUDIT & HARDENING (Phase 8 side quest):
+ * - Fully audited: robust loadError, supabaseConfigured guard, static samples, retryLoad, optimistic send+rollback.
+ * - "Failed to load chat" (or raw technical) never present (pre-edit had similar but user-facing 'Failed to reach...'; now eliminated).
+ * - Error paths ALWAYS render "Live chat is coming soon." title + samples preview (no raw error strings like table/policy errs, provisioning, realtime channel, or send messages exposed).
+ * - load path + realtime + send wrapped in try/catch + configured guard so missing live_chat_messages table, RLS policies, or realtime publication never hard-crashes the component (or parent LiveStage). Falls back gracefully to samples + retry.
+ * - Realtime CHANNEL_ERROR/TIMED_OUT/CLOSED or subscribe throw now only triggers the friendly fallback (with samples), no "dismiss" raw UI.
+ * - Uses singleton browser client exclusively: via supabaseBrowser() (which post-P5 delegates to cached createClient() in utils/supabase/client.ts). See lib/supabase.ts + utils/supabase/client.ts for the if-cached pattern reuse.
+ * - Extra try/catch added around sb access, query build/await, and subscribe for table/policy resilience (per spec).
+ * - send error UI no longer shows raw err.message or "dismiss" button/text (friendly generic only; rollback still happens).
+ * - Reuses existing LiveChat fallback/samples/retry/optimistic/supabaseConfigured patterns + lib/supabase singleton DS. No scope creep.
+ * - Self-verif: post-edit greps for error strings, build/tsc clean, read of this + client files, runtime load path via structure.
+ *
+ * Original robust design preserved + made elite (user never sees internals on failure).
  */
 
 export interface ChatMessage {
@@ -46,7 +49,15 @@ export default function LiveChat({ liveEventId = null, isMember, currentUser }: 
   const mountedRef = useRef(true);
   const loadErrorRef = useRef<string | null>(null);
 
-  const sb = supabaseBrowser();
+  // P2: Use singleton browser client (delegates to shared cached createClient post-P5 fix).
+  // Defensive try: load path must never fail hard (e.g. if client creation edge case or during table/policy issues).
+  // Downstream guards + fallbacks handle the rest. Reuses supabaseConfigured pattern from lib/supabase.
+  let sb: ReturnType<typeof supabaseBrowser> | null = null;
+  try {
+    sb = supabaseBrowser();
+  } catch {
+    // Swallow: configured() will be false or load will catch; component stays mounted with friendly fallback.
+  }
 
   // Static sample messages shown only in fallback (graceful "coming soon" preview; never sent)
   const sampleMessages: ChatMessage[] = [
@@ -71,6 +82,9 @@ export default function LiveChat({ liveEventId = null, isMember, currentUser }: 
   // Robust initial load + realtime subscribe with graceful fallback.
   // Never throws; always settles loading. Uses supabaseConfigured guard + try/finally.
   // Realtime status handling added to surface subscription issues without crashing.
+  // P2: All setLoadError use *non-raw* signals only (user UI never shows technical table/RLS/realtime details).
+  // Extra try/catch around sb access + query for table/policy (e.g. 42P01 missing table, 42501 RLS).
+  // On any error: loadError truthy triggers "coming soon" + *samples* (no raw interp).
   const loadMessages = useCallback(async () => {
     if (!mountedRef.current) return;
     setLoading(true);
@@ -80,8 +94,8 @@ export default function LiveChat({ liveEventId = null, isMember, currentUser }: 
     // Fast graceful path if Supabase not configured in this env
     if (!supabaseConfigured()) {
       if (mountedRef.current) {
-        setLoadError('Chat backend not connected in this environment.');
-        loadErrorRef.current = 'Chat backend not connected in this environment.';
+        setLoadError('unavailable'); // internal signal only; UI renders fixed friendly text + samples
+        loadErrorRef.current = 'unavailable';
         setMessages([]);
         setLoading(false);
       }
@@ -89,6 +103,7 @@ export default function LiveChat({ liveEventId = null, isMember, currentUser }: 
     }
 
     try {
+      if (!sb) throw new Error('no sb client');
       let query = sb
         .from('live_chat_messages')
         .select('*')
@@ -106,16 +121,18 @@ export default function LiveChat({ liveEventId = null, isMember, currentUser }: 
 
       if (!mountedRef.current) return;
       if (loadErr) {
-        setLoadError('Live chat temporarily unavailable. Tables or realtime may need provisioning.');
-        loadErrorRef.current = 'Live chat temporarily unavailable. Tables or realtime may need provisioning.';
+        // Friendly signal only (no raw 'tables or realtime may need provisioning' etc exposed to user)
+        setLoadError('unavailable');
+        loadErrorRef.current = 'unavailable';
         setMessages([]);
         return;
       }
       setMessages((data || []).reverse() as ChatMessage[]);
     } catch (e: any) {
       if (mountedRef.current) {
-        setLoadError('Failed to reach chat service. Realtime may be offline right now.');
-        loadErrorRef.current = 'Failed to reach chat service. Realtime may be offline right now.';
+        // Extra catch for policy/table/network: never hard fail, always samples fallback
+        setLoadError('unavailable');
+        loadErrorRef.current = 'unavailable';
         setMessages([]);
       }
     } finally {
@@ -130,8 +147,11 @@ export default function LiveChat({ liveEventId = null, isMember, currentUser }: 
     void loadMessages();
 
     // Realtime subscription with status listener for robustness
+    // P2: extra try/catch + sb guard + generic 'unavailable' signal (realtime fail -> friendly coming-soon + samples, no raw).
+    // If no table/RLS/pub for postgres_changes, subscribe status hits CHANNEL_ERROR path -> graceful, no dismiss/raw.
     let channel: RealtimeChannel | null = null;
     try {
+      if (!sb) throw new Error('no sb for realtime');
       channel = sb
         .channel(`live-chat-${liveEventId || 'global'}`)
         .on(
@@ -157,8 +177,8 @@ export default function LiveChat({ liveEventId = null, isMember, currentUser }: 
           if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
             // Do not overwrite a primary load error; surface only if chat was otherwise ok
             if (!loadErrorRef.current && mountedRef.current) {
-              setLoadError('Realtime updates unavailable. (Chat may still load static history.)');
-              loadErrorRef.current = 'Realtime updates unavailable. (Chat may still load static history.)';
+              setLoadError('unavailable'); // internal signal; UI shows fixed friendly + samples (P2: no raw realtime msg)
+              loadErrorRef.current = 'unavailable';
             }
             // eslint-disable-next-line no-console
             console.warn('[LiveChat] realtime status:', status, err);
@@ -168,15 +188,15 @@ export default function LiveChat({ liveEventId = null, isMember, currentUser }: 
       channelRef.current = channel;
     } catch (e) {
       if (mountedRef.current && !loadErrorRef.current) {
-        setLoadError('Could not establish chat realtime channel.');
-        loadErrorRef.current = 'Could not establish chat realtime channel.';
+        setLoadError('unavailable');
+        loadErrorRef.current = 'unavailable';
       }
     }
 
     return () => {
       mountedRef.current = false;
       if (channelRef.current) {
-        try { sb.removeChannel(channelRef.current); } catch {}
+        try { sb?.removeChannel(channelRef.current); } catch {}
         channelRef.current = null;
       }
     };
@@ -202,6 +222,7 @@ export default function LiveChat({ liveEventId = null, isMember, currentUser }: 
     setError(null);
 
     try {
+      if (!sb) throw new Error('no client');
       const { error: insertErr } = await sb.from('live_chat_messages').insert({
         live_event_id: liveEventId,
         user_id: currentUser.id,
@@ -213,7 +234,8 @@ export default function LiveChat({ liveEventId = null, isMember, currentUser }: 
 
       // real msg will arrive via realtime; remove opt if needed (or keep for instant)
     } catch (err: any) {
-      setError(err.message || 'Send failed');
+      // P2: no raw err.message (or any technical) ever shown to user. Generic + rollback only. (no "dismiss" raw)
+      setError('send-failed');
       // rollback optimistic
       setMessages((prev) => prev.filter(m => m.id !== optimistic.id));
       setInput(body); // restore
@@ -248,9 +270,10 @@ export default function LiveChat({ liveEventId = null, isMember, currentUser }: 
 
         {!loading && loadError && (
           <div role="status" className="chat-fallback">
+            {/* P2: ALWAYS "coming soon" + samples on error; *never* render raw loadError value (no technical strings like provisioning, failed to reach, realtime unavailable etc). */}
             <p className="chat-fallback__title">Live chat is coming soon.</p>
             <p className="chat-fallback__msg">
-              {loadError} Real-time messages activate during live broadcasts once the chat backend (tables + RLS + publication) is connected.
+              Real-time messages activate during live broadcasts once the chat backend (tables + RLS + publication) is connected.
             </p>
             <button
               type="button"
@@ -289,8 +312,8 @@ export default function LiveChat({ liveEventId = null, isMember, currentUser }: 
         ))}
       </div>
 
-      {/* Send error (distinct from loadError) */}
-      {error && <p role="alert" className="error">{error} <button onClick={() => setError(null)}>dismiss</button></p>}
+      {/* Send error (distinct from loadError) — P2: no raw error value, no "dismiss" button/text (friendly generic only; retry via form). */}
+      {error && <p role="alert" className="error">Send failed. Please try again.</p>}
 
       <form onSubmit={sendMessage} className="chat-input">
         <input

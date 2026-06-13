@@ -2,7 +2,10 @@ import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
 import InnerPageShell from "../_components/InnerPageShell";
+import ContinueRail from "../_components/ContinueRail"; // Reuse for discovery on shows catalog (site-wide breadth)
+import WatchlistButton from "../_components/WatchlistButton"; // Reuse existing for more cards (series discovery breadth)
 import { getVideoSeries, type VideoSeries } from "@/lib/series";
+import { safeStockImage, STOCK } from "@/lib/media-map";
 
 export const metadata: Metadata = {
   title: "Shows",
@@ -70,7 +73,11 @@ export default async function ShowsPage({
       </nav>
 
       {items.length === 0 ? (
-        <p className="empty-state">No shows here yet. Check back after the catalog is seeded.</p>
+        // PHASE 8 AUDIT P1: Updated empty-state to user-friendly (no "seeded"/catalog lang).
+        // Reuses .empty-state + InnerPageShell/ContinueRail patterns from podcasts/stories.
+        // Consistent with /podcasts fix below. "No shows here yet — check back soon."
+        // Does not break layout (series-grid sibling). 
+        <p className="empty-state">No shows here yet — check back soon.</p>
       ) : (
         <div className="series-grid">
           {items.map((s) => (
@@ -82,33 +89,44 @@ export default async function ShowsPage({
       {/* Aesthetic visual for shows catalog */}
       <div className="section-lead-image">
         <Image
-          src="/assets/images/slates/colony-247-slate.jpg"
+          src={STOCK.slateDefault}
           alt="The Colony shows and video library"
           width={900}
           height={300}
           className="img-aesthetic"
         />
       </div>
+
+      {/* ContinueRail reuse on /shows for site-wide discovery */}
+      <ContinueRail compact />
     </InnerPageShell>
   );
 }
 
 function SeriesCard({ series }: { series: VideoSeries }) {
   const img = series.poster_url ?? series.hero_url;
+  const displayImg = safeStockImage("podcast", series.slug, img);
   return (
     <Link href={`/shows/${series.slug}`} className="series-card">
       <div className="series-card__poster">
-        {img ? (
-          <Image src={img} alt={series.title} fill sizes="(max-width:640px) 50vw, 25vw" style={{ objectFit: "cover" }} />
-        ) : (
-          <div style={{ width: "100%", height: "100%", background: series.accent_color ?? "var(--muted)" }} />
-        )}
+        <Image
+          src={displayImg}
+          alt={series.title}
+          fill
+          sizes="(max-width:640px) 50vw, 25vw"
+          style={{ objectFit: "cover" }}
+          unoptimized={!!img && img.startsWith("http")}
+        />
       </div>
       <div className="series-card__body">
         <h2 className="series-card__title">{series.title}</h2>
         <p className="series-card__meta">
           {[series.pillar, series.type, series.is_oklahoma ? "Oklahoma" : null].filter(Boolean).join(" · ")}
         </p>
+        {/* Reuse WatchlistButton on series cards (episodes/clips context via parent show) for discovery breadth */}
+        <div onClick={(e) => e.preventDefault()} style={{ marginTop: 6 }}>
+          <WatchlistButton seriesId={series.id} className="btn btn--sm btn--outline" />
+        </div>
       </div>
     </Link>
   );

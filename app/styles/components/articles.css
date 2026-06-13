@@ -167,6 +167,32 @@
 
 .article__body strong { color: var(--color-paper); font-weight: var(--weight-bold); }
 
+/* Phase 4 typography rhythm polish (if needed for article views)
+   - Enforces 8pt vertical rhythm via tokens on paragraphs/headings.
+   - Better reading flow on prose (max-width prose + relaxed leading preserved).
+   - Works across themes (data-theme). High a11y contrast by DS.
+   - Added: ul/ol list rhythm + improved pullquote integration if used. */
+.article__body ul,
+.article__body ol {
+  margin-block: var(--space-6);
+  padding-left: var(--space-6);
+  list-style: none;
+}
+.article__body ul li,
+.article__body ol li {
+  margin-bottom: var(--space-2);
+  position: relative;
+}
+.article__body ul li::before {
+  content: "•";
+  position: absolute;
+  left: calc(-1 * var(--space-4));
+  color: var(--color-alarm);
+}
+.article__body h2 + p,
+.article__body h3 + p { margin-top: var(--space-3); }
+.article__body p + p { margin-top: var(--space-4); }
+
 /* ─── Share row ─── */
 .article__share {
   display: flex;

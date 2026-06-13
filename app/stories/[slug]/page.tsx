@@ -5,15 +5,18 @@ import Image from "next/image";
 import Breadcrumbs from "../../_components/Breadcrumbs";
 import JsonLd from "../../_components/JsonLd";
 import AuthorityBadge from "../../_components/AuthorityBadge";
+import NewsletterSignup from "../../_components/NewsletterSignup"; // Teaser newsletter / The Briefing block in story sidebar (internal)
+import ContinueRail from "../../_components/ContinueRail"; // Enhanced + reused for site-wide discovery (stories pages)
 import { getArticleBySlug, getRelatedArticles } from "@/lib/articles";
 import { formatDate } from "@/lib/format";
 import { tierLocked } from "@/lib/tiers";
-import { storyHero, hostPhoto } from "@/lib/media-map";
+import { storyHero, hostPhoto, safeStockImage, STOCK } from "@/lib/media-map";
 import { Paywall } from "../../_components/Paywall";
 import PullQuote from "../../_components/PullQuote";
 import EndMark from "../../_components/EndMark";
 import ImpactSeal from "../../_components/ImpactSeal";
 import { sanitizeHtml } from "@/lib/sanitize";
+import { gateArticle } from "@/lib/content-access";
 
 export const revalidate = 120;
 
@@ -61,12 +64,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function StoryPage({ params }: PageProps) {
   const { slug } = await params;
-  const article = await getArticleBySlug(slug).catch((e) => { console.error(e); return null; });
+  const article = await getArticleBySlug(slug).catch((e) => { console.error('[stories] getArticleBySlug failed', slug, e); return null; });
   if (!article) notFound();
 
-  const related = await getRelatedArticles(slug, 3).catch((e) => { console.error(e); return []; });
-  const locked = tierLocked(article.tier_required);
-  const rawParagraphs = bodyParagraphs(article.description);
+  const related = await getRelatedArticles(slug, 3).catch((e) => { console.error('[stories] getRelatedArticles failed', slug, e); return []; });
+  const gated = await gateArticle(article).catch(() => ({ ...article, fullBody: true, body: article.description ?? null, locked: false }));
+  const locked = (gated as any).locked ?? false;
+  const rawParagraphs = bodyParagraphs((gated as any).body ?? article.description);
   const paragraphs = rawParagraphs.map((p) => sanitizeHtml(p));
   const author = (article.contributor?.name ?? "The Colony Staff").toUpperCase();
   const canonicalUrl = `${SITE_URL}/stories/${article.slug}`;
@@ -85,6 +89,8 @@ export default async function StoryPage({ params }: PageProps) {
             "@type": "Person",
             name: article.contributor?.name ?? "The Colony Staff",
           },
+          // Defensive: some seeded data paths previously caused RSC 500s in prod prefetch; safe fallbacks here
+          dateModified: article.updated_at ?? article.published_at,
           publisher: {
             "@type": "Organization",
             name: "The Colony OK",
@@ -122,7 +128,7 @@ export default async function StoryPage({ params }: PageProps) {
                   {(() => {
                     const avatarSrc = article.contributor
                       ? hostPhoto(article.contributor.slug, article.contributor.headshot_url, article.contributor.name)
-                      : "/assets/images/author-1.svg";
+                      : STOCK.hostDefault;
                     const avatarAlt = article.contributor?.name ?? "The Colony Staff";
                     return (
                       <Image
@@ -155,7 +161,7 @@ export default async function StoryPage({ params }: PageProps) {
 
               <figure className="article__hero-image">
                 <Image
-                  src={storyHero(article.slug, article.hero_url)}
+                  src={safeStockImage("story", article.slug, article.hero_url)}
                   alt={article.hero_alt ?? `${article.title} — full investigative report visual`}
                   width={1200}
                   height={630}
@@ -222,8 +228,22 @@ export default async function StoryPage({ params }: PageProps) {
                   </ul>
                 )}
               </div>
+
+              {/* Newsletter teaser in individual story sidebar (sidebar variant, tasteful internal integration) */}
+              <div className="article-sidebar__block" style={{ borderBottom: "none" }}>
+                <NewsletterSignup
+                  variant="sidebar"
+                  source="story-sidebar"
+                  title="The local briefing"
+                  copy="County editions in your inbox."
+                  compact
+                />
+              </div>
             </aside>
           </div>
+
+          {/* Site-wide ContinueRail reuse for discovery breadth on story detail (episodes/progress + fallback) */}
+          <ContinueRail compact />
         </div>
       </main>
     </>

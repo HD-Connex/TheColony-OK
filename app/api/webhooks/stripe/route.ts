@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type Stripe from "stripe";
 import { supabaseAdmin } from "@/lib/supabase";
-import { isActiveSubscriptionStatus, stripe, tierForPriceId } from "@/lib/stripe";
+import { computeMemberFromSubscription, stripe, tierForPriceId } from "@/lib/stripe";
 import { sendReceiptEmail, sendCancelEmail, sendWelcomeEmail } from "@/lib/email";
 
 export const runtime = "nodejs";
@@ -105,12 +105,17 @@ async function syncSubscription(sub: Stripe.Subscription) {
 
   const priceId = sub.items.data[0]?.price.id ?? "";
   const paidTier = tierForPriceId(priceId);
-  const active = isActiveSubscriptionStatus(sub.status);
   const periodEnd =
     (sub.items.data[0] as { current_period_end?: number } | undefined)?.current_period_end ??
     (sub as unknown as { current_period_end?: number }).current_period_end;
 
-  const isMember = active && paidTier === "member";
+  // Use edge-aware helper (handles cancel_at_period_end grace, past_due etc) for billing parity.
+  const isMember = computeMemberFromSubscription(
+    sub.status,
+    paidTier,
+    sub.cancel_at_period_end,
+    periodEnd ?? null,
+  );
 
   // Try to get a usable email for notifications
   let notifyEmail: string | null = (member as any)?.email || null;
@@ -136,10 +141,11 @@ async function syncSubscription(sub: Stripe.Subscription) {
     .eq("user_id", member.user_id);
 
   // Email side-effects (non-blocking). Never block the 200 to Stripe.
+  const isActiveSub = sub.status === "active" || sub.status === "trialing";
   if (notifyEmail) {
-    if (sub.status === "canceled" || !active) {
+    if (sub.status === "canceled" || !isActiveSub) {
       await sendCancelEmail(notifyEmail, { tier: paidTier || undefined, endedAt: periodEnd ? new Date(periodEnd * 1000).toISOString() : undefined });
-    } else if (active && isMember) {
+    } else if (isActiveSub && isMember) {
       const amount = null;
       await sendReceiptEmail(notifyEmail, { amount, tier: "member", periodEnd: periodEnd ? new Date(periodEnd * 1000).toISOString() : undefined });
     }

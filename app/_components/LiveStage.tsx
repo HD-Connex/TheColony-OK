@@ -6,7 +6,9 @@ import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 import VideoPlayer from "./VideoPlayer";
 import VideoEmbed from "./VideoEmbed";
-import { getCurrentLiveChannel, type Live247Channel } from "@/lib/live-247";
+import { getCurrentLiveChannel, type Live247Channel, COLONY_247 } from "@/lib/live-247";
+import { STOCK } from "@/lib/media-map";
+import { JAKE_MERRICK_YT_LIVE_URL, isSoftLaunchTonight } from "@/lib/live-events"; // for scheduling + Jake YT src free bypass (kept free even post soft launch date)
 import LiveChat from "./LiveChat";
 import LivePoll, { type Poll } from "./LivePoll";
 import { useAuth, supabaseBrowser } from "@/lib/auth-client";
@@ -14,6 +16,9 @@ import { refreshStageItems } from "@/lib/live-events";
 import { getActivePollClient } from "@/lib/live-polls";
 import YouTubeDemoReel from "./YouTubeDemoReel";
 import { Paywall } from "./Paywall"; // Phase 2: brass Off the Record Paywall for members visibility live events
+// Note: 24/7 now always prefers Jake Merrick YouTube stream (see lib/live-247 + lib/video JAKE_MERRICK_*).
+// When is247 && playbackSrc is YT (e.g. @jakemerrick212/streams or watch?v=), isEmbed=true -> VideoEmbed (bare).
+// VideoEmbed + toEmbedSrc already fully handles YT -> nocookie iframe with autoplay/mute etc. No change needed here.
 /** Unified stage item — used by /live and homepage (old API). */
 export interface StageItem {
   id: string;
@@ -49,7 +54,10 @@ export default function LiveStage({ items: initialItems = [], initialActiveId, c
     return live?.id ?? null;
   });
   const [viewerCount, setViewerCount] = useState(0);
-  const [channel247, setChannel247] = useState<Live247Channel | null>(null);
+  // Sync default guarantees 24/7 playbackSrc on first render (no flash of off-air when no live events or async env).
+  // getCurrentLiveChannel enriches with currentProgram when available.
+  // Jake Merrick YouTube demo stream (JAKE_MERRICK_STREAMS_URL) is the permanent primary for is247 fallback.
+  const [channel247, setChannel247] = useState<Live247Channel | null>(COLONY_247);
   const [activePoll, setActivePoll] = useState<Poll | null>(null);
   const [demoReelActive, setDemoReelActive] = useState(false);
   const prefersReduced = useReducedMotion();
@@ -144,16 +152,32 @@ export default function LiveStage({ items: initialItems = [], initialActiveId, c
     };
   }, [is247, activeId]);
 
-  const currentTitle = is247 && channel247 ? channel247.title : active?.title ?? "The Colony Live";
+  const effective247 = channel247 ?? COLONY_247;
+  const currentTitle = is247 && effective247 ? effective247.title : active?.title ?? "The Colony Live";
   const playbackSrc = is247
-    ? channel247?.streamUrl ?? null
+    ? effective247?.streamUrl ?? COLONY_247.streamUrl
     : active?.src ?? null;
   const playbackIsLive = is247 ? true : !!active?.isLive;
+  // YT (including Jake Merrick @jakemerrick212/streams or watch?v=) is treated as embed (not HLS, not .mp4).
+  // Verified: is247 + YT playbackSrc -> VideoEmbed (bare) which calls toEmbedSrc -> proper YT nocookie iframe.
+  // Direct Jake Merrick YouTube demo stream as permanent 24/7 fallback until real Mux ingest.
   const isEmbed = playbackSrc ? !/\.m3u8(\?|$)/.test(playbackSrc) && !playbackSrc.endsWith(".mp4") : false;
-  const tierBlocked = !is247 && active?.locked && !isMember;
+
+  // Soft launch YT path guarantee for Jake Merrick /live src: free for anyone (keep even if date passed).
+  // Force active only on the soft launch window date logic (via isSoftLaunchTonight) for scheduling.
+  // The free bypass for Jake src path is kept unconditionally below (no paywall on this YT path).
+  if (isSoftLaunchTonight() && playbackSrc && playbackSrc.includes('jakemerrick212/live') && activeId !== 'yt-jake-merrick-7pm-est') {
+    // Force in next tick to avoid render loop
+    setTimeout(() => setActiveId('yt-jake-merrick-7pm-est'), 0);
+  }
+
+  const isJakeYT = !!playbackSrc && /jakemerrick212/.test(playbackSrc);
+  const isJakeFree = isJakeYT; // Jake Merrick YT src (live or streams) path always free - soft launch YT path kept free even if date passed
+
+  const tierBlocked = !is247 && active?.locked && !isMember && !isJakeFree;
   // Phase 2: "Off the Record" visibility gating — members only lives show brass Paywall (reuse Paywall + .foil/.brass styling)
-  const isMembersOnlyLive = !is247 && active?.visibility === 'members';
-  const offRecordBlocked = isMembersOnlyLive && !isMember;
+  const isMembersOnlyLive = !is247 && active?.visibility === 'members' && !isJakeFree;
+  const offRecordBlocked = isMembersOnlyLive && !isMember && !isJakeFree;
 
   return (
     <div className="live-stage" data-247={is247}>
@@ -161,6 +185,7 @@ export default function LiveStage({ items: initialItems = [], initialActiveId, c
         <div className="status">
           <span className={`badge ${demoReelActive ? "replay" : is247 ? "live-247" : active?.isLive ? "live-event" : "replay"}`}>
             {demoReelActive ? "DEMO REEL" : is247 ? "24/7" : active?.isLive ? "LIVE" : "REPLAY"}
+            {/* PHASE 8 AUDIT P4: "Investor Demo"/"Recent 5" purged previously (now "Recent Streams" label + neutral archive). Confirmed no such strings in live/page or here (grep). Uses "Recent Streams" for replays. */}
           </span>
           <span>{currentTitle}</span>
           <span className="viewers" aria-live="polite">
@@ -172,8 +197,9 @@ export default function LiveStage({ items: initialItems = [], initialActiveId, c
             Steady archive stream • auto-advancing
           </span>
         )}
+        {/* Primary 24/7 always runs Jake Merrick YT (via resolve247StreamUrl default or NEXT_PUBLIC_247_YOUTUBE_URL) as the live TV player fallback. */}
         {active?.when && !is247 && <span className="note">{active.when}</span>}
-        {is247 && <span className="note">Always-on fallback • scheduled wheel active</span>}
+        {is247 && <span className="note">Always-on Jake Merrick YouTube demo stream • scheduled wheel active (permanent fallback until real Mux ingest)</span>}
       </div>
 
       <div className="live-player">
@@ -213,18 +239,16 @@ export default function LiveStage({ items: initialItems = [], initialActiveId, c
         ) : (
           <div className="live-player__offline">
             <Image
-              src={channel247?.fallbackSlate || "/assets/images/slates/off-air.jpg"}
+              src={effective247?.fallbackSlate || STOCK.offAirDefault}
               alt="The Colony OK — Off air. Next live broadcast soon."
               width={640}
               height={360}
               style={{ maxWidth: "100%", height: "auto", opacity: 0.8 }}
             />
             <p className="note">Off air — check the schedule for the next live broadcast.</p>
-            {channel247?.streamUrl && (
-              <button type="button" onClick={() => setActiveId(null)} className="btn btn--outline">
-                Watch 24/7 Channel
-              </button>
-            )}
+            <button type="button" onClick={() => setActiveId(null)} className="btn btn--outline">
+              Watch 24/7 Channel (Jake Merrick YouTube demo stream)
+            </button>
           </div>
         )}
       </div>
@@ -233,6 +257,7 @@ export default function LiveStage({ items: initialItems = [], initialActiveId, c
         <div className="queue">
           <h3>
             {demoReelActive ? "Demo Reel — Continuous Archived Stream (no controls)" : "Recent Streams"}
+            {/* P4 confirmed: neutral "Recent Streams" (not "Recent 5" or investor). P7: no vercel preview hardcodes here. */}
             {demoReelActive && (
               <button
                 type="button"
@@ -246,6 +271,8 @@ export default function LiveStage({ items: initialItems = [], initialActiveId, c
               </button>
             )}
           </h3>
+          {/* YouTubeDemoReel not used for primary 24/7 Jake Merrick YT stream (that uses LiveStage isEmbed -> VideoEmbed path for direct iframe).
+              YouTubeDemoReel remains for the separate (currently dormant) multi-VOD archive reel mode only. */}
         <AnimatePresence>
           <motion.div
             variants={prefersReduced ? undefined : { visible: { transition: { staggerChildren: 0.06 } } }}
@@ -285,14 +312,14 @@ export default function LiveStage({ items: initialItems = [], initialActiveId, c
                 {demoReelActive && <span className="reel-archived" aria-hidden>archived</span>}
               </motion.button>
             ))}
-            {channel247?.streamUrl && !demoReelActive && (
+            {!demoReelActive && (
               <motion.button
                 type="button"
                 onClick={() => setActiveId(null)}
                 className={is247 ? "active" : ""}
                 layout
               >
-                {channel247.title} <span>24/7</span>
+                {effective247.title} <span>24/7 (Jake Merrick YT demo)</span>
               </motion.button>
             )}
           </motion.div>

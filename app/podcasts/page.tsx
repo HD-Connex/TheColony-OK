@@ -4,9 +4,10 @@ import Breadcrumbs from "../_components/Breadcrumbs";
 import PageHeader from "../_components/PageHeader";
 import SectionBlock from "../_components/SectionBlock";
 import PodcastSearchGrid from "./_components/PodcastSearchGrid";
+import ContinueRail from "../_components/ContinueRail"; // Reuse ContinueRail on podcasts index (episodes-focused discovery, site-wide)
 import { getShowsWithEpisodeCounts, getRecentEpisodes } from "@/lib/podcasts";
 import { formatDate, formatDurationLabel } from "@/lib/format";
-import { PODCAST_ART } from "@/lib/media-map";
+import { PODCAST_ART, podcastCover, safeStockImage } from "@/lib/media-map";
 import Image from "next/image";
 
 export const metadata: Metadata = {
@@ -48,11 +49,7 @@ export default async function PodcastsIndexPage() {
               >
                 <div className="episode-rail">
                   {recent.map((ep) => {
-                    const thumb =
-                      ep.thumbnail_url ??
-                      ep.cover_url ??
-                      PODCAST_ART[ep.show_slug] ??
-                      "/assets/images/podcasts/colony-report.jpg";
+                    const thumb = safeStockImage("podcast", ep.show_slug, ep.thumbnail_url ?? ep.cover_url);
                     return (
                       <Link
                         key={ep.id}
@@ -65,6 +62,7 @@ export default async function PodcastsIndexPage() {
                             alt={`${ep.show_title} — episode thumbnail for ${ep.title}`}
                             width={160}
                             height={90}
+                            sizes="160px"
                             loading="lazy"
                             style={{ width: '100%', height: 'auto', objectFit: 'cover' }}
                           />
@@ -110,7 +108,10 @@ export default async function PodcastsIndexPage() {
           </header>
 
           {podcast.shows.length === 0 ? (
-            <p className="empty-state">No shows here yet. Check back after the catalog is seeded.</p>
+            // PHASE 8 AUDIT P1: Updated empty-state message (user-friendly, no "seeded" language per scope).
+            // Reuses .empty-state class (see styles, backroom/threads, clips, topics etc). Matches task spec.
+            // Preserves PageHeader totals + rail + ContinueRail for when populated. Layout intact.
+            <p className="empty-state">No shows here yet — check back soon.</p>
           ) : (
             <PodcastSearchGrid shows={podcast.shows} />
           )}
@@ -118,7 +119,7 @@ export default async function PodcastsIndexPage() {
           {/* Aesthetic network visual for life */}
           <div className="section-lead-image">
             <Image
-              src="/assets/images/podcasts/colony-report.jpg"
+              src={safeStockImage("podcast")}
               alt="The Colony podcast network"
               width={900}
               height={300}
@@ -127,6 +128,11 @@ export default async function PodcastsIndexPage() {
           </div>
         </div>
       </section>
+
+      {/* ContinueRail site-wide reuse on podcasts (great for episode resume discovery) */}
+      <div className="container">
+        <ContinueRail compact />
+      </div>
     </main>
   );
 }

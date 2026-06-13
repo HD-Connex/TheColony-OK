@@ -1,4 +1,7 @@
 /* ─── Brutalist Newsletter Block ─── */
+/* Legacy footer (ink bg) + newsletter / The Briefing signup variants for pages (plate, inline, sidebar) — fully internal platform */
+/* Aligns with Heirloom Press: foil, grain (premium.css), rule-double, brass, mono labels, zero radius, alarm accents. Phase 1 county + DS tokens. */
+
 .newsletter {
   background-color: transparent;
   border-bottom: var(--rule-medium) solid var(--color-paper);
@@ -96,4 +99,186 @@
   .newsletter { grid-template-columns: 1fr; gap: var(--space-6); }
   .newsletter__form { grid-template-columns: 1fr; }
   .newsletter__form .btn { border-left: none; border-top: var(--rule-medium) solid var(--color-paper); }
+}
+
+/* ─── Newsletter / The Briefing Signup Blocks (internal platform, migrated from any prior external newsletter references) ─── */
+/* Plate: prominent dedicated block on paper surfaces (counties, my-feed, story bottoms, report-card teasers) */
+/* Uses grain + brass rule-double accents, ink text on cream. No radius. */
+.newsletter-signup {
+  padding: var(--space-8);
+  border: var(--rule-medium) solid var(--color-border);
+  background: var(--color-paper);
+  color: var(--color-ink);
+  position: relative;
+}
+
+.newsletter-signup--plate {
+  border: var(--rule-medium) solid var(--color-brass);
+  /* double brass rule treatment via pseudo for heirloom (see .report-card-plate + .backroom-plate patterns) */
+}
+.newsletter-signup--plate::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-top: var(--rule-double) solid var(--color-brass);
+  border-bottom: var(--rule-double) solid var(--color-brass);
+  pointer-events: none;
+  opacity: 0.65;
+}
+.newsletter-signup--plate .newsletter-signup__heading {
+  margin-bottom: var(--space-4);
+}
+
+.newsletter-signup--plate .newsletter__eyebrow {
+  color: var(--color-brass-deep);
+}
+
+.newsletter-signup__title {
+  font-family: var(--font-display);
+  font-size: clamp(var(--text-xl), 2.5vw, var(--text-2xl));
+  font-weight: var(--weight-black);
+  letter-spacing: var(--track-tight);
+  text-transform: uppercase;
+  color: var(--color-ink);
+  line-height: var(--leading-tight);
+  margin: var(--space-1) 0 var(--space-2);
+}
+
+.newsletter-signup__copy {
+  color: var(--color-text-ink-soft);
+  max-width: 52ch;
+  margin-bottom: var(--space-4);
+}
+
+.newsletter-signup__footer {
+  margin-top: var(--space-4);
+  padding-top: var(--space-3);
+  border-top: var(--rule-hairline) solid var(--color-border-paper);
+  font-size: var(--text-xs);
+}
+
+/* Form overrides for plate/paper context (ink text, brass rule accents) */
+.newsletter-signup--plate .newsletter__form,
+.newsletter-signup .newsletter__form {
+  border-color: var(--color-brass);
+  background: var(--color-paper);
+  color: var(--color-ink);
+}
+
+.newsletter-signup--plate .newsletter__input,
+.newsletter-signup .newsletter__input {
+  color: var(--color-ink);
+  background: transparent;
+  border-bottom: var(--rule-hairline) solid var(--color-border-light); /* subtle internal rule */
+}
+.newsletter-signup--plate .newsletter__input:last-of-type,
+.newsletter-signup .newsletter__input:last-of-type {
+  border-bottom: none;
+}
+.newsletter-signup--plate .newsletter__input::placeholder,
+.newsletter-signup .newsletter__input::placeholder {
+  color: var(--color-text-muted);
+}
+.newsletter-signup--plate .newsletter__input:focus-visible,
+.newsletter-signup .newsletter__input:focus-visible {
+  background-color: rgba(10,31,61,0.04);
+}
+.newsletter-signup--plate .newsletter__form .btn,
+.newsletter-signup .newsletter__form .btn {
+  border-left-color: var(--color-brass);
+  background: var(--color-ink);
+  color: var(--color-paper);
+}
+.newsletter-signup--plate .newsletter__form .btn:hover,
+.newsletter-signup .newsletter__form .btn:hover {
+  background: var(--color-alarm);
+}
+.newsletter-signup--plate .newsletter__disclaimer,
+.newsletter-signup .newsletter__disclaimer {
+  color: var(--color-text-ink-soft);
+}
+
+/* Inline variant: compact after filters/headers in news + stories (does not break flow) */
+.newsletter-signup--inline {
+  padding: var(--space-6) var(--space-4);
+  border: var(--rule-hairline) solid var(--color-border);
+  margin: var(--space-6) 0;
+  background: var(--color-paper-soft);
+}
+.newsletter-signup--inline .newsletter-signup__title {
+  font-size: var(--text-lg);
+  margin-bottom: var(--space-1);
+}
+.newsletter-signup--inline .newsletter__form {
+  grid-template-columns: 1.6fr 1fr auto; /* email | county | btn */
+  gap: var(--space-2);
+  border: var(--rule-hairline) solid var(--color-border);
+}
+.newsletter-signup--inline .newsletter__input {
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--text-xs);
+}
+.newsletter-signup--inline .newsletter__form .btn {
+  border-left: var(--rule-hairline) solid var(--color-border);
+  padding-inline: var(--space-4);
+  font-size: var(--text-xs);
+}
+@media (max-width: 640px) {
+  .newsletter-signup--inline .newsletter__form {
+    grid-template-columns: 1fr;
+  }
+  .newsletter-signup--inline .newsletter__form .btn {
+    border-left: none;
+    border-top: var(--rule-hairline) solid var(--color-border);
+  }
+}
+
+/* Sidebar variant: narrow vertical for live-sidebar, article-sidebar teasers */
+.newsletter-signup--sidebar {
+  padding: var(--space-4);
+  border: var(--rule-hairline) solid var(--color-border);
+  background: var(--color-paper);
+  font-size: var(--text-sm);
+}
+.newsletter-signup--sidebar .newsletter-signup__title {
+  font-size: var(--text-base);
+  margin: var(--space-1) 0;
+}
+.newsletter-signup--sidebar .newsletter__form {
+  grid-template-columns: 1fr;
+  gap: var(--space-2);
+  border: var(--rule-hairline) solid var(--color-border);
+}
+.newsletter-signup--sidebar .newsletter__input {
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-xs);
+}
+.newsletter-signup--sidebar .newsletter__form .btn {
+  border-left: none;
+  border-top: var(--rule-hairline) solid var(--color-border);
+  padding-block: var(--space-2);
+  font-size: var(--text-xs);
+}
+
+/* Dark/ink context fallback (e.g. if placed in .section--ink or footer-adjacent) */
+.section--ink .newsletter-signup,
+.newsletter-signup--ink {
+  background: var(--color-ink-soft);
+  color: var(--color-paper);
+  border-color: var(--color-border);
+}
+.section--ink .newsletter-signup--plate::before {
+  border-color: var(--color-brass);
+}
+.section--ink .newsletter-signup .newsletter__input {
+  color: var(--color-paper);
+}
+.section--ink .newsletter-signup .newsletter__form .btn {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  border-color: var(--color-paper);
+}
+.section--ink .newsletter-signup .newsletter__form .btn:hover {
+  background: var(--color-alarm);
+  color: var(--color-paper);
 }

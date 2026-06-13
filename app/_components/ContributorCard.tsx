@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import type { Contributor } from "@/lib/contributors";
 import { tierBadgeClass, tierLabel } from "@/lib/contributor-tiers";
 import { hostPhoto } from "@/lib/media-map";
+import FollowButton from "./FollowButton"; // Integrated for reuse across directory, journalists, profiles (Phase 1 contributors follow)
 
 function Meta({ c }: { c: Contributor }) {
   return (
@@ -83,6 +84,7 @@ export default function ContributorCard({
           <Meta c={c} />
           {teaser && <div className="contrib__meta text-xs mt-1">{teaser}</div>}
           <Link className="btn btn--outline btn--sm self-start" href={href}>Read their work →</Link>
+          <div style={{ marginTop: 6 }}><FollowButton contributorId={c.id} compact /></div>
         </div>
       </motion.article>
     );
@@ -103,6 +105,7 @@ export default function ContributorCard({
           {c.bio && <p className="contrib__bio" style={{ fontSize: "var(--text-sm)" }}>{c.bio}</p>}
           <Meta c={c} />
           {teaser && <div className="contrib__meta text-xs mt-1">{teaser}</div>}
+          <div style={{ marginTop: 6 }}><FollowButton contributorId={c.id} compact /></div>
         </div>
       </motion.article>
     );
@@ -121,6 +124,9 @@ export default function ContributorCard({
         <h3 className="contrib__name">{c.name}</h3>
         {c.role && <span className="contrib__role">{c.role}</span>}
         {teaser && <div className="text-mono text-[10px] text-muted mt-0.5">{teaser}</div>}
+        <div onClick={(e) => e.stopPropagation()} style={{ marginTop: 4, display: "inline-block" }}>
+          <FollowButton contributorId={c.id} compact />
+        </div>
       </div>
     </Link>
   );

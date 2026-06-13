@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useAuth, supabaseBrowser } from '@/lib/auth-client';
-import { createClient } from '@/utils/supabase/client'; // new Supabase SSR browser client (per Phase 1 my-counties pattern + plan)
+import { createClient } from '@/utils/supabase/client'; // P5: now shared singleton (via cached createBrowserClient); mixed with supabaseBrowser() is safe, one GoTrueClient total
 import { supabaseConfigured } from '@/lib/supabase';
 import { Paywall } from '../_components/Paywall';
 import InnerPageShell from '../_components/InnerPageShell';

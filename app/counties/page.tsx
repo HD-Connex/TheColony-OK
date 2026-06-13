@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import InnerPageShell from "../_components/InnerPageShell";
+import NewsletterSignup from "../_components/NewsletterSignup"; // Dedicated newsletter / The Briefing block for counties page (internal)
 import { getCountiesWithCounts } from "@/lib/articles";
 
 export const metadata: Metadata = {
@@ -34,6 +35,16 @@ export default async function CountiesPage() {
             </div>
           </Link>
         ))}
+      </div>
+
+      {/* Dedicated newsletter signup section for /counties (full plate variant, prominent "local briefing" + county picker reuse) */}
+      <div style={{ marginTop: "var(--space-12)" }}>
+        <NewsletterSignup
+          variant="plate"
+          source="counties-page"
+          title="Subscribe for the local briefing"
+          copy="County-specific editions of The Briefing. Pick your county in the form (or set multiple in My Counties as a member). Investigations, live, and podcasts for the places you care about."
+        />
       </div>
 
       <p className="fine-print" style={{ marginTop: "var(--space-8)" }}>

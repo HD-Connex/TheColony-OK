@@ -1,6 +1,8 @@
 // Articles for home + news surfaces (Supabase + RLS).
-import { supabasePublic } from "./supabase";
-import { STORY_HERO, STORY_HERO_ALT } from "./media-map";
+import { supabasePublic, supabaseAdmin } from "./supabase";
+import { STORY_HERO, STORY_HERO_ALT, safeStockImage } from "./media-map";
+import { embedQuery } from "./semantic-search"; // Phase 2: generate embeddings on article ingest/publish for semantic search
+import { getRecommendations } from "./recommendations"; // Phase 2: AI recs replace naive category/recency
 
 export interface Article {
   id: string;
@@ -8,6 +10,7 @@ export interface Article {
   title: string;
   description: string | null;
   published_at: string;
+  updated_at?: string; // added for defensive JsonLd / story pages (Phase 6 verifier)
   tier_required?: string | null;
   hero_url?: string | null;
   hero_alt?: string | null;
@@ -46,6 +49,13 @@ const ARTICLE_CONTRIBUTOR_FALLBACK: Record<string, Article["contributor"]> = {
   "energy-sector-green-mandates": { slug: "marcus-webb", name: "Marcus Webb", tier: "featured", location: "Oklahoma City, OK" },
   "sheriffs-race-investigation": { slug: "sarah-mitchell", name: "Sarah Mitchell", tier: "headliner", location: "Oklahoma City, OK" },
   "tulsa-dei-defund-vote": { slug: "rachel-torres", name: "Rachel Torres", tier: "featured", location: "Tulsa, OK" },
+  // Migrated newsletter archive articles (ex-external refs, now native)
+  "harvest-reality-2026": { slug: "wes-carter", name: "Wes Carter", tier: "featured", location: "Enid, OK" },
+  "patch-reality-energy": { slug: "wes-carter", name: "Wes Carter", tier: "featured", location: "Guymon, OK" },
+  "heritage-4h-counties": { slug: "rachel-torres", name: "Rachel Torres", tier: "featured", location: "Lawton, OK" },
+  // Phase 6 new rural OK articles (wes-carter fits ag/ranch focus; seed has UPDATEs)
+  "panhandle-coop-grid-strain-2026": { slug: "wes-carter", name: "Wes Carter", tier: "featured", location: "Guymon, OK" },
+  "fifth-gen-ranchers-dc-mandates-2026": { slug: "wes-carter", name: "Wes Carter", tier: "featured", location: "Guymon, OK" },
 };
 
 function normalizeContributor(raw: unknown): Article["contributor"] {
@@ -70,7 +80,7 @@ function enrichArticle(row: ArticleRow): Article {
     tier_required: memberOnly ? "member" : "free",
     member_only: memberOnly,
     contributor: row.contributor ?? ARTICLE_CONTRIBUTOR_FALLBACK[row.slug] ?? null,
-    hero_url: row.hero_url || STORY_HERO[row.slug] || null,
+    hero_url: safeStockImage("story", row.slug, row.hero_url) || STORY_HERO[row.slug] || null,
     hero_alt: row.hero_alt || STORY_HERO_ALT[row.slug] || row.title,
   };
 }
@@ -128,6 +138,28 @@ export async function getArticleBySlug(slug: string): Promise<Article | null> {
 
 export async function getRelatedArticles(slug: string, limit = 3): Promise<Article[]> {
   const current = await getArticleBySlug(slug);
+  if (!current) return [];
+
+  // Phase 2 AI recs: prefer embedding sim + collab (usage_events). Gated graceful degrade to old behavior.
+  try {
+    const seedText = `${current.title} ${current.dek || current.description || ""}`;
+    const recs = await getRecommendations({ id: current.id, text: seedText, type: "article" }, undefined, limit);
+    if (recs.length > 0) {
+      // Map rec items back to full Article shape (light fetch)
+      const ids = recs.map(r => r.id);
+      const { data } = await supabasePublic()
+        .from("articles")
+        .select(`${ARTICLE_COLS}, ${CONTRIBUTOR_JOIN}`)
+        .in("id", ids)
+        .eq("status", "published");
+      if (data && data.length) {
+        const mapped = (data as any[]).map((r) => enrichArticle(normalizeRow(r)));
+        if (mapped.length) return mapped.slice(0, limit);
+      }
+    }
+  } catch {}
+
+  // Fallback: original naive category + recency (preserves behavior when no keys or no embeddings/usage)
   const sb = supabasePublic();
 
   const fetchRelated = async (withCategory: boolean) => {
@@ -195,8 +227,6 @@ export async function getCountiesWithCounts(): Promise<{ county: string; count: 
 
 // ===== ADMIN / EDITOR HELPERS (use supabaseAdmin only; called from gated routes or server components) =====
 
-import { supabaseAdmin } from "./supabase";
-
 export interface AdminArticleInput {
   slug: string;
   title: string;
@@ -258,12 +288,31 @@ export async function adminUpsertArticle(input: AdminArticleInput & { id?: strin
   if (input.id) {
     const { data, error } = await sb.from("articles").update(payload).eq("id", input.id).select().single();
     if (error) throw error;
+    // Phase 2 AI: re-embed on update if published
+    if (data && (data as any).status === 'published') void embedArticleForSearch(data as any);
     return data;
   } else {
     const { data, error } = await sb.from("articles").insert(payload).select().single();
     if (error) throw error;
+    if (data && (data as any).status === 'published') void embedArticleForSearch(data as any);
     return data;
   }
+}
+
+async function embedArticleForSearch(article: { id: string; title?: string; dek?: string | null; description?: string | null; body?: string | null }) {
+  if (!process.env.OPENAI_API_KEY) return; // gated
+  const text = [article.title, article.dek, article.description, (article.body || '').slice(0, 1200)].filter(Boolean).join(' \n ');
+  if (!text.trim()) return;
+  const vec = await embedQuery(text);
+  if (!vec) return;
+  try {
+    await supabaseAdmin().from('content_embeddings').insert({
+      content_type: 'article' as any, // extend for articles (search will resolve)
+      content_id: article.id,
+      chunk: text.slice(0, 900),
+      embedding: vec,
+    });
+  } catch {}
 }
 
 export async function adminDeleteArticle(id: string) {

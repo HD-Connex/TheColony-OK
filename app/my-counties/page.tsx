@@ -3,14 +3,10 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useAuth, supabaseBrowser } from "@/lib/auth-client";
-// Use the new Supabase SSR browser client (createBrowserClient via @supabase/ssr) for session token on save/load
+// P5: Use the shared browser client singleton (createBrowserClient via @supabase/ssr + cache in utils/supabase/client.ts); safe to mix with supabaseBrowser()
 import { createClient } from "@/utils/supabase/client";
 import InnerPageShell from "../_components/InnerPageShell";
-
-const OK_COUNTIES = [
-  "Oklahoma", "Tulsa", "Cleveland", "Comanche", "Canadian", "Rogers", "Payne", "Washington", "Grady", "Cherokee",
-  // Add more as needed for the platform
-];
+import { OK_COUNTIES } from "@/lib/counties"; // Phase 1 shared county list (reused for newsletter / The Briefing blocks + prefs)
 
 export default function MyCountiesPage() {
   const { user, isMember, loading } = useAuth();

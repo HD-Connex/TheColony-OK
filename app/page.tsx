@@ -1,21 +1,39 @@
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import JsonLd from "./_components/JsonLd";
 import Countdown from "./_components/Countdown";
 import StoryCard from "./_components/StoryCard";
 import LiveStageMount from "./_components/LiveStageMount";
 import { type StageItem } from "./_components/LiveStage";
 import MotionStagger, { MotionStaggerItem } from "./_components/motion/MotionStagger";
-import { PODCAST_ART, storyHero } from "@/lib/media-map";
+import MotionReveal from "./_components/motion/MotionReveal";
+import { PODCAST_ART, storyHero, podcastCover, safeStockImage } from "@/lib/media-map";
 import Image from "next/image";
 import { getArticles, type Article } from "@/lib/articles";
 import { getShowsWithEpisodeCounts } from "@/lib/podcasts";
 import { getLiveEvents, eventsToStageItems } from "@/lib/live-events";
 import { formatDate, formatHeroDateline, formatTimeCT, formatLiveWhen, whenLabel } from "@/lib/format";
 import { CONTRIBUTOR_PLANS } from "@/lib/contributor-plans";
-import ClipsUploadForm from "./_components/ClipsUploadForm";
 import ContinueRail from "./_components/ContinueRail";
 import BuildingHubNotice from "./_components/BuildingHubNotice";
 import { getFeaturedBlogPost } from "@/lib/blog-posts";
+import { getHomepageBundle } from "@/lib/homepage";
+import SectionRail from "./_components/SectionRail";
+
+// Phase 7 LCP/perf: defer non-critical below-fold client component (ClipsUploadForm is upload form, not discovery/lead content).
+// Dynamic + ssr:false reduces initial JS bundle/hydration for LCP path. Reuses existing ClipsUploadForm (no rewrite).
+// MotionStagger on podcast grid kept (above-fold polish + reuse motion primitive); later SectionRails use viewport-deferred MotionReveal/Stagger internally.
+const ClipsUploadForm = dynamic(
+  () => import("./_components/ClipsUploadForm"),
+  {
+    // Phase 7: ssr:false removed (not allowed in Server Components per Next 16/Turbopack; dynamic still lazy-loads chunk for perf/LCP deferral of below-fold form).
+    loading: () => (
+      <div className="clips-teaser" style={{ padding: "var(--space-8)", opacity: 0.7 }}>
+        Member clips — sign in to upload field reports.
+      </div>
+    ),
+  }
+);
 
 export const revalidate = 60;
 
@@ -26,10 +44,11 @@ function authorName(a: Article): string {
 }
 
 export default async function HomePage() {
-  const [latest, podcast, live] = await Promise.all([
+  const [latest, podcast, live, bundle] = await Promise.all([
     getArticles({ limit: 8 }),
     getShowsWithEpisodeCounts(4),
     getLiveEvents(),
+    getHomepageBundle(),
   ]);
 
   const hero = latest[0] ?? null;
@@ -52,6 +71,9 @@ export default async function HomePage() {
 
   const featuredBlog = getFeaturedBlogPost();
 
+  // Phase 1 homepage bundle rails (DB-driven, reuse existing)
+  const { topStories, liveNow, trendingClips, latestEpisodes, contributorSpotlight, countyPulse, opinionRail, liveItems: hpLive } = bundle;
+
   return (
     <>
       <JsonLd
@@ -62,59 +84,107 @@ export default async function HomePage() {
           url: SITE_URL,
         }}
       />
+      {/* Phase 4 SEO: additional rich results JsonLd — Organization + NewsMediaOrganization for E-E-A-T, rich SERP (logo, sameAs, contact). 
+          Complements per-story NewsArticle/VideoObject in StoryCard pages + EpisodePlayer. 
+          Sitemap updated for /watch /clips /briefing /topics etc for full discovery. */}
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "NewsMediaOrganization",
+          name: "The Colony OK",
+          url: SITE_URL,
+          logo: `${SITE_URL}/assets/images/logo.jpg`,
+          description: "Oklahoma's independent conservative press. Investigative journalism, podcasting, live programming, and daily news — funded by readers, not advertisers.",
+          sameAs: ["https://thecolonyok.com"],
+          contactPoint: {
+            "@type": "ContactPoint",
+            contactType: "Editorial",
+            url: `${SITE_URL}/submit-a-tip`,
+          },
+          publishingPrinciples: `${SITE_URL}/about`,
+        }}
+      />
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          name: "The Colony OK",
+          url: SITE_URL,
+          foundingDate: "2026",
+          areaServed: "Oklahoma",
+        }}
+      />
 
       <main id="main">
-        <section className="hero" aria-label="Lead story">
+        {/* Phase 4: cinematic hero + standardized MotionReveal on lead elements for motion polish.
+            .hero--cinematic adds overlays/grain/rule depth (see hero.css). Reduced-motion respected in primitives. */}
+        <section className="hero hero--cinematic" aria-label="Lead story">
           <div className="hero__grid">
             <article className="hero__primary">
-              <p className="hero__dateline">
-                <span>N°43 / <strong>VOL I</strong></span>
-                <span>{formatHeroDateline(hero?.published_at)}</span>
-                <span>INVESTIGATIONS DESK</span>
-              </p>
-              <p className="hero__eyebrow">{hero?.category ?? "Investigative Report"}</p>
-              <h1 className="hero__title">
-                {hero ? (
-                  <Link href={`/stories/${hero.slug}`}>{hero.title}</Link>
-                ) : (
-                  "What They Don't Want You to Know About Oklahoma's Budget Crisis"
-                )}
-              </h1>
-              <p className="hero__excerpt">
-                {hero?.description ?? hero?.dek ?? "Our journalists spent six weeks inside the state capitol. What we found will make you angry — and it's why independent media exists."}
-              </p>
-              <div className="hero__meta">
-                <span>{authorName(hero ?? ({} as Article))}</span>
-                <span className="hero__meta-divider" />
-                <span>8 MIN READ</span>
-                <span className="hero__meta-divider" />
-                <span>FILED {formatDate(hero?.published_at) || "MAY 28, 2026"}</span>
-              </div>
-              <div className="hero__actions">
-                {hero && <Link className="btn btn--primary btn--lg" href={`/stories/${hero.slug}`}>Read the Report</Link>}
-                <Link className="btn btn--outline btn--lg" href="/pricing">Join — $4.99/mo</Link>
-              </div>
+              <MotionReveal delay={0.02}>
+                <p className="hero__dateline">
+                  <span>N°43 / <strong>VOL I</strong></span>
+                  <span>{formatHeroDateline(hero?.published_at)}</span>
+                  <span>INVESTIGATIONS DESK</span>
+                </p>
+              </MotionReveal>
+              <MotionReveal delay={0.05}>
+                <p className="hero__eyebrow">{hero?.category ?? "Investigative Report"}</p>
+              </MotionReveal>
+              <MotionReveal delay={0.08}>
+                <h1 className="hero__title">
+                  {hero ? (
+                    <Link href={`/stories/${hero.slug}`}>{hero.title}</Link>
+                  ) : (
+                    "What They Don't Want You to Know About Oklahoma's Budget Crisis"
+                  )}
+                </h1>
+              </MotionReveal>
+              <MotionReveal delay={0.11}>
+                <p className="hero__excerpt">
+                  {hero?.description ?? hero?.dek ?? "Our journalists spent six weeks inside the state capitol. What we found will make you angry — and it's why independent media exists."}
+                </p>
+              </MotionReveal>
+              <MotionReveal delay={0.14}>
+                <div className="hero__meta">
+                  <span>{authorName(hero ?? ({} as Article))}</span>
+                  <span className="hero__meta-divider" />
+                  <span>8 MIN READ</span>
+                  <span className="hero__meta-divider" />
+                  <span>FILED {formatDate(hero?.published_at) || "MAY 28, 2026"}</span>
+                </div>
+              </MotionReveal>
+              <MotionReveal delay={0.17}>
+                <div className="hero__actions">
+                  {hero && <Link className="btn btn--primary btn--lg" href={`/stories/${hero.slug}`}>Read the Report</Link>}
+                  <Link className="btn btn--outline btn--lg" href="/pricing">Join — $4.99/mo</Link>
+                </div>
+              </MotionReveal>
             </article>
 
             <aside className="hero__secondary hero__secondary--paper" aria-label="Live tonight">
-              <div className="hero__secondary-block">
-                <div className="hero__secondary-label">
-                  ▼ {isOnAir ? "LIVE NOW" : "LIVE TONIGHT · " + formatLiveWhen(nextLive)}
+              <MotionReveal>
+                <div className="hero__secondary-block">
+                  <div className="hero__secondary-label">
+                    ▼ {isOnAir ? "LIVE NOW" : "LIVE TONIGHT · " + formatLiveWhen(nextLive)}
+                  </div>
+                  <h2 className="hero__secondary-title">
+                    {nextLive?.title ?? "The Colony Report"}
+                  </h2>
+                  <p className="hero__secondary-meta">
+                    {nextLive?.description ?? "Live from Oklahoma City — whistleblower interviews, governor's race, and your questions."}
+                  </p>
                 </div>
-                <h2 className="hero__secondary-title">
-                  {nextLive?.title ?? "The Colony Report"}
-                </h2>
-                <p className="hero__secondary-meta">
-                  {nextLive?.description ?? "Live from Oklahoma City — whistleblower interviews, governor's race, and your questions."}
-                </p>
-              </div>
-              <div className="hero__secondary-block hero__secondary--ink">
-                <div className="hero__secondary-label">STARTS IN</div>
-                <Countdown target={countdownTarget} variant="ink" />
-                <Link className="btn btn--outline btn--full" href="/live">
-                  Watch Live
-                </Link>
-              </div>
+              </MotionReveal>
+              <MotionReveal delay={0.08}>
+                <div className="hero__secondary-block hero__secondary--ink">
+                  <div className="hero__secondary-label">STARTS IN</div>
+                  <Countdown target={countdownTarget} variant="ink" />
+                  <Link className="btn btn--outline btn--full" href="/live">
+                    Watch Live
+                  </Link>
+                </div>
+              </MotionReveal>
             </aside>
           </div>
         </section>
@@ -151,7 +221,7 @@ export default async function HomePage() {
             </header>
 
             <div className="grid-feature">
-              {topLead && <StoryCard a={topLead} variant="lead" />}
+              {topLead && <StoryCard a={topLead} variant="lead" priority />}
               <div>
                 {topSecondary.map((a, i) => (
                   <article className="card card--horizontal" key={a.id}>
@@ -204,7 +274,7 @@ export default async function HomePage() {
                   <span className="podcast-card__number">SHOW N°{String(i + 1).padStart(2, "0")}</span>
                   <div className="podcast-card__art">
                     <Image
-                      src={show.cover_url ?? PODCAST_ART[show.slug] ?? "/assets/images/podcasts/colony-report.jpg"}
+                      src={podcastCover(show.slug, show.cover_url)}
                       alt={`${show.title} — The Colony OK podcast cover`}
                       width={220}
                       height={220}
@@ -249,15 +319,15 @@ export default async function HomePage() {
 
             <div className="live-section">
               <div className="live-player">
-                {/* Phase 3: continue rail placed on home for visibility */}
-                <ContinueRail />
-
                 <LiveStageMount
                   items={liveItems}
                   initialActiveId={live.live[0]?.id ?? null}
                   compact
                 />
               </div>
+
+              {/* Fixed placement: ContinueRail moved OUT of .live-player (aspect-ratio grid cell) to prevent overlay/breakage of the media stage. */}
+              <ContinueRail />
 
               <div className="live-sidebar live-sidebar--paper">
                 <div className="live-status">
@@ -332,7 +402,7 @@ export default async function HomePage() {
             {/* Aesthetic lead image for life (brutalist filter per DS) */}
             <div className="section-lead-image">
               <Image
-                src="/assets/images/heroes/story-lead.jpg"
+                src={safeStockImage("hero")}
                 alt="Oklahoma investigations and rural reporting"
                 width={1200}
                 height={400}
@@ -369,6 +439,19 @@ export default async function HomePage() {
             <ClipsUploadForm />
           </div>
         </section>
+
+        {/* Phase 1 control room rails (minimal, using bundle; SectionRail for scrollable discovery) */}
+        <SectionRail title="Top Stories" dateline="WEIGHTED RECENCY + IMPACT" linkHref="/stories" linkLabel="All →">
+          <div className="grid-3">
+            {topStories?.slice(0,3).map((s: any, i: number) => <StoryCard key={i} a={s as any} />)}
+          </div>
+        </SectionRail>
+
+        <SectionRail title="Contributor Spotlight" dateline="OK VOICES" linkHref="/contributors">
+          <div style={{display:'flex', gap:8}}>
+            {contributorSpotlight?.slice(0,3).map((c: any, i: number) => <div key={i} className="card">{c.name}</div>)}
+          </div>
+        </SectionRail>
 
         {/* Hub teaser only — full depth + tiers on dedicated /contributors/join (per hub model + no-repeats rule in DS + audit Phase 1). */}
         <section className="section section--alarm">

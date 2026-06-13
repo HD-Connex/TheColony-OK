@@ -6,6 +6,9 @@ import AudioPlayer from "./AudioPlayer";
 import VideoPlayer from "./VideoPlayer";
 import VideoEmbed from "./VideoEmbed";
 import { formatDate, formatDuration, formatDurationLabel } from "@/lib/format";
+import type { Transcript, TranscriptSegment } from "@/lib/transcripts";
+import { searchTranscript, formatTranscriptTime, exportSrt } from "@/lib/transcripts";
+import TranscriptClipper from "./TranscriptClipper"; // Phase 2: one-click moments from transcript segments in player
 
 export interface PlayableEpisode {
   id: string;
@@ -40,7 +43,7 @@ export interface PlayableEpisode {
  *
  *  Full data model now wired (video_url etc on episodes table + parser + admin + seed).
  *  Real video podcast episodes (e.g. colony-report video demo) surface toggle, VIDEO badge, visualizer, chapters from DB. */
-export default function EpisodePlayer({ episodes: episodesProp, episode: episodeProp }: { episodes?: PlayableEpisode[]; episode?: PlayableEpisode }) {
+export default function EpisodePlayer({ episodes: episodesProp, episode: episodeProp, transcript }: { episodes?: PlayableEpisode[]; episode?: PlayableEpisode; transcript?: Transcript | null }) {
   // Support singular for per-ep dedicated page + array for library
   const episodes = episodesProp || (episodeProp ? [episodeProp] : []);
   const firstPlayable = useMemo(() => episodes.find((e) => e.audio_url) ?? null, [episodes]);
@@ -60,6 +63,9 @@ export default function EpisodePlayer({ episodes: episodesProp, episode: episode
   const [seekCmd, setSeekCmd] = useState<{ time: number; token: number } | null>(null);
   const [mediaTime, setMediaTime] = useState(0);
   const [mediaPlaying, setMediaPlaying] = useState(false);
+
+  // Phase 2 transcript panel local search (client only)
+  const [transcriptQuery, setTranscriptQuery] = useState("");
 
   // Sync handoff on mode change (pause implicit on unmount; seek the incoming at captured t)
   const requestMode = useCallback((newMode: "video" | "audio") => {
@@ -121,7 +127,16 @@ export default function EpisodePlayer({ episodes: episodesProp, episode: episode
       const idx = Math.floor((i / barCount) * binCount);
       const v = freq[idx] / 255;
       const bh = Math.max(1.5, v * maxBarH);
-      c.fillStyle = "#e02b3a"; // var(--color-alarm) rgb
+      // Respect design token --color-alarm (brutalist alarm red) instead of raw hex.
+      // Falls back to the documented value if var not resolvable (e.g. SSR edge or reduced env).
+      try {
+        const varAlarm = (typeof document !== 'undefined')
+          ? getComputedStyle(document.documentElement).getPropertyValue('--color-alarm').trim()
+          : '';
+        c.fillStyle = varAlarm || '#ec1024';
+      } catch {
+        c.fillStyle = '#ec1024';
+      }
       c.fillRect(x, h - bh, barW, bh);
       x += barW + gap;
     }
@@ -316,6 +331,79 @@ export default function EpisodePlayer({ episodes: episodesProp, episode: episode
                     </button>
                   ))}
                 </div>
+              </div>
+            )}
+
+            {/* Phase 2 Full AI: Transcript panel. Real segments from DB (or generated on first view via getOrGenerate). Searchable, timestamped, seek + TranscriptClipper for auto moment clips. Gated: if no transcript prop (no key), hidden. Brutalist grain style matching design system. */}
+            {transcript && transcript.segments && transcript.segments.length > 0 && (
+              <div className="podcast-player__transcript grain" style={{ marginTop: "var(--space-3)", border: "1px solid var(--color-brass)", padding: "var(--space-2)", background: "var(--color-paper)" }} aria-label="Transcript">
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "var(--space-2)" }}>
+                  <div className="podcast-player__chapters-label">▼ TRANSCRIPT — {transcript.provider.toUpperCase()} {transcript.language?.toUpperCase()}</div>
+                  {transcript.srt && (
+                    <button
+                      type="button"
+                      className="btn btn--sm btn--outline"
+                      onClick={() => {
+                        const srt = exportSrt(transcript);
+                        const blob = new Blob([srt], { type: "text/srt" });
+                        const a = document.createElement("a");
+                        a.href = URL.createObjectURL(blob);
+                        a.download = `transcript-${active?.id || "ep"}.srt`;
+                        a.click();
+                      }}
+                    >
+                      Download SRT
+                    </button>
+                  )}
+                </div>
+
+                <input
+                  type="text"
+                  placeholder="Search transcript…"
+                  className="search-input"
+                  style={{ width: "100%", marginBottom: "var(--space-2)", fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)" }}
+                  onChange={(e) => setTranscriptQuery(e.target.value)}
+                />
+                <button
+                  type="button"
+                  className="btn btn--sm btn--outline"
+                  style={{ fontSize: "10px", marginBottom: "var(--space-1)" }}
+                  onClick={() => {
+                    // Phase 2: AI-suggest moments via quote detection heuristic (", ?, impactful phrases) from real transcript segments. One-click clipper below does Blob + caption.
+                    const q = transcript.segments
+                      .filter((s: any) => /["“”'‘’]/.test(s.text) || /\?|!/.test(s.text) || s.text.length > 70)
+                      .map((s: any) => s.text.slice(0, 40))
+                      .join(" ");
+                    setTranscriptQuery(q || "the ");
+                  }}
+                >
+                  Suggest AI quote moments
+                </button>
+
+                <div style={{ maxHeight: 280, overflow: "auto", fontSize: "var(--text-xs)", lineHeight: 1.35, fontFamily: "var(--font-mono)" }}>
+                  {(transcriptQuery ? searchTranscript(transcript, transcriptQuery) : transcript.segments).slice(0, 80).map((seg: TranscriptSegment, idx: number) => (
+                    <div key={idx} style={{ padding: "4px 0", borderBottom: "1px dotted var(--color-border)", display: "flex", gap: 8, alignItems: "flex-start" }}>
+                      <button
+                        type="button"
+                        onClick={() => seekToChapter(seg.start)}
+                        className="chapter-btn"
+                        style={{ minWidth: 52, fontFamily: "var(--font-mono)" }}
+                        aria-label={`Seek to ${formatTranscriptTime(seg.start)}`}
+                      >
+                        {formatTranscriptTime(seg.start)}
+                      </button>
+                      <span style={{ flex: 1 }}>{seg.text}</span>
+                      <TranscriptClipper
+                        href={`#t=${Math.floor(seg.start)}`}
+                        title={seg.text.slice(0, 80)}
+                        startTime={seg.start}
+                        phrase={seg.text}
+                        epId={active?.id}
+                      />
+                    </div>
+                  ))}
+                </div>
+                <div style={{ fontSize: "10px", color: "var(--color-text-muted)", marginTop: 4 }}>Click time to seek. Use clip button for shareable Citizen Dispatch moments (member). Real DB rows only.</div>
               </div>
             )}
           </div>

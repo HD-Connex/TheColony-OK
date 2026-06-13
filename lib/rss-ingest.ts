@@ -2,6 +2,7 @@ import "server-only";
 import { XMLParser } from "fast-xml-parser";
 import { supabaseAdmin } from "./supabase";
 import { withRetry } from "./jobs";
+import { generateTranscript } from "./transcripts"; // Phase 2: auto-transcribe new episodes on ingest (if audio_url + AI key)
 
 export interface RssItem {
   title: string;
@@ -189,7 +190,29 @@ export async function ingestPodcastFeeds(): Promise<IngestResult> {
           pub_date: item.publishedAt ?? new Date().toISOString(),
         });
 
-        if (!insertErr) showNew++;
+        if (!insertErr) {
+          showNew++;
+          // Phase 2: auto-transcription on ingest for new episodes (real Whisper if keys; also embeds chunks).
+          // Use the guid as proxy for episodeId lookup inside generate? No — better re-select the fresh id or call using guid (our episodes.id is uuid, guid is source).
+          // Re-query the inserted by guid to get real id for transcripts key.
+          if (item.audioUrl) {
+            void (async () => {
+              try {
+                const { data: fresh } = await sb
+                  .from("episodes")
+                  .select("id")
+                  .eq("show_slug", show.slug)
+                  .eq("guid", item.guid)
+                  .single();
+                if (fresh?.id) {
+                  await generateTranscript(fresh.id, item.audioUrl, { contentType: 'episode' });
+                }
+              } catch (e) {
+                // non-fatal
+              }
+            })();
+          }
+        }
       }
 
       added += showNew;

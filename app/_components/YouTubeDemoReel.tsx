@@ -23,6 +23,11 @@ interface YouTubeDemoReelProps {
  * - On video end, automatically loads + plays the next in the list (cycles forever).
  * - Looks and behaves like a "live stream" feed for investor/demo purposes.
  * - No play/pause/skip UI exposed in the player itself.
+ *
+ * NOTE: This is the *archive reel* (multi-item from queue). The primary live TV 24/7 player
+ * (is247) ALWAYS runs the Jake Merrick YouTube stream directly (lib/live-247.ts default to
+ * JAKE_MERRICK_STREAMS_URL or NEXT_PUBLIC_247_YOUTUBE_URL -> LiveStage isEmbed -> VideoEmbed).
+ * No changes needed here for the "run the youtube stream" 24/7 behavior.
  */
 export default function YouTubeDemoReel({ items, onExit }: YouTubeDemoReelProps) {
   const playerRef = useRef<any>(null);

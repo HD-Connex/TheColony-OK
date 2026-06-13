@@ -149,3 +149,56 @@
   --honey-deep: var(--color-alarm-hover);
   --parchment: var(--color-paper);
 }
+
+/* ─── Dark Mode / Theme Support (Phase 4)
+   - [data-theme] attribute on <html> (set by SiteClient toggle + localStorage).
+   - Default (no attr or "dark"): current brutalist ink/paper DS (navy-first).
+   - "light": full paper/ink swap for high-contrast light brutalist reading (still alarm red urgency, mono, zero radius).
+   - Semantic tokens overridden; no raw hex in components. Sections (.section--paper) continue to work.
+   - Toggle is pure client, respects reduced-motion, a11y labeled.
+   - Add to layout <html data-theme> optional; JS drives it. */
+[data-theme="light"] {
+  /* Paper-primary light brutalist theme swap (ink becomes paper, paper becomes ink) */
+  --color-bg-primary: var(--color-paper);
+  --color-bg-secondary: var(--color-paper-soft);
+  --color-bg-card: var(--color-paper-soft);
+  --color-bg-elevated: var(--color-paper);
+  --color-bg-paper: var(--color-ink);
+
+  --color-text-primary: var(--color-ink);
+  --color-text-secondary: var(--color-text-ink-soft);
+  --color-text-muted: var(--color-text-secondary);
+  --color-text-inverse: var(--color-paper);
+  --color-text-ink: var(--color-paper);
+  --color-text-ink-soft: var(--color-text-secondary);
+
+  --color-border: var(--color-rule-soft);
+  --color-border-light: #d6cfbf;
+  --color-border-ink: var(--color-paper);
+  --color-border-paper: var(--color-rule);
+
+  /* Keep alarm urgency identical across themes */
+  --color-alarm: #ec1024;
+  --color-alarm-hover: #ff1d31;
+
+  /* Semantic shadcn-like for any future */
+  --background: var(--color-paper);
+  --foreground: var(--color-ink);
+  --card: var(--color-paper-soft);
+  --card-foreground: var(--color-ink);
+  --popover: var(--color-paper-soft);
+  --popover-foreground: var(--color-ink);
+  --border: var(--color-rule-soft);
+  --input: var(--color-border-light);
+  --ring: var(--color-alarm);
+
+  /* Section paper/ink flip naturally via color vars above */
+}
+
+[data-theme="dark"] {
+  /* Explicit dark mirrors :root for completeness (no change needed) */
+  --color-bg-primary: var(--color-ink);
+  --color-bg-secondary: var(--color-ink-soft);
+  --color-text-primary: var(--color-paper);
+  /* other dark defaults inherited */
+}

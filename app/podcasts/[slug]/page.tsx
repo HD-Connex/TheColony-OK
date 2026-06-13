@@ -6,9 +6,13 @@ import Breadcrumbs from "../../_components/Breadcrumbs";
 import PageHeader from "../../_components/PageHeader";
 import JsonLd from "../../_components/JsonLd";
 import Countdown from "../../_components/Countdown";
-import { supabasePublic, type Show, type Episode } from "@/lib/supabase";
+import { supabasePublic } from "@/lib/supabase";
+import { gatePodcastEpisode } from "@/lib/content-access";
+// Local minimal types (lib/supabase no longer re-exports domain row types; keep surface working)
+type Show = { slug: string; title: string; host: string; description?: string | null; cover_url?: string | null };
+type Episode = { id: string; slug?: string; title: string; pub_date: string; episode_no?: number | null; duration_s?: number | null; description?: string | null; audio_url?: string | null; video_url?: string | null; mux_playback_id?: string | null; thumbnail_url?: string | null; chapters?: any; host_name?: string | null; tier_required?: string | null };
 import EpisodePlayer from "../../_components/EpisodePlayer";
-import { hostPhoto } from "@/lib/media-map";
+import { hostPhoto, podcastCover, safeStockImage } from "@/lib/media-map";
 import { formatDate, formatDurationLabel } from "@/lib/format";
 
 export const revalidate = 60;
@@ -34,7 +38,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title: show.title as string,
     description: (show.description as string) ?? undefined,
     alternates: { canonical: `/podcasts/${slug}` },
-    openGraph: { type: "website", title: show.title as string, images: show.cover_url ? [show.cover_url as string] : undefined },
+    openGraph: { type: "website", title: show.title as string, images: [podcastCover(slug, show.cover_url as string | null)] },
   };
 }
 
@@ -53,12 +57,18 @@ export default async function PodcastShowPage({ params }: PageProps) {
   const data = await getShowAndEpisodes(slug);
   if (!data) notFound();
   const { show, episodes } = data;
-  const latest = episodes[0];
+
+  // Gate every episode for the library (real server-side paywall).
+  // Non-entitled episodes get audio_url/video_url/mux_playback_id nulled + truncated description.
+  // This prevents full media leakage from the show page (library + latest) into EpisodePlayer or UI.
+  const gatedEpisodes = await Promise.all((episodes || []).map((ep: any) => gatePodcastEpisode(ep)));
+  const latest = gatedEpisodes[0] ?? null;
 
   // Episodes now carry real optional video_url / mux_playback_id / thumbnail_url / chapters (jsonb)
   // from DB (populated via seed, admin, or RSS parser for video enclosures). 
   // /podcasts/colony-report (after reseed) shows real VIDEO episode(s) with toggle/viz/chapters.
-  const playableEpisodes = episodes;
+  // Gated versions are passed so locked episodes have no playable URLs.
+  const playableEpisodes = gatedEpisodes;
 
   return (
     <>
@@ -69,7 +79,7 @@ export default async function PodcastShowPage({ params }: PageProps) {
         name: show.title,
         description: show.description,
         url: `${SITE_URL}/podcasts/${show.slug}`,
-        image: show.cover_url ? `${SITE_URL}${show.cover_url}` : undefined,
+        image: `${SITE_URL}${podcastCover(slug, show.cover_url as string | null)}`,
         author: { "@type": "Person", name: show.host },
         publisher: { "@id": `${SITE_URL}/#organization` },
         webFeed: `${SITE_URL}/feeds/${show.slug}.xml`,
@@ -93,7 +103,7 @@ export default async function PodcastShowPage({ params }: PageProps) {
             <span className="podcast-subscribe__label">▼ SUBSCRIBE</span>
             <a className="btn btn--outline btn--sm" href="https://podcasts.apple.com/" target="_blank" rel="noopener">Apple Podcasts</a>
             <a className="btn btn--outline btn--sm" href="https://open.spotify.com/" target="_blank" rel="noopener">Spotify</a>
-            <a className="btn btn--outline btn--sm" href={`/feeds/${show.slug}.xml`}>RSS</a>
+            <a className="btn btn--outline btn--sm" href="https://podcasts.apple.com/" target="_blank" rel="noopener noreferrer">Apple / RSS</a>
             <a className="btn btn--outline btn--sm" href="https://rumble.com/thecolonyok" target="_blank" rel="noopener">Rumble</a>
             <a className="btn btn--outline btn--sm" href="https://youtube.com/@thecolonyok" target="_blank" rel="noopener">YouTube</a>
           </div>
@@ -117,7 +127,11 @@ export default async function PodcastShowPage({ params }: PageProps) {
                   <h3 className="pod-latest-title">{latest.title}</h3>
                   {latest.description && <p className="pod-latest-desc">{latest.description}</p>}
                   <div className="pod-latest-actions">
-                    {latest.audio_url && <a className="btn btn--primary" href="#library">▶ Play Episode</a>}
+                    {latest.fullAccess && latest.audio_url ? (
+                      <a className="btn btn--primary" href="#library">▶ Play Episode</a>
+                    ) : (
+                      <Link className="btn btn--primary" href={`/podcasts/${slug}/${latest.slug || latest.id}`}>Members — Listen on episode page</Link>
+                    )}
                     <a className="btn btn--outline" href="#library">Show Notes</a>
                   </div>
                 </div>

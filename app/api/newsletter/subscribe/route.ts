@@ -21,7 +21,7 @@ export async function POST(req: Request) {
   if (!rl.ok) return tooManyRequests(rl);
 
   const body = await req.json().catch(() => ({}));
-  const { email: bodyEmail, source, county, counties: bodyCounties } = body;
+  const { email: bodyEmail, source, county, counties: bodyCounties, lists: bodyLists } = body;
 
   // Resolve logged-in user (new SSR client + legacy bearer for this project's localStorage auth pattern)
   let authedUser = await getUserFromRequest(req);
@@ -52,6 +52,12 @@ export async function POST(req: Request) {
     countiesArr = [county.trim()];
   }
 
+  // Multiple lists (daily/county/alerts) from enhanced NewsletterForm + /newsletter/preferences (Phase 1)
+  let listsArr: string[] = [];
+  if (Array.isArray(bodyLists)) {
+    listsArr = bodyLists.map((l: any) => String(l).trim().toLowerCase()).filter((l) => ["daily", "county", "alerts"].includes(l));
+  }
+
   const sb = supabaseAdmin();
 
   // Fetch existing to avoid resetting confirmed status / token on prefs updates
@@ -66,6 +72,7 @@ export async function POST(req: Request) {
   const finalSource = [
     source || (existing?.source || "web"),
     countiesArr.length ? `counties:${countiesArr.join(",")}` : (county ? `county:${county}` : ""),
+    listsArr.length ? `lists:${listsArr.join(",")}` : "",
   ].filter(Boolean).join("|");
 
   const upsertPayload: any = {
@@ -87,6 +94,11 @@ export async function POST(req: Request) {
     upsertPayload.counties = countiesArr.length > 0 ? countiesArr : null;
   }
 
+  // Set / update lists (0028 migration adds lists text[]; parallel to counties for daily/county/alerts etc)
+  if (listsArr.length > 0 || bodyLists !== undefined) {
+    upsertPayload.lists = listsArr.length > 0 ? listsArr : null;
+  }
+
   const { error } = await sb.from("newsletter_subscribers").upsert(upsertPayload, { onConflict: "email" });
 
   if (error) {
@@ -102,7 +114,7 @@ export async function POST(req: Request) {
     await sendNewsletterConfirmEmail(clean, { confirmUrl, unsubscribeUrl: unsubUrl });
   }
 
-  return NextResponse.json({ ok: true, pending: shouldSendConfirm, counties: countiesArr });
+  return NextResponse.json({ ok: true, pending: shouldSendConfirm, counties: countiesArr, lists: listsArr });
 }
 
 /** GET current newsletter prefs (esp. counties array) for the authenticated user.
@@ -127,13 +139,14 @@ export async function GET(req: Request) {
   const sb = supabaseAdmin();
   const { data } = await sb
     .from("newsletter_subscribers")
-    .select("email, counties, confirmed_at, source, updated_at")
+    .select("email, counties, confirmed_at, source, updated_at, lists")
     .eq("email", clean)
     .maybeSingle();
 
   return NextResponse.json({
     email: authedUser.email,
     counties: (data?.counties as string[]) || [],
+    lists: (data?.lists as string[]) || [],
     confirmed: !!data?.confirmed_at,
     source: data?.source || null,
   });

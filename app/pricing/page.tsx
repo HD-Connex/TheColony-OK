@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import Image from "next/image";
+import { safeStockImage, STOCK } from "@/lib/media-map";
 import Breadcrumbs from "../_components/Breadcrumbs";
 import PageHeader from "../_components/PageHeader";
 import CheckoutButton from "../_components/CheckoutButton";
@@ -14,7 +15,7 @@ export const metadata: Metadata = {
 };
 
 /* Aesthetic image for pricing life (added for visual appeal) */
-const PRICING_HERO = "/assets/images/heroes/lead-hero.jpg";
+const PRICING_HERO = STOCK.heroDefault;
 
 const FEATURES = [
   "All investigative articles — no paywall",
@@ -92,7 +93,7 @@ export default function PricingPage() {
               {/* Aesthetic image to bring life to pricing */}
               <div className="section-lead-image">
                 <Image
-                  src="/assets/images/heroes/lead-hero.jpg"
+                  src={PRICING_HERO}
                   alt="The Colony OK independent press"
                   width={900}
                   height={320}

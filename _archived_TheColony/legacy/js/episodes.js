@@ -3,7 +3,7 @@
 // The static HTML ships pre-rendered episode rows as a fallback (no flash of
 // empty content). On successful fetch, the JS replaces them with fresh data.
 
-const FALLBACK_API_BASE = 'https://thecolony-app.vercel.app';
+const FALLBACK_API_BASE = 'https://thecolony-app.vercel.app'; // PHASE 8 P7: legacy archived; updated to canonical prod alias (no preview hash). Prefer env in active code.
 
 export async function initEpisodes() {
   const target = document.getElementById('episode-list');

@@ -12,19 +12,20 @@ const securityHeaders = [
     key: "Strict-Transport-Security",
     value: "max-age=63072000; includeSubDomains; preload",
   },
-  // Phase 3-05: CSP report-only (non-blocking). Tighten over time.
+  // Phase 3: Enforce CSP (was report-only). Tighten over time as needed.
   // Allows current stack: Plausible, Stripe, YouTube/Rumble embeds, Supabase, Vercel Blob (clips), plausible analytics.
+  // report-uri still present for violation reporting (via /api/csp-report).
   {
-    key: "Content-Security-Policy-Report-Only",
+    key: "Content-Security-Policy",
     value:
       "default-src 'self'; " +
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://plausible.io https://js.stripe.com https://www.youtube.com https://rumble.com; " +
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://plausible.io https://js.stripe.com https://www.youtube.com https://rumble.com https://cdn.jsdelivr.net; " +
       "style-src 'self' 'unsafe-inline'; " +
       "img-src 'self' data: https: blob:; " +
       "font-src 'self' data:; " +
       "connect-src 'self' https://*.supabase.co https://plausible.io https://api.stripe.com https://*.vercel.app blob: https://*.public.blob.vercel-storage.com; " +
       "media-src 'self' blob: https:; " +
-      "frame-src https://www.youtube.com https://rumble.com https://js.stripe.com; " +
+      "frame-src https://www.youtube.com https://www.youtube-nocookie.com https://rumble.com https://js.stripe.com; " +
       "report-uri /api/csp-report; report-to default;",
   },
 ];
@@ -46,6 +47,9 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "i.ytimg.com" },
     ],
   },
+  // TWA/PWA Phase 8: manifest served via app/manifest.ts (standalone + icons/maskable in public/icon-*.png + screenshots).
+  // No PWA plugin needed (Next built-in). assetlinks for TWA verification in public/.well-known (see vercel.json + MOBILE doc).
+  // Offline shell in public/sw.js (v6, clips SWR + shell routes). Test: build produces manifest.webmanifest; /sw.js registers in SiteClient.
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },

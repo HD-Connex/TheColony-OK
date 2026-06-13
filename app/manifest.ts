@@ -48,6 +48,8 @@ export default function manifest(): MetadataRoute.Manifest {
     ],
     // TWA / share ready (future clip upload via share sheet)
     prefer_related_applications: false,
+    // TWA Phase 8: standalone + theme + icons (maskable for adaptive) already aligned to MOBILE_TWA_PWA_STRATEGY.md.
+    // Android assetlinks.json (public/.well-known) + Play Store listing notes in docs. Icons: /icon-192.png etc exist + crisp.
     // share_target for clip upload from other apps (Phase 3+)
     // share_target: { action: "/submit-a-tip", method: "POST", enctype: "multipart/form-data", params: { title: "title", text: "text", url: "url", files: [{ name: "clip", accept: ["video/*", "audio/*"] }] } },
   };

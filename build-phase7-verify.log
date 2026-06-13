@@ -1,0 +1,12 @@
+﻿
+> thecolony-app@0.1.0 build
+> next build
+
+Γû▓ Next.js 16.2.6 (Turbopack)
+- Environments: .env.local
+
+  Creating an optimized production build ...
+Γ£ô Compiled successfully in 74s
+  Skipping validation of types
+  Finished TypeScript config validation in 1946ms ...
+  Collecting page data using 7 workers ...

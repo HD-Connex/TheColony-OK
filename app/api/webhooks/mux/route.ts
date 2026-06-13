@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { mux, muxThumbnail, enableGeneratedSubtitles } from "@/lib/mux";
 import { supabaseAdmin } from "@/lib/supabase";
 import { log } from "@/lib/log";
+import { generateTranscript } from "@/lib/transcripts"; // Phase 2: wire auto-transcribe on asset.ready for episodes (if direct audio present)
 
 export const runtime = "nodejs";
 
@@ -74,6 +75,25 @@ export async function POST(req: Request) {
             })
             .eq("id", episodeId);
         }
+
+        // Phase 2: enqueue auto-transcription on asset.ready (for episodes that have direct audio_url from ingest; Mux video uses subs + separate audio path)
+        // Non-blocking; if no audio_url or no AI keys, generateTranscript degrades to null.
+        void (async () => {
+          try {
+            const { data: epRow } = await sb
+              .from("episodes")
+              .select("audio_url, video_url")
+              .eq("id", episodeId)
+              .maybeSingle();
+            const mediaUrl = epRow?.audio_url || epRow?.video_url || null;
+            if (mediaUrl) {
+              await generateTranscript(episodeId, mediaUrl, { contentType: 'episode' });
+              log.debug('[mux webhook] triggered transcript for episode', episodeId);
+            }
+          } catch (e) {
+            log.warn('[mux webhook] transcript trigger failed (non-fatal)', e);
+          }
+        })();
       }
 
       // If this asset came from a live stream recording, try to link to live_event + create VOD episode row

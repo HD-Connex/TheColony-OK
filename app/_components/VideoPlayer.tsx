@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { saveProgress } from "@/lib/viewer";
+import { STOCK } from "@/lib/media-map";
 // Note: for fully authenticated progress, prefer the /api/progress route (which has user context).
 // viewer.saveProgress now supports an optional userId 4th arg to write to watch_progress table.
 
@@ -225,6 +226,7 @@ export default function VideoPlayer({
         s.src = HLS_CDN;
         s.async = true;
         s.onload = attachHls;
+        s.onerror = () => setError("HLS loader failed — using native or reconnect");
         document.head.appendChild(s);
       }
     }
@@ -310,7 +312,7 @@ export default function VideoPlayer({
     <div className="live-player live-player--custom">
       <video
         ref={ref}
-        poster={poster}
+        poster={poster || STOCK.slateDefault}
         title={title}
         playsInline
         preload="metadata"

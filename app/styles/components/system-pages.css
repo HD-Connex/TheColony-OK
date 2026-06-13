@@ -1,3 +1,19 @@
+/* .fine-print utility — used site-wide for small notes, evidence, disclaimers, report-card methodology, admin labels, clips, etc.
+   Brutalist DS: mono uppercase xs, muted, uppercase track. Was missing causing "plain text" labels everywhere.
+   Added here (system pages) so it applies globally via main.css cascade. */
+.fine-print {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--track-wide);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  opacity: 0.85;
+  line-height: var(--leading-relaxed);
+}
+.section--paper .fine-print {
+  color: var(--color-text-ink-soft);
+}
+
 .system-page {
   padding: var(--space-16) 0 var(--space-24);
   min-height: 50vh;

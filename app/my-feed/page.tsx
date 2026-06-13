@@ -3,9 +3,10 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-client";
-import { createClient } from "@/utils/supabase/client";
+import { createClient } from "@/utils/supabase/client"; // P5 singleton shared (consolidated)
 import InnerPageShell from "../_components/InnerPageShell";
 import ContinueRail from "../_components/ContinueRail";
+import NewsletterSignup from "../_components/NewsletterSignup"; // Newsletter / The Briefing block integrated for my-feed (prefill + update briefing)
 
 export default function MyFeedPage() {
   const { user, isMember, loading } = useAuth();
@@ -96,6 +97,16 @@ export default function MyFeedPage() {
         {counties.length === 0 && (
           <p>Set your counties in <Link href="/my-counties">My Counties</Link> to see personalized feed.</p>
         )}
+
+        {/* Newsletter block in my-feed: members see prefilled + can update via form (ties to same /api + counties array) */}
+        <div style={{ marginTop: "var(--space-10)" }}>
+          <NewsletterSignup
+            variant="plate"
+            source="my-feed"
+            title="Your local briefing subscription"
+            copy="The Briefing uses your My Counties selections for tailored daily editions. Update your email prefs here (or full list in My Counties)."
+          />
+        </div>
 
         {/* Phase 3: link to Citizen Dispatch member feed from personalized area */}
         <p className="fine-print" style={{ marginTop: 'var(--space-8)' }}>

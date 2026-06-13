@@ -169,7 +169,7 @@ export default function AdminDashboard({ currentUserRole }: Props) {
 
   return (
     <div className="admin-cms">
-      <nav className="admin-tabs" style={{ display: "flex", gap: "8px", margin: "16px 0", borderBottom: "3px solid #111", paddingBottom: 8 }}>
+      <nav className="admin-tabs" style={{ display: "flex", gap: "8px", margin: "16px 0", borderBottom: "3px solid var(--color-ink)", paddingBottom: 8 }}>
         {["articles", "contributors", "live", "clips", "members", "report-card"].map((t) => (
           <button
             key={t}
@@ -183,7 +183,7 @@ export default function AdminDashboard({ currentUserRole }: Props) {
         <span style={{ marginLeft: "auto", fontSize: 12, alignSelf: "center" }}>Role: {currentUserRole}</span>
       </nav>
 
-      {msg && <div style={{ background: "#fff3cd", border: "2px solid #111", padding: 8, marginBottom: 12 }}>{msg}</div>}
+      {msg && <div style={{ background: "var(--color-paper-soft)", border: "2px solid var(--color-ink)", padding: 8, marginBottom: 12 }}>{msg}</div>}
 
       {tab === "articles" && (
         <section>
@@ -209,7 +209,7 @@ export default function AdminDashboard({ currentUserRole }: Props) {
             <thead><tr><th>Name</th><th>Email</th><th>Tier</th><th>Applied</th><th></th></tr></thead>
             <tbody>
               {apps.map((a) => (
-                <tr key={a.id} style={{ borderBottom: "1px solid #ccc" }}>
+                <tr key={a.id} style={{ borderBottom: "1px solid var(--color-rule-soft)" }}>
                   <td>{a.name}</td>
                   <td>{a.email}</td>
                   <td>{a.tier}</td>
@@ -230,7 +230,7 @@ export default function AdminDashboard({ currentUserRole }: Props) {
           <p className="fine-print">Creates real Mux live stream. Stream key + playback stored on live_events. Webhook flips status + auto-creates VOD replay episode on end.</p>
 
           {/* Functional simulcast UI (wired to /api/admin/live/start + lib/mux addSimulcastTargets) */}
-          <div style={{ marginTop: 12, border: "2px solid #111", padding: 8, background: "#fff" }}>
+          <div style={{ marginTop: 12, border: "2px solid var(--color-ink)", padding: 8, background: "var(--color-paper)" }}>
             <h3 style={{ margin: 0, fontSize: "var(--text-sm)" }}>Multi-platform simulcast</h3>
             <p className="fine-print">Provide RTMP ingest + stream key for YouTube/Rumble/X/FB etc. Targets are attached when you click GO LIVE (Mux handles the rest). Full show stays member-only on site.</p>
 

@@ -75,11 +75,22 @@ async function upstashLimit(key: string, opts: RateLimitOptions): Promise<RateLi
   }
 }
 
-/** Check and consume one request against `key`. */
+/** Check and consume one request against `key`.
+ * In production: Upstash Redis is *required* for distributed enforcement across instances
+ * (memory fallback is per-process only and insufficient for abuse protection on sensitive routes).
+ * If missing in prod, fail-closed: return not-ok (callers return 429 via tooManyRequests).
+ * Sensitive routes using this (examples): checkout, billing, newsletter, signin (auth flows),
+ * comments, tips, clips-upload, etc. See callers in app/api/*.
+ */
 export async function rateLimit(key: string, opts: RateLimitOptions): Promise<RateLimitResult> {
   sweep();
   const redis = await upstashLimit(key, opts);
   if (redis) return redis;
+  if (process.env.NODE_ENV === "production") {
+    // Require Upstash in prod (no silent unlimited memory fallback for security).
+    // Forces 429 on sensitive endpoints until UPSTASH_REDIS_REST_URL + TOKEN configured.
+    return { ok: false, remaining: 0, retryAfterSec: Math.max(60, opts.windowSec) };
+  }
   return memoryLimit(key, opts);
 }
 

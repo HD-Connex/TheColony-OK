@@ -35,7 +35,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const seedPath = join(__dirname, '..', 'supabase', 'seed-content.sql');
 
 const SEED_TABLES = ['shows', 'episodes', 'live_events', 'series', 'video_episodes', 'articles', 'contributors'];
-// Expanded seed-content.sql now delivers: 5 shows +12 eps (podcasts), 5 series+8+ veps (shows), 11 articles (stories/news + 3 Substack pages imported as /stories content), 5 contributors (journalists), 3 live. Substack pages uploaded to correct articles table location.
+// Expanded seed-content.sql now delivers: 5 shows +12 eps (podcasts), 5 series+8+ veps (shows), 11+ articles (stories/news + 3 fully migrated newsletter archive articles now native on platform), 5 contributors (journalists), 3 live. Former external newsletter content uploaded to correct articles table location. Platform self-contained — no Substack links.
 
 async function countRows(client, table) {
   const exists = await client.query(
@@ -76,7 +76,7 @@ async function main() {
     }
 
     console.log('\n=== SUMMARY ===');
-    console.log(JSON.stringify({ seedFile: 'supabase/seed-content.sql (expanded: 5 shows/12eps/5series/11arts/5contrib/3live; Substack pages as articles for correct /stories location)', rowCounts: counts }, null, 2));
+    console.log(JSON.stringify({ seedFile: 'supabase/seed-content.sql (expanded: 5 shows/12eps/5series/11+arts/5contrib/3live; 3 migrated newsletter archive articles now native)', rowCounts: counts }, null, 2));
     console.log('After: npm run dev; check /podcasts /shows /stories /news /journalists /live (no empties). Update claims in advertise etc. Re-runnable.');
   } catch (err) {
     console.error('Seed failed:', err.message);

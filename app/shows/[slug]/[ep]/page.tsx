@@ -16,6 +16,8 @@ import {
 } from "@/lib/series";
 import { formatDate, formatDuration, formatDurationLabel } from "@/lib/format";
 import { tierLocked, tierLabel } from "@/lib/tiers";
+import { safeStockImage, STOCK } from "@/lib/media-map";
+import { gateVideoEpisode } from "@/lib/content-access";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://thecolonyok.com";
 
@@ -51,7 +53,8 @@ export default async function VideoEpisodePage({ params }: { params: Promise<Par
   if (!data) notFound();
 
   const { series, episode } = data;
-  const playback = resolveVideo(episode);
+  const gated = await gateVideoEpisode(episode);
+  const playback = resolveVideo(gated.episode as any);
   const [prev, next] = await getSiblingVideoEpisodes(series.id, episode.id).catch(() => [null, null] as const);
   const related = (await getSeriesEpisodes(series.id).catch(() => []))
     .filter((e) => e.id !== episode.id)
@@ -59,7 +62,7 @@ export default async function VideoEpisodePage({ params }: { params: Promise<Par
 
   const canonicalPath = `/shows/${series.slug}/${episode.slug}`;
   const shareUrl = `${SITE_URL}${canonicalPath}`;
-  const locked = tierLocked(episode.tier_required);
+  const locked = gated.locked;
   const isEmbed = playback.kind === "embed" && !!playback.src;
 
   const videoObject =
@@ -107,21 +110,29 @@ export default async function VideoEpisodePage({ params }: { params: Promise<Par
             <h1 className="per-ep-page__title">{episode.title}</h1>
 
             <div className="per-ep-page__player">
-              {playback.kind === "none" || !playback.src ? (
+              {gated.fullAccess ? (
+                playback.kind === "none" || !playback.src ? (
+                  <div className="live-player">
+                    <div className="live-player__offline">
+                      <span className="live-player__status">▼ VIDEO COMING SOON</span>
+                    </div>
+                  </div>
+                ) : isEmbed ? (
+                  <VideoEmbed url={playback.src} title={episode.title} />
+                ) : (
+                  <VideoPlayer
+                    src={playback.src}
+                    poster={safeStockImage("podcast", undefined, episode.thumbnail_url)}
+                    title={episode.title}
+                    episodeId={episode.id}
+                  />
+                )
+              ) : (
                 <div className="live-player">
                   <div className="live-player__offline">
-                    <span className="live-player__status">▼ VIDEO COMING SOON</span>
+                    <span className="live-player__status">▼ MEMBERS ONLY — PREVIEW</span>
                   </div>
                 </div>
-              ) : isEmbed ? (
-                <VideoEmbed url={playback.src} title={episode.title} />
-              ) : (
-                <VideoPlayer
-                  src={playback.src}
-                  poster={episode.thumbnail_url ?? undefined}
-                  title={episode.title}
-                  episodeId={episode.id}
-                />
               )}
             </div>
 
@@ -129,7 +140,7 @@ export default async function VideoEpisodePage({ params }: { params: Promise<Par
               <section aria-label="About this episode">
                 <SectionBlock number="N°01" title="About this episode">
                   <p className="ep-desc">
-                    {episode.description}
+                    {gated.fullAccess ? episode.description : (gated.episode as any).description}
                   </p>
                 </SectionBlock>
               </section>
@@ -162,9 +173,13 @@ export default async function VideoEpisodePage({ params }: { params: Promise<Par
                     <li key={s.id}>
                       <Link href={`/shows/${series.slug}/${s.slug}`} className="chapter-btn episode-related">
                         <span className="episode-related__thumb">
-                          {s.thumbnail_url && (
-                            <Image src={s.thumbnail_url} alt={s.title} fill sizes="72px" className="img-cover" />
-                          )}
+                          <Image
+                            src={safeStockImage("podcast", undefined, s.thumbnail_url)}
+                            alt={s.title}
+                            fill
+                            sizes="72px"
+                            className="img-cover"
+                          />
                         </span>
                         <span>
                           <span className="block">{s.title}</span>

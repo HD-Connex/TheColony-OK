@@ -90,9 +90,45 @@
 .nav__link--live { display: inline-flex; align-items: center; gap: var(--space-2); color: var(--color-alarm); }
 .nav__link--live:hover { color: var(--color-paper); }
 
-.nav__actions { display: flex; gap: var(--space-3); }
+/* Fox-like LIVE indicator dot (red alarm) next to Live link in the horizontal menu. */
+.nav__live-dot {
+  display: inline-block;
+  width: 0.5em;
+  height: 0.5em;
+  background: var(--color-alarm);
+  border-radius: 50%; /* small exception for indicator only; rest of DS zero-radius */
+  margin-left: 0.25ch;
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nav__live-dot { animation: none; }
+}
 
-/* ─── Hamburger ─── */
+.nav__actions { display: flex; gap: var(--space-3); align-items: center; }
+
+/* Fox-like search link (right before Sign In / Join). Text "SEARCH" for brutalist DS (mono, upper, alarm accent like LIVE). */
+.nav__search {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: var(--track-wide);
+  color: var(--color-alarm);
+  padding: var(--space-1) var(--space-2);
+  border: var(--rule-hairline) solid var(--color-alarm);
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+.nav__search:hover {
+  background: var(--color-alarm);
+  color: var(--color-paper);
+  border-color: var(--color-alarm);
+}
+
+/* ─── Hamburger — STRICTLY MOBILE ONLY (no presence whatsoever on desktop) */
 .nav__hamburger {
   display: none;
   /* Phase 1: a11y/touch — 44px minimum target (was 36px) */
@@ -102,6 +138,18 @@
   border: var(--rule-medium) solid var(--color-paper);
   background-color: transparent;
   padding: 0;
+}
+
+/* Desktop guarantee: NEVER show hamburger or mobile menu on desktop. 
+   Desktop content always visible and laid out. */
+@media (min-width: 1025px) {
+  .nav__hamburger,
+  .nav__mobile {
+    display: none !important;
+  }
+  .nav__desktop {
+    display: contents; /* let inner links + actions participate in parent .nav grid */
+  }
 }
 .nav__hamburger span {
   position: absolute;
@@ -171,8 +219,7 @@
 .breaking-bar .ticker__item::before { color: var(--color-paper); }
 
 @media (max-width: 1024px) {
-  .nav__links,
-  .nav__actions { display: none; }
+  .nav__desktop { display: none; }
   .nav__hamburger { display: block; }
   .nav { grid-template-columns: auto 1fr auto; }
 }
@@ -208,6 +255,13 @@
   padding: var(--space-1) 0;
   z-index: var(--z-nav);
   box-shadow: 0 4px 0 rgba(0,0,0,0.2);
+  display: none; /* Base hidden. Desktop hover or .is-open will show it. */
+}
+
+/* Desktop hover + JS is-open state make the dropdowns actually work reliably */
+.nav__dropdown:hover .nav__dropdown-menu,
+.nav__dropdown-menu.is-open {
+  display: block;
 }
 
 .nav__dropdown-item {
@@ -239,11 +293,24 @@
   padding-left: calc(var(--space-4) - var(--rule-medium));
 }
 
-/* Desktop nav polish: tabs visible, high contrast dropdowns */
+/* Desktop nav polish: Fox News-style dense horizontal category bar.
+   Grouped dropdowns for like pages (no hamburger on desktop).
+   Brutalist: mono upper, alarm on active/hover (bottom rule), zero radius, high contrast on ink bg.
+*/
 .nav__links {
   display: flex;
   align-items: center;
-  gap: var(--space-6);
+  gap: var(--space-4);
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Ensure dropdowns actually work on desktop: hover shows menu as reliable backup to JS */
+@media (min-width: 1025px) {
+  .nav__dropdown:hover .nav__dropdown-menu {
+    display: block;
+  }
 }
 
 /* ─── Folio bar — edition line under masthead ─── */

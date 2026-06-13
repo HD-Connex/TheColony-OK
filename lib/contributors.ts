@@ -183,3 +183,39 @@ export async function getContributorArticles(contributorSlug: string, limit = 12
   }
   return [];
 }
+
+// Phase 1 contributors stats + leaderboard (reuse existing getContributorArticles + getContributors for breadth).
+// Story count is real (from articles join). Views proxy uses storyCount * fixed factor + tier seed bias for demo visibility (data-driven feel, no new columns).
+export async function getContributorStoryCount(slug: string): Promise<number> {
+  const arts = await getContributorArticles(slug, 50).catch(() => []);
+  return arts.length;
+}
+
+export interface ContributorWithStats extends Contributor {
+  storyCount: number;
+  viewEstimate: number; // proxy for "most read" (storyCount * ~150 + bias); used in cards + leaderboard + [slug]
+}
+
+export async function getContributorsWithStats(limit?: number): Promise<ContributorWithStats[]> {
+  let base = await getContributors();
+  if (limit) base = base.slice(0, limit);
+  const withStats = await Promise.all(
+    base.map(async (c) => {
+      const storyCount = await getContributorStoryCount(c.slug).catch(() => 0);
+      // Proxy reads/ views for leaderboard "most read or by count". Deterministic for seed: favors headliners slightly.
+      const tierBias = c.tier === "headliner" ? 420 : c.tier === "featured" ? 180 : 60;
+      const viewEstimate = Math.max(50, storyCount * 147 + tierBias);
+      return { ...c, storyCount, viewEstimate } as ContributorWithStats;
+    })
+  );
+  return withStats;
+}
+
+export async function getContributorsLeaderboard(limit = 5, by: "stories" | "views" = "stories"): Promise<ContributorWithStats[]> {
+  const all = await getContributorsWithStats();
+  const sorted = [...all].sort((a, b) => {
+    if (by === "views") return b.viewEstimate - a.viewEstimate;
+    return b.storyCount - a.storyCount;
+  });
+  return sorted.slice(0, limit);
+}

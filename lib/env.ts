@@ -40,9 +40,10 @@ const FEATURE_RECOMMENDED = [
   "BLOB_READ_WRITE_TOKEN",
   // Email
   "RESEND_API_KEY",
-  // AI / search / transcription
+  // AI / search / transcription / briefing
   "OPENAI_API_KEY",
   "GROQ_API_KEY",
+  "ANTHROPIC_API_KEY",
   // Rate limit (multi-instance)
   "UPSTASH_REDIS_REST_URL",
   "UPSTASH_REDIS_REST_TOKEN",

@@ -253,6 +253,7 @@ export async function resolveEmbeddingHits(
         href: `/podcasts/${ep.show_slug}/${ep.slug || ep.id}${timeParam}`,
         thumbnail: ep.thumbnail_url,
         excerpt: truncate(hit.chunk),
+        startTime: hit.start != null ? Math.floor(hit.start) : undefined,
       });
       continue;
     }
@@ -267,6 +268,7 @@ export async function resolveEmbeddingHits(
         href: `/shows/${ep.series.slug}/${ep.slug || ep.id}${timeParam}`,
         thumbnail: ep.thumbnail_url ?? ep.series.poster_url ?? null,
         excerpt: truncate(hit.chunk),
+        startTime: hit.start != null ? Math.floor(hit.start) : undefined,
       });
       continue;
     }
@@ -284,6 +286,7 @@ export async function resolveEmbeddingHits(
         href: `/shows/${c.episodes.show_slug}/${epSlug}${time}`,
         thumbnail: null,
         excerpt: truncate(hit.chunk),
+        startTime: (c.start_s != null ? Math.floor(c.start_s) : (hit.start != null ? Math.floor(hit.start) : undefined)),
       });
       continue;
     }

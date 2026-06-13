@@ -3,6 +3,7 @@ import { getUserFromRequest } from "@/lib/auth-server";
 import { supabaseAdmin } from "@/lib/supabase";
 import { priceIdForPlan } from "@/lib/tiers";
 import { stripe } from "@/lib/stripe";
+import { rateLimit, keyFromRequest, tooManyRequests } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -10,6 +11,10 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
 /** Start Stripe Checkout for a membership plan (Bearer Supabase session). */
 export async function POST(req: Request) {
+  // Rate limit sensitive billing entry (prod requires Upstash; returns 429 if exceeded or misconfig in prod).
+  const rl = await rateLimit(keyFromRequest(req, "checkout"), { limit: 10, windowSec: 3600 });
+  if (!rl.ok) return tooManyRequests(rl);
+
   const user = await getUserFromRequest(req);
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 

@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import Image from "next/image";
 import type { ShowWithCount } from "@/lib/podcasts";
-import { PODCAST_ART } from "@/lib/media-map";
+import { PODCAST_ART, podcastCover, safeStockImage, stockUnoptimized } from "@/lib/media-map";
 
 interface Props {
   shows: ShowWithCount[];
@@ -50,10 +51,13 @@ export default function PodcastSearchGrid({ shows }: Props) {
             >
               <span className="podcast-card__number">SHOW N°{String(i + 1).padStart(2, "0")}</span>
               <div className="podcast-card__art">
-                <img
-                  src={show.cover_url ?? PODCAST_ART[show.slug] ?? "/assets/images/podcasts/colony-report.jpg"}
+                <Image
+                  src={podcastCover(show.slug, show.cover_url)}
                   alt={`${show.title} — The Colony OK podcast cover`}
-                  loading="lazy"
+                  fill
+                  sizes="(max-width: 640px) 50vw, 25vw"
+                  className="img-cover"
+                  unoptimized={stockUnoptimized(podcastCover(show.slug, show.cover_url))}
                 />
                 <div className="podcast-card__play">
                   <div className="podcast-card__play-icon">

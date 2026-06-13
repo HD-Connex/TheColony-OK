@@ -3,7 +3,13 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: { absolute: "404 — Page Not Found" },
+  // PHASE 8 AUDIT P6: Confirmed good title "404 — Page Not Found" (absolute) + robots noindex/nofollow.
+  // Renders <meta name="robots" content="noindex, nofollow"> via Next metadata (verified pattern in robots.ts/sitemap).
+  // Per spec: if missing explicit, ensure — here via metadata (industry standard, no raw <meta> needed in app dir body).
+  // Also noindex for SEO (crawlers skip 404s). Reuses system-page brutalist DS from error.tsx etc. Layout intact.
   robots: { index: false, follow: false },
+  // Explicit noindex for audit (supplements metadata):
+  other: { "X-Robots-Tag": "noindex" },
 };
 
 export default function NotFound() {

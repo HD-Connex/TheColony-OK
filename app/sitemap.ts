@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 import { getActiveContributorSlugs } from "@/lib/contributors";
 import { getShowsWithEpisodeCounts } from "@/lib/podcasts";
 import { getArticles } from "@/lib/articles";
+import { getTopics } from "@/lib/topics";
 
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ??
@@ -16,6 +17,13 @@ const STATIC_PATHS = [
   "/live",
   "/podcasts",
   "/shows",
+  "/watch",      // Phase 4 unified video hub (new route coverage)
+  "/clips",      // Member clips dispatches
+  "/briefing",   // Member AI briefing (gated)
+  "/topics",     // Phase 1 1.2 topics index + dynamic
+  "/counties",
+  "/my-feed",
+  "/blog",
   "/search",
   "/pricing",
   "/membership",
@@ -25,6 +33,7 @@ const STATIC_PATHS = [
   "/journalists",
   "/advertise",
   "/submit-a-tip",
+  "/personalities", // Phase 8: personalities hub (TRACK B Layer5/6, mixed work, Person JsonLd, SEO/GEO)
   "/legal/privacy",
   "/legal/terms",
   "/legal/cookies",
@@ -87,5 +96,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // graceful in worktree / no DB
   }
 
-  return [...staticRoutes, ...contributorRoutes, ...showRoutes, ...articleRoutes];
+  // Phase 1 1.2: Topics index + per-topic pages (from real topics or demo categories/counties)
+  let topicRoutes: MetadataRoute.Sitemap = [];
+  try {
+    const topics = await getTopics();
+    topicRoutes = topics.map((t) => ({
+      url: `${SITE_URL}/topics/${t.slug}`,
+      lastModified: now,
+      changeFrequency: "weekly" as const,
+      priority: 0.65,
+    }));
+  } catch {
+    // graceful fallback (demo topics will be generated on /topics visit)
+  }
+
+  return [...staticRoutes, ...contributorRoutes, ...showRoutes, ...articleRoutes, ...topicRoutes];
 }

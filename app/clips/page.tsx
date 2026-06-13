@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth, supabaseBrowser } from '@/lib/auth-client';
-import { createClient } from '@/utils/supabase/client'; // new SSR client pattern (per plan: use where server/client code)
+import { createClient } from '@/utils/supabase/client'; // P5: shared singleton (browser client cache); dual import with supabaseBrowser now consolidated to one instance
 import InnerPageShell from '../_components/InnerPageShell';
 import ClipEmbed from '../_components/ClipEmbed';
 import ClipsTeaser from '../_components/ClipsTeaser';
@@ -185,12 +185,14 @@ export default function ClipsFeedPage() {
           {clips.map((clip) => {
             const dispatch = isCitizen(clip);
             const title = clip.transcript || clip.source_phrase || 'Untitled Dispatch';
-            const epInfo = clip.episodes as any;
+            const epInfo = (clip.episodes as any) || {};
             const timeLabel = clip.start_s != null
               ? `${Math.floor(clip.start_s / 60)}:${(clip.start_s % 60).toString().padStart(2, '0')}`
               : null;
+            const showSlugForLink = epInfo.show_slug || 'colony-report';
+            const epSlugForLink = epInfo.slug || clip.ep_id;
             const viewHref = clip.ep_id
-              ? `/podcasts/${clip.ep_id}${clip.start_s != null ? `?t=${clip.start_s}` : ''}${clip.id ? `&clip=${clip.id}` : ''}`
+              ? `/podcasts/${showSlugForLink}/${epSlugForLink}${clip.start_s != null ? `?t=${clip.start_s}` : ''}${clip.id ? `&clip=${clip.id}` : ''}`
               : null;
 
             return (

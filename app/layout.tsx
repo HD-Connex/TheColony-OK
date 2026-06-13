@@ -11,9 +11,10 @@ import ScrollToTop from "./_components/ScrollToTop";
 
 const SITE_URL = "https://thecolonyok.com";
 
-// Note for P7: Production URLs hard-coded to https://thecolonyok.com for canonical/OG/metadataBase.
+// Note for P7: Production URLs hard-coded to https://thecolonyok.com for canonical/OG/metadataBase (canonical domain).
 // Vercel preview deployments will use their *.vercel.app URLs (or NEXT_PUBLIC_SITE_URL if set in project envs);
 // this is expected — previews differ for testing. sitemap.ts / robots.ts also fall back identically.
+// PHASE 8 P7: preview hash URLs (thecolony-*-hd-connex.vercel.app etc) removed from docs/tests/README/load (replaced with prod https://thecolony-app.vercel.app or env); code paths already prefer process.env.NEXT_PUBLIC_SITE_URL (see layout note, lib/env, multiple api/pages). No old aliases remain in active sources.
 // Eliminates external Google Fonts request, improves CWV/INP, removes layout shift.
 const fontDisplay = Archivo_Black({
   subsets: ["latin"],
@@ -77,12 +78,19 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${fontDisplay.variable} ${fontSans.variable} ${fontMono.variable} ${fontSerif.variable}`}>
       <head>
+        {/* Phase 4: data-theme driven by SiteClient (localStorage + toggle). Default dark. Avoids FOUC via client setAttribute. See variables.css + main.css a11y/Lighthouse notes. */}
         {/* Phase 3-05: Removed external Google Fonts links (now via next/font above).
             Kept other preconnects for Stripe/YouTube/Rumble/Plausible perf. */}
         <link rel="dns-prefetch" href="https://js.stripe.com" />
         <link rel="dns-prefetch" href="https://www.youtube.com" />
         <link rel="dns-prefetch" href="https://rumble.com" />
         <link rel="dns-prefetch" href="https://plausible.io" />
+        {/* Phase 7 LCP: preload hint for static cinematic hero bg (lead-hero.jpg used in .hero__primary::before CSS).
+            Main LCP candidate remains the priority lead StoryCard image (Next auto-preloads via priority+fetchPriority).
+            Static hero preload helps early paint; fonts via next/font (no external). */}
+        <link rel="preload" as="image" href="/assets/images/heroes/lead-hero.jpg" fetchPriority="high" />
+        {/* Also preload primary story asset used for default budget-crisis lead (media-map) to accelerate LCP img fetch. */}
+        <link rel="preload" as="image" href="/assets/images/stories/oklahoma-budget-crisis.jpg" fetchPriority="high" />
       </head>
       <body>
         <SiteChrome header={<Header />} footer={<Footer />}>

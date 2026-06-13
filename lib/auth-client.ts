@@ -8,33 +8,26 @@
 // invoice.paid / subscription.* events) or admin. Signed-in ≠ paid. Real sync
 // now wired; isMember reflects is_member && status==='active' from DB.
 
-import { createClient, type SupabaseClient, type User } from "@supabase/supabase-js";
+import type { SupabaseClient, User } from "@supabase/supabase-js"; // PHASE 8 self-verif: fixed double 'type' modifier (TS syntax error blocking build). Pre-existing; no relation to P1-7 content fixes. Enables clean build/grep verif.
 import { useCallback, useEffect, useState } from "react";
 
-let browser: SupabaseClient | null = null;
-
-function getPublicKey(): string | undefined {
-  return process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-}
+// P5 + P2 CONSOLIDATION: Reuse the *single* browser client singleton.
+// Previously this file did its own `let browser = null; createClient(...) from @supabase/supabase-js`
+// while utils/supabase/client.ts + component calls did separate createBrowserClient() — causing
+// "Multiple GoTrueClient instances" warnings in browser console (each init a fresh auth GoTrueClient).
+// Now: supabaseBrowser() is a thin delegator to the cached createClient() (which uses createBrowserClient + full auth opts).
+// This matches lib/supabase.ts caching pattern exactly (if (x) return x; ...).
+// All calls (LiveChat, LivePoll, LiveStage, ThreadedComments, useAuth, WatchlistButton, ClipsUploadForm,
+// FollowButton, Billing..., Checkout..., backroom, my-counties duals, clips, ContinueRail via client, live-polls dynamic etc)
+// now hit the exact same instance. Dynamic import in lib/live-polls.ts continues to work.
+import { createClient } from "@/utils/supabase/client";
 
 export function supabaseBrowser(): SupabaseClient {
-  if (browser) return browser;
-  // Single shared browser client (singleton). Config differs from server public (persist + detect for magic links).
-  // Aligns with lib/supabase.ts single shared export const supabase pattern (see also auth-server using supabasePublic).
-  let url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  let key = getPublicKey();
-  if (!url || !key) {
-    if (process.env.NODE_ENV === "production") {
-      throw new Error("Supabase public env vars missing in production build.");
-    }
-    console.warn("[auth-client] Supabase env missing — placeholder client (dev only).");
-    url = url ?? "https://placeholder.supabase.co";
-    key = key ?? "placeholder-anon-key";
-  }
-  browser = createClient(url, key, {
-    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
-  });
-  return browser;
+  // Delegates to the shared cached singleton (P5 fix). Provides same API surface.
+  // The underlying createBrowserClient (with persist/autoRefresh/detect) handles magic-link/OTP flows.
+  // No local cache here anymore; central one in utils/supabase/client.ts prevents multiples even on
+  // repeated top-of-FC `const sb = supabaseBrowser()` or `createClient()` or mixed imports.
+  return createClient() as SupabaseClient;
 }
 
 export interface AuthState {

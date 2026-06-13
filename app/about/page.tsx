@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import Image from "next/image";
+import { STOCK } from "@/lib/media-map";
 import InnerPageShell from "../_components/InnerPageShell";
 
 export const metadata: Metadata = {
@@ -49,7 +50,7 @@ export default function AboutPage() {
         {/* Aesthetic team life image */}
         <div className="section-lead-image">
           <Image
-            src="/assets/images/hosts/jake-merrick.jpg"
+            src={STOCK.hostDefault}
             alt="The Colony OK team and masthead"
             width={800}
             height={300}
@@ -57,8 +58,11 @@ export default function AboutPage() {
           />
         </div>
         <p>
+          {/* PHASE 8 AUDIT P3: Reconciled to seed: 5 contributors/journalists (Sarah Mitchell, Marcus Webb, Rachel Torres, Pastor Dan Hollis, Wes Carter).
+             "5 ON STAFF" now consistent with journalists/page.tsx eyebrow + seed-content.sql (no "post-seed" inflation). 
+             Aligns /advertise /vs/blaze /live /journalists claims. 11+ articles/stories, 12+ eps, 5 shows (incl Energy OK + Ag Report series). */}
           Editorial leadership:{" "}
-          <Link href="/journalists">Sarah Mitchell, Marcus Webb, Rachel Torres, Pastor Dan Hollis, Wes Carter</Link> (5 on masthead post-seed). Founding
+          <Link href="/journalists">Sarah Mitchell, Marcus Webb, Rachel Torres, Pastor Dan Hollis, Wes Carter</Link> (5 ON STAFF). Founding
           publisher: Jake Merrick. Operations: JAM Media.
         </p>
       </article>

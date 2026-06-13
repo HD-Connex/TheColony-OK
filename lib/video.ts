@@ -2,13 +2,18 @@
 // provider abstraction (scaffolded for later). The VideoPlayer component already
 // plays HLS, so enabling self-hosting later is just feeding it a .m3u8 URL.
 
-/** Jake Merrick YouTube — placeholder until Mux 247 ingest is wired. */
+/** Jake Merrick YouTube — placeholder until Mux 247 ingest is wired.
+ * NOW THE PERMANENT PRIMARY DEMO/24/7 FALLBACK for live TV player:
+ * lib/live-247.ts resolve247StreamUrl() + COLONY_247 default to this (or NEXT_PUBLIC_247_YOUTUBE_URL override).
+ * When used as 247 streamUrl, LiveStage detects isEmbed (YT) and renders via VideoEmbed bare.
+ * /streams and @handle URLs resolve here to embed of the placeholder video ID for continuous demo playback.
+ */
 export const JAKE_MERRICK_STREAMS_URL = "https://www.youtube.com/@jakemerrick212/streams";
 export const JAKE_MERRICK_CHANNEL_ID =
   process.env.NEXT_PUBLIC_YT_COLONY_CHANNEL_ID ?? "UCExrnzUQGrVZmO4WW9XJ-bA";
 /** Latest VOD from the /streams tab (override via env when it changes). */
 export const JAKE_MERRICK_PLACEHOLDER_VIDEO_ID =
-  process.env.NEXT_PUBLIC_YT_PLACEHOLDER_VIDEO_ID ?? "yEjlzfS4k1s";
+  process.env.NEXT_PUBLIC_YT_PLACEHOLDER_VIDEO_ID ?? "jfKfPfyJRdk"; // continuous public demo stream ID (reliable for 24/7 YT fallback)
 
 const YT_HANDLE_CHANNELS: Record<string, string> = {
   jakemerrick212: JAKE_MERRICK_CHANNEL_ID,

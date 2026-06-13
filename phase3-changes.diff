@@ -1,0 +1,200 @@
+﻿git : warning: in the working copy of 'app/admin/page.tsx', LF will be replaced by CRLF the next time Git touches it
+At line:1 char:74
++ ... -porcelain; git diff --no-color --unified=0 -- supabase/migrations/00 ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (warning: in the... Git touches it:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+warning: in the working copy of 'app/api/stripe/billing-portal/route.ts', LF will be replaced by CRLF the next time 
+Git touches it
+warning: in the working copy of 'app/api/stripe/checkout/route.ts', LF will be replaced by CRLF the next time Git 
+touches it
+warning: in the working copy of 'app/api/webhooks/stripe/route.ts', LF will be replaced by CRLF the next time Git 
+touches it
+warning: in the working copy of 'lib/entitlements.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'lib/rate-limit.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'lib/stripe.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'lib/supabase.ts', LF will be replaced by CRLF the next time Git touches it
+diff --git a/app/admin/page.tsx b/app/admin/page.tsx
+index 95eb5ef..dfd2bcf 100644
+--- a/app/admin/page.tsx
++++ b/app/admin/page.tsx
+@@ -19,2 +19,3 @@ export default async function AdminIndex() {
+-  // Prefer SSR cookie-based user resolution (what middleware + utils/supabase/server support).
+-  // This bridges the middleware session refresh to server components (unlike bearer-only path).
++  // Audit (Phase 3): all /api/admin/* routes use requireAdmin from lib/admin-auth.ts (with editor|admin minRole).
++  // This page also uses it (primary gate). SSR cookie path + synthesized Request for requireAdmin (bearer/cookie).
++  // requireAdmin is the single source of truth for role checks (reuses getUserRole + roleAtLeast).
+@@ -26,5 +27,15 @@ export default async function AdminIndex() {
+-  if (user) {
+-    // Re-use the role lookup (and minRole logic) from requireAdmin without re-parsing bearer.
+-    // We call getUserRole directly (it uses service role) + the roleAtLeast helper.
+-    // To avoid duplicating, we synthesize a minimal check here using the same primitives.
+-    // (requireAdmin itself stays bearer-centric for API routes per its design + auth-client localStorage.)
++
++  // Always synthesize a Request (headers + cookies) so we use requireAdmin uniformly for the page gate (audit compliance + reuse).
++  const h = await headers();
++  const authHeader = h.get("authorization") || "";
++  const cookieHeader = h.get("cookie") || "";
++  const req = new Request("http://local/admin", {
++    headers: {
++      ...(authHeader && { authorization: authHeader }),
++      ...(cookieHeader && { cookie: cookieHeader }),
++    },
++  });
++  admin = await requireAdmin(req, "editor");
++
++  // If no bearer but SSR user present, do role lookup via requireAdmin primitives (still reuses the lib).
++  if (!admin && user) {
+@@ -38,15 +48,0 @@ export default async function AdminIndex() {
+-  // Fallback: also try the legacy header reconstruction + requireAdmin (in case a Bearer was explicitly sent).
+-  // This keeps prior behavior for any direct API-style calls or tests.
+-  if (!admin) {
+-    const h = await headers();
+-    const authHeader = h.get("authorization") || "";
+-    const cookieHeader = h.get("cookie") || "";
+-    const req = new Request("http://local/admin", {
+-      headers: {
+-        ...(authHeader && { authorization: authHeader }),
+-        ...(cookieHeader && { cookie: cookieHeader }),
+-      },
+-    });
+-    admin = await requireAdmin(req, "editor");
+-  }
+-
+diff --git a/app/api/stripe/billing-portal/route.ts b/app/api/stripe/billing-portal/route.ts
+index fec3197..8aaedad 100644
+--- a/app/api/stripe/billing-portal/route.ts
++++ b/app/api/stripe/billing-portal/route.ts
+@@ -4,0 +5 @@ import { stripe } from "@/lib/stripe";
++import { rateLimit, keyFromRequest, tooManyRequests } from "@/lib/rate-limit";
+@@ -11,0 +13,4 @@ export async function POST(req: Request) {
++  // Rate limit sensitive billing (prod Upstash required; 429 on exceed/misconfig).
++  const rl = await rateLimit(keyFromRequest(req, "billing"), { limit: 20, windowSec: 3600 });
++  if (!rl.ok) return tooManyRequests(rl);
++
+diff --git a/app/api/stripe/checkout/route.ts b/app/api/stripe/checkout/route.ts
+index 4e8b4f1..9834d1b 100644
+--- a/app/api/stripe/checkout/route.ts
++++ b/app/api/stripe/checkout/route.ts
+@@ -5,0 +6 @@ import { stripe } from "@/lib/stripe";
++import { rateLimit, keyFromRequest, tooManyRequests } from "@/lib/rate-limit";
+@@ -12,0 +14,4 @@ export async function POST(req: Request) {
++  // Rate limit sensitive billing entry (prod requires Upstash; returns 429 if exceeded or misconfig in prod).
++  const rl = await rateLimit(keyFromRequest(req, "checkout"), { limit: 10, windowSec: 3600 });
++  if (!rl.ok) return tooManyRequests(rl);
++
+diff --git a/app/api/webhooks/stripe/route.ts b/app/api/webhooks/stripe/route.ts
+index 7189c5b..085f5a2 100644
+--- a/app/api/webhooks/stripe/route.ts
++++ b/app/api/webhooks/stripe/route.ts
+@@ -4 +4 @@ import { supabaseAdmin } from "@/lib/supabase";
+-import { isActiveSubscriptionStatus, stripe, tierForPriceId } from "@/lib/stripe";
++import { computeMemberFromSubscription, stripe, tierForPriceId } from "@/lib/stripe";
+@@ -108 +107,0 @@ async function syncSubscription(sub: Stripe.Subscription) {
+-  const active = isActiveSubscriptionStatus(sub.status);
+@@ -113 +112,7 @@ async function syncSubscription(sub: Stripe.Subscription) {
+-  const isMember = active && paidTier === "member";
++  // Use edge-aware helper (handles cancel_at_period_end grace, past_due etc) for billing parity.
++  const isMember = computeMemberFromSubscription(
++    sub.status,
++    paidTier,
++    sub.cancel_at_period_end,
++    periodEnd ?? null,
++  );
+diff --git a/lib/entitlements.ts b/lib/entitlements.ts
+index 204580f..fe90b4f 100644
+--- a/lib/entitlements.ts
++++ b/lib/entitlements.ts
+@@ -29 +29 @@ export async function getMembership(userId: string | null | undefined): Promise<
+-    .select("is_member, status, tier, role, current_period_end")
++    .select("is_member, status, tier, role, current_period_end, cancel_at_period_end")
+@@ -33,0 +34,8 @@ export async function getMembership(userId: string | null | undefined): Promise<
++  let isMember = Boolean(data.is_member) && active;
++  // Handle billing edge for membership flows (cancel_at_period_end + period): grant until end even if status edge case (defensive vs webhook timing).
++  if (!isMember && data.current_period_end) {
++    const endMs = Date.parse(data.current_period_end);
++    if (endMs > Date.now() && data.cancel_at_period_end !== false) {
++      isMember = Boolean(data.is_member);
++    }
++  }
+@@ -35 +43 @@ export async function getMembership(userId: string | null | undefined): Promise<
+-    isMember: Boolean(data.is_member) && active,
++    isMember,
+diff --git a/lib/rate-limit.ts b/lib/rate-limit.ts
+index 59484eb..8cad7cd 100644
+--- a/lib/rate-limit.ts
++++ b/lib/rate-limit.ts
+@@ -78 +78,7 @@ async function upstashLimit(key: string, opts: RateLimitOptions): Promise<RateLi
+-/** Check and consume one request against `key`. */
++/** Check and consume one request against `key`.
++ * In production: Upstash Redis is *required* for distributed enforcement across instances
++ * (memory fallback is per-process only and insufficient for abuse protection on sensitive routes).
++ * If missing in prod, fail-closed: return not-ok (callers return 429 via tooManyRequests).
++ * Sensitive routes using this (examples): checkout, billing, newsletter, signin (auth flows),
++ * comments, tips, clips-upload, etc. See callers in app/api/*.
++ */
+@@ -82,0 +89,5 @@ export async function rateLimit(key: string, opts: RateLimitOptions): Promise<Ra
++  if (process.env.NODE_ENV === "production") {
++    // Require Upstash in prod (no silent unlimited memory fallback for security).
++    // Forces 429 on sensitive endpoints until UPSTASH_REDIS_REST_URL + TOKEN configured.
++    return { ok: false, remaining: 0, retryAfterSec: Math.max(60, opts.windowSec) };
++  }
+diff --git a/lib/stripe.ts b/lib/stripe.ts
+index 5716752..0d9b765 100644
+--- a/lib/stripe.ts
++++ b/lib/stripe.ts
+@@ -36,0 +37,25 @@ export function isActiveSubscriptionStatus(status: Stripe.Subscription.Status):
++/**
++ * Handle billing edge cases for membership grants (Phase 3 hardening).
++ * - cancel_at_period_end: keep access until current_period_end (Stripe transitions status later).
++ * - past_due / unpaid / incomplete / incomplete_expired / canceled: no grant (strict; no auto grace beyond period).
++ * - Used by webhook sync + can be used by membership flows/entitlements for recompute.
++ * Reuses isActiveSubscriptionStatus; callers pass sub fields from event.
++ */
++export function computeMemberFromSubscription(
++  status: Stripe.Subscription.Status,
++  paidTier: "member" | null,
++  cancelAtPeriodEnd = false,
++  currentPeriodEndSec?: number | null,
++): boolean {
++  if (!isActiveSubscriptionStatus(status)) {
++    return false;
++  }
++  if (cancelAtPeriodEnd && currentPeriodEndSec) {
++    const nowSec = Math.floor(Date.now() / 1000);
++    if (nowSec >= currentPeriodEndSec) {
++      return false;
++    }
++  }
++  return paidTier === "member";
++}
++
+diff --git a/lib/supabase.ts b/lib/supabase.ts
+index 4b29009..9421246 100644
+--- a/lib/supabase.ts
++++ b/lib/supabase.ts
+@@ -9,0 +10,8 @@ let pub: SupabaseClient | null = null;
++ *
++ * Service-role key rotation (Phase 3 security hardening ΓÇö minimal doc colocated at usage):
++ * - Rotate SUPABASE_SERVICE_ROLE_KEY every 90 days (or on incident/team change) via Supabase Dashboard > Project Settings > API > service_role key (generate new, copy).
++ * - Immediately update the key in all envs (Vercel, local .env, CI) ΓÇö never commit to git.
++ * - Revoke the old key in the Supabase dashboard right after rotation (old JWTs cease to work instantly).
++ * - Only used here (supabaseAdmin) and in guarded paths: admin routes (after requireAdmin), webhooks/stripe, crons, rss-ingest, seeds, transcripts jobs.
++ * - Service role bypasses *all* RLS (incl. the new 0029 policies) ΓÇö treat as root; log/audit its calls.
++ * - On rotation: also rotate any backup DIRECT_URL if used; test a write path post-deploy.
+diff --git a/next.config.ts b/next.config.ts
+index fb94447..b4ced25 100644
+--- a/next.config.ts
++++ b/next.config.ts
+@@ -15 +15 @@ const securityHeaders = [
+-  // Phase 3-05: CSP report-only (non-blocking). Tighten over time.
++  // Phase 3: Enforce CSP (was report-only). Tighten over time as needed.
+@@ -16,0 +17 @@ const securityHeaders = [
++  // report-uri still present for violation reporting (via /api/csp-report).
+@@ -18 +19 @@ const securityHeaders = [
+-    key: "Content-Security-Policy-Report-Only",
++    key: "Content-Security-Policy",
+@@ -21 +22 @@ const securityHeaders = [
+-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://plausible.io https://js.stripe.com https://www.youtube.com https://rumble.com; " +
++      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://plausible.io https://js.stripe.com https://www.youtube.com https://rumble.com https://cdn.jsdelivr.net; " +

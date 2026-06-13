@@ -6,7 +6,7 @@
 import { escapeIlike } from "./ilike";
 import { supabaseAdmin, supabaseConfigured, supabasePublic } from "./supabase";
 
-export type ContentType = "episode" | "video_episode" | "clip";
+export type ContentType = "episode" | "video_episode" | "clip" | "article"; // Phase 2: support article embeddings for semantic (textSearch fallback always present; embeddings gated)
 
 export interface EmbeddingSearchResult {
   id: string;

@@ -4,9 +4,32 @@ let admin: SupabaseClient | null = null;
 let pub: SupabaseClient | null = null;
 
 /**
+ * P5 FIX NOTE (browser client singleton to stop GoTrueClient warnings):
+ * The browser (client-component) singleton is now centralized in utils/supabase/client.ts
+ * using identical cached pattern to supabasePublic/supabaseAdmin here:
+ *   let client = null; if (client) return client; client = ...; return client;
+ * - supabaseBrowser() in lib/auth-client.ts now reuses it (thin wrapper).
+ * - Direct imports of createClient() from utils/supabase/client in browser pages/components
+ *   (my-counties, backroom, ContinueRail, my-feed, newsletter prefs, clips, etc) now also share it.
+ * - This eliminates the root cause of "Multiple GoTrueClient instances" (one from auth-client's old direct createClient + one from @supabase/ssr createBrowserClient + ad-hoc calls).
+ * - Server-only paths (supabasePublic/Admin, utils/supabase/server createClient per-req, middleware/proxy, api routes) untouched and correct.
+ * - LiveChat (and Live* components) now guaranteed singleton via supabaseBrowser -> shared.
+ * - See also: utils/supabase/client.ts header for full audit/fix plan + self-verif checklist.
+ * (Added per Phase 8 side-quest instructions; no behavior change for pub/admin.)
+ */
+
+/**
  * Admin (service role) client — bypasses RLS for writes, crons, admin APIs, seed.
  * Throws if credentials missing (callers should only use in privileged contexts).
  * Cached singleton.
+ *
+ * Service-role key rotation (Phase 3 security hardening — minimal doc colocated at usage):
+ * - Rotate SUPABASE_SERVICE_ROLE_KEY every 90 days (or on incident/team change) via Supabase Dashboard > Project Settings > API > service_role key (generate new, copy).
+ * - Immediately update the key in all envs (Vercel, local .env, CI) — never commit to git.
+ * - Revoke the old key in the Supabase dashboard right after rotation (old JWTs cease to work instantly).
+ * - Only used here (supabaseAdmin) and in guarded paths: admin routes (after requireAdmin), webhooks/stripe, crons, rss-ingest, seeds, transcripts jobs.
+ * - Service role bypasses *all* RLS (incl. the new 0029 policies) — treat as root; log/audit its calls.
+ * - On rotation: also rotate any backup DIRECT_URL if used; test a write path post-deploy.
  */
 export function supabaseAdmin(): SupabaseClient {
   if (admin) return admin;

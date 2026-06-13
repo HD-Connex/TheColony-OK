@@ -7,6 +7,7 @@ import {
   getEpisodesByShowSlug,
   episodeToPlayable,
 } from "@/lib/podcasts";
+import { getOrGenerateTranscript, type Transcript } from "@/lib/transcripts"; // Phase 2 AI: real auto-transcript for EpisodePlayer surface + clipper
 import { getContributorByName } from "@/lib/contributors";
 import Breadcrumbs from "@/app/_components/Breadcrumbs";
 import SectionBlock from "@/app/_components/SectionBlock";
@@ -18,6 +19,8 @@ import ClipsTeaser from "@/app/_components/ClipsTeaser";
 import ChapterSidebar from "../../_components/ChapterSidebar";
 import { formatDate, formatDurationLabel } from "@/lib/format";
 import { sanitizeHtml } from "@/lib/sanitize";
+import { safeStockImage } from "@/lib/media-map";
+import { gatePodcastEpisode } from "@/lib/content-access";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://thecolonyok.com";
 
@@ -36,7 +39,7 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   const desc =
     episode.description?.slice(0, 160) || `Watch or listen to ${episode.title} — video podcast from The Colony.`;
   const canonical = `/podcasts/${slug}/${episode.slug || episode.id}`;
-  const thumb = episode.thumbnail_url || playable.thumbnail_url || undefined;
+  const thumb = safeStockImage("podcast", slug, episode.thumbnail_url || playable.thumbnail_url);
   const durationIso = episode.duration_s
     ? `PT${Math.floor(episode.duration_s / 60)}M${episode.duration_s % 60}S`
     : undefined;
@@ -48,7 +51,7 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
     openGraph: {
       title,
       description: desc,
-      images: thumb ? [{ url: thumb }] : undefined,
+      images: [{ url: thumb }],
       videos: isVideo && playable.video_url ? [{ url: playable.video_url }] : undefined,
       // Deeper: type-specific + locale/rural signals
       locale: "en_US",
@@ -72,7 +75,8 @@ export default async function PerEpisodePage({ params }: { params: Promise<Param
   const episode = await getEpisodeByShowAndEp(showSlug, ep);
   if (!episode) notFound();
 
-  const playable = episodeToPlayable(episode);
+  const gated = await gatePodcastEpisode(episode);
+  const playable = episodeToPlayable(gated);
   const siblings = await getSiblingEpisodes(showSlug, episode.id);
   const prev = siblings[0] ?? null;
   const next = siblings[1] ?? null;
@@ -85,6 +89,13 @@ export default async function PerEpisodePage({ params }: { params: Promise<Param
   const isVideo = !!(playable.video_url || playable.mux_playback_id);
   const canonicalPath = `/podcasts/${showSlug}/${episode.slug || episode.id}`;
   const shareUrl = `${SITE_URL}${canonicalPath}`;
+
+  // Phase 2: fetch (or generate) real transcript server-side for this ep (gated, real DB only; null if no key/audio)
+  const transcript: Transcript | null = await getOrGenerateTranscript(
+    episode.id,
+    episode.audio_url || episode.video_url || null,
+    { contentType: 'episode' }
+  ).catch(() => null);
 
   const related = (await getEpisodesByShowSlug(showSlug))
     .filter((s) => s.id !== episode.id)
@@ -99,7 +110,7 @@ export default async function PerEpisodePage({ params }: { params: Promise<Param
     name: episode.title,
     description: episode.description,
     thumbnailUrl: episode.thumbnail_url || playable.thumbnail_url,
-    uploadDate: episode.published_at || episode.pub_date,
+    uploadDate: (episode as any).published_at || episode.pub_date,
     duration: episode.duration_s ? `PT${Math.floor((episode.duration_s || 0) / 60)}M` : undefined,
     author: episode.host_name ? { "@type": "Person", name: episode.host_name } : undefined,
     publisher: { "@type": "Organization", name: "The Colony OK", url: SITE_URL },
@@ -143,7 +154,7 @@ export default async function PerEpisodePage({ params }: { params: Promise<Param
         <div className="per-ep-page__grid">
           <div className="per-ep-page__main">
             <div className="per-ep-page__meta">
-              <span>{formatDate(episode.published_at || episode.pub_date)}</span>
+              <span>{formatDate((episode as any).published_at || episode.pub_date)}</span>
               {episode.host_name && <span>{episode.host_name}</span>}
               <span>{isVideo ? "VIDEO + AUDIO" : "AUDIO"}</span>
               {episode.duration_s != null && episode.duration_s > 0 && (
@@ -155,13 +166,21 @@ export default async function PerEpisodePage({ params }: { params: Promise<Param
             <h1 className="per-ep-page__title">{episode.title}</h1>
 
             <div className="per-ep-page__player">
-              <EpisodePlayer episode={playable} />
+              {gated.fullAccess ? (
+                <EpisodePlayer episode={playable} transcript={transcript} />
+              ) : (
+                <div className="live-player">
+                  <div className="live-player__offline">
+                    <span className="live-player__status">▼ MEMBERS ONLY — PREVIEW</span>
+                  </div>
+                </div>
+              )}
             </div>
 
             {episode.description && (
               <section aria-label="About this episode">
                 <SectionBlock number="N°01" title="About this episode">
-                  <div className="article__body pod-ep-body" dangerouslySetInnerHTML={{ __html: sanitizeHtml(episode.description) }} />
+                  <div className="article__body pod-ep-body" dangerouslySetInnerHTML={{ __html: sanitizeHtml(gated.fullAccess ? episode.description : gated.description) }} />
                 </SectionBlock>
               </section>
             )}

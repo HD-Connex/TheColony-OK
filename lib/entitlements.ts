@@ -26,13 +26,21 @@ export async function getMembership(userId: string | null | undefined): Promise<
   if (!userId) return NO_MEMBERSHIP;
   const { data, error } = await supabaseAdmin()
     .from("members")
-    .select("is_member, status, tier, role, current_period_end")
+    .select("is_member, status, tier, role, current_period_end, cancel_at_period_end")
     .eq("user_id", userId)
     .maybeSingle();
   if (error || !data) return NO_MEMBERSHIP;
   const active = data.status === "active" || data.status === "trialing";
+  let isMember = Boolean(data.is_member) && active;
+  // Handle billing edge for membership flows (cancel_at_period_end + period): grant until end even if status edge case (defensive vs webhook timing).
+  if (!isMember && data.current_period_end) {
+    const endMs = Date.parse(data.current_period_end);
+    if (endMs > Date.now() && data.cancel_at_period_end !== false) {
+      isMember = Boolean(data.is_member);
+    }
+  }
   return {
-    isMember: Boolean(data.is_member) && active,
+    isMember,
     status: data.status ?? null,
     tier: data.tier ?? null,
     role: (data.role as string) ?? "member",

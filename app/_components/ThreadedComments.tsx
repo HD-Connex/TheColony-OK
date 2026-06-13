@@ -101,7 +101,7 @@ export default function ThreadedComments({ targetType, targetId, isMember, curre
   function renderThread(c: Comment, depth = 0) {
     const replies = byParent.get(c.id) || [];
     return (
-      <div key={c.id} style={{ marginLeft: depth * 12, borderLeft: depth ? "2px solid #ccc" : "none", paddingLeft: depth ? 8 : 0, marginBottom: 8 }}>
+      <div key={c.id} style={{ marginLeft: depth * 12, borderLeft: depth ? "2px solid var(--color-rule-soft)" : "none", paddingLeft: depth ? 8 : 0, marginBottom: 8 }}>
         <div style={{ fontSize: 13, background: "#faf8f0", padding: 6, border: "1px solid #111" }}>
           <span style={{ fontFamily: "monospace", opacity: 0.7 }}>{new Date(c.created_at).toLocaleTimeString()}</span>{" "}
           {c.content}

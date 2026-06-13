@@ -1,0 +1,19 @@
+﻿
+> thecolony-app@0.1.0 build
+> next build
+
+Γû▓ Next.js 16.2.6 (Turbopack)
+- Environments: .env.local
+
+  Creating an optimized production build ...
+node.exe : 
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Users\hizzysdreambox\AppData ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+> Build error occurred
+Error: ENOENT: no such file or directory, open 
+'D:\1Projects\thecolony-app\.next\static\uAA7tCHlQX38cz9lwHsQc\_buildManifest.js.tmp.x0mtg39s2'
+    at ignore-listed frames

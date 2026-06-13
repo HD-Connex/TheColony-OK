@@ -52,7 +52,7 @@ export async function updateSession(request: NextRequest): Promise<NextResponse>
           setAll(cookiesToSet, headers) {
             cookiesToSet.forEach(({ name, value, options }) => {
               try {
-                request.cookies.set(name, value, options);
+                (request.cookies as any).set(name, value, options);
               } catch {}
             });
 
@@ -113,7 +113,7 @@ export const createClient = (request: NextRequest) => {
           },
           setAll(cookiesToSet) {
             cookiesToSet.forEach(({ name, value, options }) => {
-              try { request.cookies.set(name, value, options); } catch {}
+              try { (request.cookies as any).set(name, value, options); } catch {}
             });
             supabaseResponse = NextResponse.next({ request });
             cookiesToSet.forEach(({ name, value, options }) => {

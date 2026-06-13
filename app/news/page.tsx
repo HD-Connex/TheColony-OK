@@ -1,10 +1,12 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import Image from "next/image";
+import { safeStockImage, STOCK } from "@/lib/media-map";
 import InnerPageShell from "../_components/InnerPageShell";
 import SectionBlock from "../_components/SectionBlock";
 import StoryCard from "../_components/StoryCard";
-import { getArticles, type Article, getCountiesWithCounts } from "@/lib/articles";
+import NewsletterSignup from "../_components/NewsletterSignup"; // Newsletter / The Briefing block (after filters, internal platform)
+import { getArticles, type Article, getCountiesWithCounts, getRelatedArticles } from "@/lib/articles"; // Reuse getRelatedArticles for discovery breadth (news page)
 import {
   formatDateShort,
   formatNewsTime,
@@ -110,6 +112,9 @@ export default async function NewsPage({
   const groups = groupArticles(rest);
   const visibleGroups = GROUP_ORDER.filter((g) => groups[g].length > 0);
 
+  // Reuse getRelatedArticles in news (more places than just stories/[slug]) — breadth discovery rail from first/pinned story
+  const relatedFromNews = pinned ? await getRelatedArticles(pinned.slug, 4).catch(() => []) : [];
+
   return (
     <InnerPageShell
       breadcrumbs={[{ label: "Home", href: "/" }, { label: "Daily News" }]}
@@ -132,10 +137,24 @@ export default async function NewsPage({
         <small className="fine-print" style={{ marginLeft: 8 }}>Also browse <a href="/counties">all counties</a></small>
       </form>
 
+      {/* Newsletter signup block (The Briefing): after filters/headers (tasteful, inline variant, reuses enhanced NewsletterForm + shared counties) */}
+      <NewsletterSignup
+        variant="inline"
+        source="news-page"
+        title="Subscribe for the local briefing"
+        copy="Daily headlines + county editions. No spam, double opt-in."
+        compact
+      />
+
+      {/* Phase 2 AI: on-site member briefing with Claude summaries + real citations only */}
+      <p style={{ margin: "var(--space-2) 0", fontSize: "var(--text-xs)" }}>
+        Members: see your personalized daily AI briefing at <a href="/briefing" className="btn btn--sm btn--outline" style={{ display: "inline" }}>/briefing</a> (also emailed weekly via cron).
+      </p>
+
       {/* Aesthetic lead image for news */}
       <div className="section-lead-image">
         <Image
-          src="/assets/images/heroes/lead-hero.jpg"
+          src={STOCK.heroDefault}
           alt="Daily news and dispatches from Oklahoma"
           width={1200}
           height={380}
@@ -144,7 +163,10 @@ export default async function NewsPage({
       </div>
 
       {items.length === 0 ? (
-        <p className="empty-state">No headlines yet.</p>
+        // PHASE 8 AUDIT P1: Updated empty-state (user-friendly, no seeded refs; reuses .empty-state pattern from stories/news siblings + topics/counties).
+        // Example-aligned: "No headlines yet — check back soon or be the first to contribute via tip line."
+        // Keeps county filter + Newsletter + aesthetic image + related rail above/below for consistency when data loads. No layout break.
+        <p className="empty-state">No headlines yet — check back soon or be the first to contribute via tip line.</p>
       ) : (
         <>
           {pinned && (
@@ -166,6 +188,22 @@ export default async function NewsPage({
             </SectionBlock>
           ))}
         </>
+      )}
+
+      {/* Related content reuse of getRelatedArticles (news page breadth, beyond stories detail) */}
+      {relatedFromNews.length > 0 && (
+        <section className="section section--tight">
+          <SectionBlock number="N°R" title="Related Headlines" dateline="FROM CURRENT COVERAGE">
+            <div className="work-rail">
+              {relatedFromNews.map((r) => (
+                <div className="work-rail__item" key={r.id}>
+                  <Link href={`/stories/${r.slug}`}>{r.title}</Link>
+                  <span className="work-rail__meta">{r.category ?? "News"} · {formatDateShort(r.published_at)}</span>
+                </div>
+              ))}
+            </div>
+          </SectionBlock>
+        </section>
       )}
     </InnerPageShell>
   );

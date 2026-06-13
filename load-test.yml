@@ -1,0 +1,47 @@
+config:
+  target: 'https://thecolony-app.vercel.app'
+  phases:
+    - duration: 60
+      arrivalRate: 10
+      rampTo: 100
+    - duration: 120
+      arrivalRate: 20
+      rampTo: 200
+    - duration: 60
+      arrivalRate: 50
+      rampTo: 300
+    - duration: 60
+      arrivalRate: 100
+      rampTo: 500  # Target 500 concurrent users simulation for soft launch stress test on live YT stream page and key routes.
+  defaults:
+    headers:
+      user-agent: 'TheColony-LoadTest/1.0 (SoftLaunchVerification)'
+      accept: 'text/html,application/xhtml+xml'
+
+scenarios:
+  - name: "Live Page - Jake Merrick YT Stream at 7pm (core for soft launch)"
+    flow:
+      - get:
+          url: "/live"
+          capture:
+            - json: "$.title"
+              as: "pageTitle"
+      - think: 2
+      - get:
+          url: "/live?247=1"  # Test 24/7 fallback too
+  - name: "Home Page - Live Teaser + Hub"
+    flow:
+      - get:
+          url: "/"
+  - name: "Stories Page - Content Load"
+    flow:
+      - get:
+          url: "/stories"
+  - name: "News Page"
+    flow:
+      - get:
+          url: "/news"
+  - name: "Podcasts - Media Section"
+    flow:
+      - get:
+          url: "/podcasts"

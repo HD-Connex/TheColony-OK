@@ -9,6 +9,7 @@ import {
   textSearch,
   type SearchResult,
 } from "@/lib/search";
+import { safeStockImage } from "@/lib/media-map";
 import {
   getEmbeddingSearchStatus,
   searchTranscriptChunks,
@@ -46,10 +47,11 @@ function searchStatusNote(
 export default async function SearchPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string }>;
+  searchParams: Promise<{ q?: string; facet?: string }>;
 }) {
-  const { q: raw } = await searchParams;
+  const { q: raw, facet: rawFacet } = await searchParams;
   const query = raw?.trim() ?? "";
+  const activeFacet = (rawFacet || "all").toLowerCase();
 
   let results: SearchResult[] = [];
   let statusNote: string | null = null;
@@ -82,6 +84,19 @@ export default async function SearchPage({
 
     results = mergeSearchResults(semanticResults, transcriptResults, textResults);
     statusNote = searchStatusNote(embedStatus, usedSemantic, usedTranscript);
+
+    // Phase 2 facets: server filter by result type (subtitle driven) for episodes/podcasts, video, articles, clips/transcript moments
+    if (activeFacet !== "all") {
+      const f = activeFacet;
+      results = results.filter((r) => {
+        const sub = r.subtitle.toLowerCase();
+        if (f === "episodes" || f === "podcasts") return sub.includes("podcast") || sub.includes("episode");
+        if (f === "video" || f === "shows") return sub.includes("episode") || sub.includes("show");
+        if (f === "articles" || f === "news") return sub.includes("article");
+        if (f === "clips" || f === "transcript") return sub.includes("clip") || sub.includes("transcript") || sub.includes("semantic");
+        return true;
+      });
+    }
   }
 
   return (
@@ -115,6 +130,23 @@ export default async function SearchPage({
         </p>
       )}
 
+      {/* Phase 2 semantic+transcript facets + jump-to-moment via clipper in results. Use links to preserve server render + brutalist no-Tailwind. */}
+      {query && (
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: "var(--space-3)" }}>
+          {["all", "episodes", "video", "articles", "clips"].map((f) => (
+            <a
+              key={f}
+              href={`/search?q=${encodeURIComponent(query)}&facet=${f}`}
+              className={`btn btn--sm ${activeFacet === f ? "btn--primary" : "btn--outline"}`}
+              style={{ fontSize: "var(--text-xs)" }}
+            >
+              {f === "all" ? "ALL" : f.toUpperCase()}
+            </a>
+          ))}
+          <span className="fine-print" style={{ alignSelf: "center" }}>• jump via TranscriptClipper below (time-aware from pgvector chunks)</span>
+        </div>
+      )}
+
       {query && results.length === 0 && (
         <p className="empty-state">No matches found. Try different keywords.</p>
       )}
@@ -123,15 +155,14 @@ export default async function SearchPage({
         {results.map((r) => (
           <Link key={r.id} href={r.href} className="search-result">
             <div className="search-result__thumb">
-              {r.thumbnail && (
-                <Image
-                  src={r.thumbnail}
-                  alt={r.title}
-                  width={320}
-                  height={180}
-                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                />
-              )}
+              <Image
+                src={safeStockImage("story", undefined, r.thumbnail)}
+                alt={r.title}
+                width={320}
+                height={180}
+                sizes="(max-width: 640px) 100vw, 320px"
+                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+              />
             </div>
             <div className="search-result__body">
               <p className="search-result__series">{r.subtitle}</p>

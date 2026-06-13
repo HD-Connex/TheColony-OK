@@ -85,14 +85,26 @@ export async function POST(req: Request) {
       return jsonError('Forbidden', 403);
     }
 
-    const { clipId, url } = await req.json();
-    if (!clipId || !url || typeof url !== 'string') {
-      return jsonError('Missing clipId or url', 400);
+    const body = await req.json();
+    const { clipId, episodeId, url, contentId, contentType } = body as { clipId?: string; episodeId?: string; url?: string; contentId?: string; contentType?: 'episode'|'video_episode'|'clip' };
+    const id = clipId || episodeId || contentId;
+    const cType = contentType || (clipId ? 'clip' : 'episode');
+    if (!id || !url || typeof url !== 'string') {
+      return jsonError('Missing id (clipId or episodeId) or url', 400);
     }
 
     const supabase = supabaseAdmin();
-    const { data: clip } = await supabase.from('clips').select('id').eq('id', clipId).single();
-    if (!clip) return jsonError('Clip not found', 404);
+    if (clipId) {
+      const { data: clip } = await supabase.from('clips').select('id').eq('id', clipId).single();
+      if (!clip) return jsonError('Clip not found', 404);
+    } else if (episodeId || contentId) {
+      // episodes or video_episodes: existence optional for transcript (we store in transcripts table)
+      const table = cType === 'video_episode' ? 'video_episodes' : 'episodes';
+      const { data: ep } = await supabase.from(table).select('id').eq('id', id).maybeSingle();
+      if (!ep) {
+        // still allow (may be from webhook before row visible); proceed to transcripts
+      }
+    }
 
     const provider = resolveProvider();
     if (!provider) {
@@ -119,13 +131,15 @@ export async function POST(req: Request) {
       }));
     }
 
-    await supabase.from('clips').update({ transcript }).eq('id', clipId);
+    if (clipId) {
+      await supabase.from('clips').update({ transcript }).eq('id', clipId);
+    } // for episodes: transcript lives only in unified transcripts table (no episodes.transcript column assumed)
 
-    // Mirror into transcripts table for unified search (rich timed segments).
+    // Mirror into transcripts table for unified search (rich timed segments). Supports episode + clip (Phase 2).
     const { error: trErr } = await supabase.from('transcripts').upsert(
       {
-        content_id: clipId,
-        content_type: 'clip',
+        content_id: id,
+        content_type: cType,
         language: 'en',
         segments,
         provider: provider.model,
@@ -134,19 +148,20 @@ export async function POST(req: Request) {
     );
     if (trErr) log.warn('[jobs/transcribe] transcripts upsert failed', trErr.message);
 
-    // Phase 3: chunk + embed timed segments for semantic + time-aware search
+    // Phase 3/2: chunk + embed timed segments for semantic + time-aware search (also for episodes)
     try {
       const { embedQuery } = await import('@/lib/semantic-search');
-      for (const seg of segments.slice(0, 8)) {
+      for (const seg of segments.slice(0, 12)) {
         if (!seg.text) continue;
         const vec = await embedQuery(seg.text);
         if (vec) {
           try {
             await supabase.from('content_embeddings').insert({
-              content_type: 'clip',
-              content_id: clipId,
+              content_type: cType,
+              content_id: id,
               chunk: seg.text.slice(0, 900),
               embedding: vec,
+              chunk_index: Math.floor(seg.start || 0),
             });
           } catch {}
         }
@@ -187,14 +202,14 @@ export async function POST(req: Request) {
           // chapters could be stored in transcripts.segments or a dedicated chapters field
           // Note: summary is generated but not overwriting clip.source_phrase (preserves original spoken phrase for moments).
           // For future: store in episodes.summary / a metadata jsonb, or dedicated summary column.
-          console.log("[transcribe] LLM summary/chapters generated for", clipId, { summary: parsed.summary, chapters: parsed.chapters?.length || 0 });
+          console.log("[transcribe] LLM summary/chapters generated for", id, { summary: parsed.summary, chapters: parsed.chapters?.length || 0 });
         }
       }
     } catch (e) {
       // non-fatal
     }
 
-    return NextResponse.json({ clipId, status: 'done', transcript });
+    return NextResponse.json({ id, contentType: cType, status: 'done', transcript });
   } catch (err) {
     log.error('[jobs/transcribe] unexpected error', err);
     return jsonError('Transcription failed', 500);
