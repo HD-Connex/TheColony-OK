@@ -22,6 +22,7 @@ import { Paywall } from "./Paywall"; // Phase 2: brass Off the Record Paywall fo
 // VideoEmbed + toEmbedSrc already fully handles YT -> nocookie iframe with autoplay/mute etc. No change needed here.
 /** Unified stage item — used by /live and homepage (old API).
  * P2-16: realtime verified: live_events postgres_changes, live_polls for activePoll, presence. + sidebar poll/chat wiring on /live (P2-16 polish). Channels use live target id or global.
+ */
 export interface StageItem {
   id: string;
   title: string;

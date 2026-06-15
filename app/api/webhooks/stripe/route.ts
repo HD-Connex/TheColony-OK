@@ -84,7 +84,7 @@ async function linkCheckoutSession(session: Stripe.Checkout.Session, eventId: st
   }
 }
 
-async function syncSubscription(sub: Stripe.Subscription) {
+async function syncSubscription(sub: Stripe.Subscription, eventId: string) {
   const customerId = typeof sub.customer === "string" ? sub.customer : sub.customer.id;
   const sb = supabaseAdmin();
 
