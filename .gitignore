@@ -10,3 +10,4 @@ terminals/
 *.tsbuildinfo
 
 .vercel
+.env*

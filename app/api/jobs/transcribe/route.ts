@@ -198,11 +198,29 @@ export async function POST(req: Request) {
           const content = chatJson.choices?.[0]?.message?.content || "{}";
           let parsed: any = {};
           try { parsed = JSON.parse(content); } catch {}
-          // Store summary on the clip (reuses source_phrase for visibility in feeds; for episodes use episodes.summary / chapters jsonb)
-          // chapters could be stored in transcripts.segments or a dedicated chapters field
-          // Note: summary is generated but not overwriting clip.source_phrase (preserves original spoken phrase for moments).
-          // For future: store in episodes.summary / a metadata jsonb, or dedicated summary column.
-          console.log("[transcribe] LLM summary/chapters generated for", id, { summary: parsed.summary, chapters: parsed.chapters?.length || 0 });
+
+          const summary: string | null =
+            typeof parsed.summary === "string" && parsed.summary.trim()
+              ? parsed.summary.trim().slice(0, 2000)
+              : null;
+          const chapters = Array.isArray(parsed.chapters) ? parsed.chapters : null;
+
+          // Persist summary + chapters for episodes / video_episodes (columns: 0030 summary, 0003/0007 chapters jsonb).
+          // Clips keep their original source_phrase (the spoken phrase for moments) — we don't overwrite it with a summary.
+          if ((summary || chapters) && (cType === "episode" || cType === "video_episode")) {
+            const table = cType === "video_episode" ? "video_episodes" : "episodes";
+            const patch: Record<string, unknown> = {};
+            if (summary) patch.summary = summary;
+            if (chapters) patch.chapters = chapters;
+            const { error: sumErr } = await supabase.from(table).update(patch).eq("id", id);
+            if (sumErr) {
+              log.warn("[transcribe] summary/chapters persist failed", sumErr.message);
+            } else {
+              log.debug("[transcribe] persisted summary/chapters", { id, table, chapters: chapters?.length || 0 });
+            }
+          } else {
+            log.debug("[transcribe] LLM summary/chapters generated (not persisted for this content type)", { id, cType });
+          }
         }
       }
     } catch (e) {

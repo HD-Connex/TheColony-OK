@@ -30,12 +30,25 @@ export async function POST(req: Request) {
   const sig = req.headers.get("mux-signature");
   const secret = process.env.MUX_WEBHOOK_SECRET;
 
-  if (sig && secret) {
+  // Signature enforcement (P0 security): in production the secret is mandatory and
+  // every webhook must carry a valid signature. Without this, an attacker could POST
+  // forged events (fake live-stream "active", spoofed VOD assets). Dev without a secret
+  // is still allowed (with a loud warning) so local Mux testing isn't blocked.
+  if (process.env.NODE_ENV === "production" && !secret) {
+    log.error("[mux webhook] MUX_WEBHOOK_SECRET is not set in production — rejecting webhook (cannot verify signature)");
+    return new NextResponse("Webhook secret not configured", { status: 500 });
+  }
+  if (secret) {
+    if (!sig) {
+      return new NextResponse("Missing signature", { status: 400 });
+    }
     try {
       mux().webhooks.verifySignature(body, { "mux-signature": sig }, secret);
     } catch {
       return new NextResponse("Invalid signature", { status: 400 });
     }
+  } else {
+    log.warn("[mux webhook] no MUX_WEBHOOK_SECRET set — skipping signature verification (dev only)");
   }
 
   const event = JSON.parse(body) as MuxEvent;

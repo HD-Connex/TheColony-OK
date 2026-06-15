@@ -11,12 +11,6 @@
       "schedule": "*/20 * * * *"
     }
   ],
-  // TWA (Trusted Web Activity) Phase 8 per docs/MOBILE_TWA_PWA_STRATEGY.md + P7-06.
-  // Static /.well-known/assetlinks.json serves Android Play Store verification (public/.well-known/assetlinks.json).
-  // Update package_name + real sha256_cert_fingerprints (from Play Console / bubblewrap sign) for prod release.
-  // No rewrite needed; Next public static + headers cover. Icons/manifest already PWA/TWA-ready (standalone, maskable, theme navy/cream).
-  // App store notes + build test: see MOBILE doc + PHASE5_LAUNCH_READINESS update.
-  // Test manifest: after build, https://thecolony-app.vercel.app/manifest.webmanifest (or local /manifest.webmanifest).
   "headers": [
     {
       "source": "/.well-known/assetlinks.json",
