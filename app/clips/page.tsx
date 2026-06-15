@@ -36,19 +36,23 @@ export default function ClipsFeedPage() {
   const { user, isMember, loading: authLoading } = useAuth();
   const [clips, setClips] = useState<Clip[]>([]);
   const [filter, setFilter] = useState<'all' | 'citizen_dispatch' | 'upload'>('all');
+  const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const PER_PAGE = 20; // P1 pagination on clips surface
 
   // New SSR client (browser instance here for consistency with my-feed/backroom; anon key for public RLS-approved reads)
   const ssrClient = createClient();
 
-  async function loadClips() {
+  async function loadClips(p = page) {
     setLoading(true);
     setLoadError(null);
     try {
       // Use browser client — RLS "clips_public_approved_read" allows anon/public select on approved=true
       // (no session needed for viewing the feed; matches upvote public design)
       const sb = supabaseBrowser();
+      const from = (p - 1) * PER_PAGE;
+      const to = from + PER_PAGE - 1;
       let query = sb
         .from('clips')
         .select(`
@@ -68,7 +72,7 @@ export default function ClipsFeedPage() {
         .eq('approved', true)
         .order('upvotes', { ascending: false })
         .order('created_at', { ascending: false })
-        .limit(60);
+        .range(from, to);
 
       if (filter !== 'all') {
         query = query.eq('dispatch_type', filter);
@@ -88,8 +92,8 @@ export default function ClipsFeedPage() {
   }
 
   useEffect(() => {
-    void loadClips();
-  }, [filter]);
+    void loadClips(page);
+  }, [filter, page]);
 
   // Upvote reuses existing /api/clips/upvote (public, rate-limited, denorm increment)
   async function handleUpvote(clipId: string, currentUpvotes: number) {
@@ -145,7 +149,7 @@ export default function ClipsFeedPage() {
             Member Uploads
           </button>
 
-          <button onClick={loadClips} className="btn btn--outline btn--sm" style={{ marginLeft: 'auto' }} disabled={loading}>
+          <button onClick={() => { setPage(1); void loadClips(1); }} className="btn btn--outline btn--sm" style={{ marginLeft: 'auto' }} disabled={loading}>
             {loading ? 'Loading…' : 'Refresh'}
           </button>
 
@@ -314,6 +318,12 @@ export default function ClipsFeedPage() {
         {/* Bottom: reuse teaser + explainer. Links added in nav/footer per later steps. */}
         <div style={{ marginTop: 'var(--space-4)' }}>
           <ClipsTeaser count={clips.length} showLink={false} />
+          {/* P1 pagination on clips (offset/range via .range on client supabase; 3rd surface) */}
+          <div style={{ display: 'flex', gap: 8, marginTop: 8, alignItems: 'center' }}>
+            <button onClick={() => setPage(p => Math.max(1, p-1))} disabled={page <= 1 || loading} className="btn btn--sm btn--outline">← Prev page</button>
+            <span className="fine-print">Page {page} (up to {PER_PAGE} per page)</span>
+            <button onClick={() => setPage(p => p+1)} disabled={loading || clips.length < PER_PAGE} className="btn btn--sm btn--outline">Next page →</button>
+          </div>
           <p className="fine-print" style={{ marginTop: 'var(--space-4)' }}>
             Uploads and transcript moments require active membership (enforced server-side via entitlements). 
             All approved items visible publicly and upvotable. Top-upvoted recent dispatches included in weekly member digests.

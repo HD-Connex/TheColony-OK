@@ -18,11 +18,16 @@ import ContinueRail from "./_components/ContinueRail";
 import BuildingHubNotice from "./_components/BuildingHubNotice";
 import { getFeaturedBlogPost } from "@/lib/blog-posts";
 import { getHomepageBundle } from "@/lib/homepage";
-import SectionRail from "./_components/SectionRail";
+// p2-13 LCP: dynamic import for below-fold SectionRails (after live/clips sections) to code-split framer-motion + rail chunks out of main LCP/hydration bundle.
+// Hero/podcast-grid Motion kept above-fold for polish; bottom rails non-critical for LCP path. Reuses existing dynamic pattern from ClipsUploadForm.
+const SectionRail = dynamic(() => import("./_components/SectionRail"), {
+  loading: () => <div className="section-rail" style={{ minHeight: "120px", opacity: 0.5 }} aria-hidden="true">Loading stories…</div>,
+});
 
 // Phase 7 LCP/perf: defer non-critical below-fold client component (ClipsUploadForm is upload form, not discovery/lead content).
 // Dynamic + ssr:false reduces initial JS bundle/hydration for LCP path. Reuses existing ClipsUploadForm (no rewrite).
 // MotionStagger on podcast grid kept (above-fold polish + reuse motion primitive); later SectionRails use viewport-deferred MotionReveal/Stagger internally.
+// p2-13: framer-motion (used via Motion* + StoryCard hover) inspected; easy split on rails done. Bundle impact: reduces main entry for LCP.
 const ClipsUploadForm = dynamic(
   () => import("./_components/ClipsUploadForm"),
   {
@@ -35,6 +40,7 @@ const ClipsUploadForm = dynamic(
   }
 );
 
+// p2-13 LCP: revalidate=60 kept for balance (fresh homepage content for news hub vs CDN/LCP cache); homepage bundle fetches prioritized in parallel below. Tune higher if static wins needed.
 export const revalidate = 60;
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://thecolonyok.com";

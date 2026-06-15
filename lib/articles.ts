@@ -3,6 +3,7 @@ import { supabasePublic, supabaseAdmin } from "./supabase";
 import { STORY_HERO, STORY_HERO_ALT, safeStockImage } from "./media-map";
 import { embedQuery } from "./semantic-search"; // Phase 2: generate embeddings on article ingest/publish for semantic search
 import { getRecommendations } from "./recommendations"; // Phase 2: AI recs replace naive category/recency
+import { getPaginateParams, type PaginateParams } from "./paginate"; // P1-10: pagination support for listings (avoids full scans)
 
 export interface Article {
   id: string;
@@ -85,15 +86,18 @@ function enrichArticle(row: ArticleRow): Article {
   };
 }
 
-export async function getArticles(opts: { limit?: number; county?: string } = {}): Promise<Article[]> {
-  const { limit = 8, county } = opts;
+export async function getArticles(opts: { limit?: number; offset?: number; county?: string } & Partial<PaginateParams> = {}): Promise<Article[]> {
+  const { county } = opts;
+  const { limit, offset } = getPaginateParams(opts); // P1-10: use shared paginate (supports page/offset/limit, capped)
   const sb = supabasePublic();
+  const from = offset;
+  const to = offset + limit - 1;
   let q = sb
     .from("articles")
     .select(`${ARTICLE_COLS}, ${CONTRIBUTOR_JOIN}`)
     .eq("status", "published")
     .order("published_at", { ascending: false })
-    .limit(limit);
+    .range(from, to);
   if (county) q = q.eq("county", county);
 
   const joined = await q;
@@ -105,7 +109,7 @@ export async function getArticles(opts: { limit?: number; county?: string } = {}
           .select(ARTICLE_COLS)
           .eq("status", "published")
           .order("published_at", { ascending: false })
-          .limit(limit)
+          .range(from, to)
       ).data ?? []
     : joined.data ?? [];
 
@@ -201,6 +205,15 @@ export async function getRelatedArticles(slug: string, limit = 3): Promise<Artic
 
 export async function getTierArticles(_tier: string, limit = 3): Promise<Article[]> {
   return getArticles({ limit });
+}
+
+/** Count for pager UI (P1 pagination surfaces). */
+export async function getArticlesCount(county?: string): Promise<number> {
+  const sb = supabasePublic();
+  let q = sb.from("articles").select("id", { count: "exact", head: true }).eq("status", "published");
+  if (county) q = q.eq("county", county);
+  const { count } = await q;
+  return count || 0;
 }
 
 /** Get distinct counties with story counts for /counties page. */

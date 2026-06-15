@@ -1,6 +1,7 @@
 // Resend email sender + template wiring.
 // Templates live in ../emails/*.ts (plain HTML strings for max deliverability, no extra deps).
 // All sends are fire-and-forget; errors are logged but never throw to callers.
+// P1: Resend idempotencyKey support added for webhooks. Bounce/complaint: stub Resend webhook at /api/webhooks/resend if needed (handle via Resend dashboard for now; no auto DB bounce flag yet).
 
 import { Resend } from "resend";
 import { welcomeHtml, type WelcomeProps } from "../emails/welcome";
@@ -27,17 +28,22 @@ function getResend(): Resend | null {
 
 const FROM = process.env.RESEND_FROM || "The Colony OK <no-reply@thecolonyok.com>";
 
-async function send(opts: { to: string; subject: string; html: string; tags?: { name: string; value: string }[] }) {
+async function send(opts: { to: string; subject: string; html: string; tags?: { name: string; value: string }[]; idempotencyKey?: string }) {
   const client = getResend();
   if (!client) return { ok: false, skipped: true };
   try {
-    const { data, error } = await client.emails.send({
+    const sendOpts: any = {
       from: FROM,
       to: opts.to,
       subject: opts.subject,
       html: opts.html,
       tags: opts.tags,
-    });
+    };
+    if (opts.idempotencyKey) {
+      // Resend supports idempotency for safe retries (use Stripe event.id or similar in callers)
+      sendOpts.headers = { "Idempotency-Key": opts.idempotencyKey };
+    }
+    const { data, error } = await client.emails.send(sendOpts);
     if (error) {
       log.error("[email] send failed", error);
       return { ok: false, error };
@@ -51,22 +57,24 @@ async function send(opts: { to: string; subject: string; html: string; tags?: { 
 }
 
 /** New member welcome (call after first successful membership sync). */
-export async function sendWelcomeEmail(to: string, props: Omit<WelcomeProps, "siteUrl"> = {}) {
+export async function sendWelcomeEmail(to: string, props: Omit<WelcomeProps, "siteUrl"> = {}, idempotencyKey?: string) {
   return send({
     to,
     subject: "Welcome to The Colony OK — thank you",
     html: welcomeHtml({ ...props, siteUrl: process.env.NEXT_PUBLIC_SITE_URL }),
     tags: [{ name: "category", value: "welcome" }],
+    idempotencyKey,
   });
 }
 
 /** Payment receipt after checkout or renewal. */
-export async function sendReceiptEmail(to: string, props: Omit<ReceiptProps, "siteUrl" | "email">) {
+export async function sendReceiptEmail(to: string, props: Omit<ReceiptProps, "siteUrl" | "email">, idempotencyKey?: string) {
   return send({
     to,
     subject: "Receipt — The Colony OK membership",
     html: receiptHtml({ ...props, email: to, siteUrl: process.env.NEXT_PUBLIC_SITE_URL }),
     tags: [{ name: "category", value: "receipt" }],
+    idempotencyKey,
   });
 }
 

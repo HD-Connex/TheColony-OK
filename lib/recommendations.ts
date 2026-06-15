@@ -27,15 +27,40 @@ export async function getSimilarByEmbedding(seedText: string, excludeIds: string
   if (!vec) return [];
   try {
     const hits: EmbeddingSearchResult[] = await semanticSearch(seedText, limit + 4, { threshold: 0.4 });
+    // BATCH: collect ids per type to kill N+1 per-hit .eq single selects (p2-11)
+    const epIds: string[] = [];
+    const artIds: string[] = [];
+    for (const h of hits) {
+      if (excludeIds.includes(h.content_id)) continue;
+      if (h.content_type === "episode") epIds.push(h.content_id);
+      else if (h.content_type === "article") artIds.push(h.content_id);
+    }
+    // Single batched queries (replaces loop of individual .maybeSingle per hit)
+    const epMap = new Map<string, any>();
+    if (epIds.length) {
+      const { data: epRows } = await supabasePublic()
+        .from("episodes")
+        .select("id,title,description,show_slug,slug")
+        .in("id", epIds);
+      (epRows ?? []).forEach((d: any) => epMap.set(d.id, d));
+    }
+    const artMap = new Map<string, any>();
+    if (artIds.length) {
+      const { data: artRows } = await supabasePublic()
+        .from("articles")
+        .select("id,slug,title,dek")
+        .in("id", artIds)
+        .eq("status", "published");
+      (artRows ?? []).forEach((d: any) => artMap.set(d.id, d));
+    }
     const out: RecItem[] = [];
     for (const h of hits) {
       if (excludeIds.includes(h.content_id)) continue;
-      // Resolve minimally via public reads (reuse resolve logic patterns but light here)
       if (h.content_type === "episode") {
-        const { data } = await supabasePublic().from("episodes").select("id,title,description,show_slug,slug").eq("id", h.content_id).maybeSingle();
+        const data = epMap.get(h.content_id);
         if (data) out.push({ id: data.id, title: data.title, href: `/podcasts/${(data as any).show_slug}/${(data as any).slug || data.id}`, type: "episode", score: h.similarity, dek: (data as any).description });
       } else if (h.content_type === "article") {
-        const { data } = await supabasePublic().from("articles").select("id,slug,title,dek").eq("id", h.content_id).eq("status", "published").maybeSingle();
+        const data = artMap.get(h.content_id);
         if (data) out.push({ id: data.id, title: data.title, href: `/stories/${(data as any).slug}`, type: "article", score: h.similarity, dek: (data as any).dek });
       }
       if (out.length >= limit) break;
@@ -71,14 +96,39 @@ export async function getCollaborativeRecs(seedId: string, seedType: string, lim
       if (t && t !== seedId) counts[`${typ}:${t}`] = (counts[`${typ}:${t}`] || 0) + 1;
     }
     const ranked = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, limit);
+    // BATCH p2-11: collect ids per type then single .in() per type (kills N+1 loop of .eq/maybeSingle)
+    const artIds: string[] = [];
+    const epIds: string[] = [];
+    for (const [key] of ranked) {
+      const [typ, id] = key.split(":");
+      if (typ === "article") artIds.push(id);
+      else if (typ === "episode") epIds.push(id);
+    }
+    const artMap = new Map<string, any>();
+    if (artIds.length) {
+      const { data: artRows } = await sb
+        .from("articles")
+        .select("id,slug,title,dek")
+        .in("id", artIds)
+        .eq("status", "published");
+      (artRows ?? []).forEach((d: any) => artMap.set(d.id, d));
+    }
+    const epMap = new Map<string, any>();
+    if (epIds.length) {
+      const { data: epRows } = await sb
+        .from("episodes")
+        .select("id,title,show_slug,slug,description")
+        .in("id", epIds);
+      (epRows ?? []).forEach((d: any) => epMap.set(d.id, d));
+    }
     const out: RecItem[] = [];
     for (const [key] of ranked) {
       const [typ, id] = key.split(":");
       if (typ === "article") {
-        const { data } = await sb.from("articles").select("id,slug,title,dek").eq("id", id).eq("status", "published").maybeSingle();
+        const data = artMap.get(id);
         if (data) out.push({ id: data.id, title: data.title, href: `/stories/${data.slug}`, type: "article", score: 0.6, dek: (data as any).dek });
       } else if (typ === "episode") {
-        const { data } = await sb.from("episodes").select("id,title,show_slug,slug,description").eq("id", id).maybeSingle();
+        const data = epMap.get(id);
         if (data) out.push({ id: data.id, title: (data as any).title, href: `/podcasts/${(data as any).show_slug}/${(data as any).slug || id}`, type: "episode", score: 0.6, dek: (data as any).description });
       }
       if (out.length >= limit) break;

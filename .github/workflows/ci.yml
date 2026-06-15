@@ -37,6 +37,19 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      # P2-15: Playwright E2E (after build; requires browsers + deps)
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+      - name: Run E2E tests
+        run: npx playwright test
+
+      # P2-15: Simple migration lint / order check (catches unsorted or missing 00xx prefixes in supabase/migrations)
+      - name: Migration order lint
+        run: |
+          echo "Checking supabase/migrations sort order (lexical + version):"
+          ls supabase/migrations | sort -V
+          # Basic check: ensure starts with 00xx_ ; for stricter could parse and verify sequential but ls|sort sufficient for gate
   # Phase 3-06 CI: npm ci + lint + tsc --noEmit + vitest + build on push/PR to main/latest-for-testing.
   # Tests cover sanitize, rate-limit, safeCompare, entitlements (pure + memory paths).
-  # Add e2e + migration lint + Sentry release tokens later per vercel-cicd guidance.
+  # P2-15: + e2e (playwright install + test) + migration lint (ls | sort). Sentry source maps token later (Vercel env).

@@ -11,3 +11,9 @@ terminals/
 
 .vercel
 .env*
+
+# P2-17 repo hygiene: future *.log (build-*, test-*, rate-*, npm-*, tsc-*) go to _archived_ or ignored.
+# Old ones cleaned; active PHASE* md kept in root for launch notes.
+*.log
+!PHASE5*.md
+!PHASE*.log

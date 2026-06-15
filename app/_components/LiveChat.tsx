@@ -7,6 +7,7 @@ import type { RealtimeChannel, User } from '@supabase/supabase-js';
 
 /**
  * P2 (Live Chat) + P5 (Supabase singleton) AUDIT & HARDENING (Phase 8 side quest):
+ * P2-16: realtime wiring verified (channel `live-chat-${id||global}`, postgres_changes INSERT filter live_event_id=eq. or is.null for threaded per-live-target; sub + insert guarded; pairs with /live sidebar + LiveStage). Migrations 0004/5 ensure pub.
  * - Fully audited: robust loadError, supabaseConfigured guard, static samples, retryLoad, optimistic send+rollback.
  * - "Failed to load chat" (or raw technical) never present (pre-edit had similar but user-facing 'Failed to reach...'; now eliminated).
  * - Error paths ALWAYS render "Live chat is coming soon." title + samples preview (no raw error strings like table/policy errs, provisioning, realtime channel, or send messages exposed).
@@ -85,6 +86,7 @@ export default function LiveChat({ liveEventId = null, isMember, currentUser }: 
   // P2: All setLoadError use *non-raw* signals only (user UI never shows technical table/RLS/realtime details).
   // Extra try/catch around sb access + query for table/policy (e.g. 42P01 missing table, 42501 RLS).
   // On any error: loadError truthy triggers "coming soon" + *samples* (no raw interp).
+  // (See ThreadedComments for P1 realtime UPDATE handling pattern for mod approvals.)
   const loadMessages = useCallback(async () => {
     if (!mountedRef.current) return;
     setLoading(true);

@@ -10,9 +10,11 @@ import { type StageItem } from "../_components/LiveStage";
 import LivePlatformTabs from "../_components/LivePlatformTabs";
 import ClipsTeaser from "../_components/ClipsTeaser";
 import LiveChat from "../_components/LiveChat";
+import LivePoll from "../_components/LivePoll";
 import { Paywall } from "../_components/Paywall";
 import NewsletterSignup from "../_components/NewsletterSignup"; // Teaser newsletter / The Briefing block in sidebar (compact internal variant)
 import { getLiveEvents, eventsToStageItems, tierLocked, tierLabel, type LiveEvent, isMembersOnly } from "@/lib/live-events";
+import { getActivePoll } from "@/lib/live-polls";
 import { whenLabel, formatLiveWhen } from "@/lib/format";
 import { safeStockImage, STOCK } from "@/lib/media-map";
 
@@ -55,6 +57,11 @@ export default async function LivePage({
   const isActiveMemberUser = user ? await isActiveMember(user.id) : false;
   const primaryLive = live[0];
   const primaryIsOffRecord = primaryLive ? isMembersOnly(primaryLive) : false;
+
+  // P2-16: wire live polls to /live sidebar (previously only inside LiveStage when !hideInteractivity).
+  // Uses server getActivePoll (lib/live-polls.ts) + client LivePoll for realtime vote tally (postgres_changes on live_poll_votes + active poll listener).
+  // Matches LiveStage + LiveChat pattern: target liveEventId (or null global). isMember + userId from SSR for gate/own-vote.
+  const activePoll = await getActivePoll(primaryLive?.id ?? null);
 
   return (
     <>
@@ -157,6 +164,13 @@ export default async function LivePage({
               {/* Live chat in sidebar container (global or event) to keep player clean and text contained */}
               {/* Phase 2: use server-computed isActiveMemberUser (from SSR) for chat gate; client will align via useAuth */}
               <LiveChat liveEventId={live[0]?.id ?? null} isMember={isActiveMemberUser} currentUser={null} />
+
+              {/* P2-16 realtime wiring: Live polls now also in /live sidebar (hot path). Uses same liveEventId target for channel filter.
+                  Realtime subscribe on live_polls (for active changes) + live_poll_votes (tally refresh) in LivePoll + LiveStage.
+                  Chat uses live_chat_messages with live_event_id=eq filter for threaded per-target. Migrations 0004/0005 enable publication. */}
+              {activePoll && (
+                <LivePoll poll={activePoll} isMember={isActiveMemberUser} currentUserId={user?.id ?? null} />
+              )}
 
               {/* Aesthetic life image for live section */}
               <div className="section-lead-image">

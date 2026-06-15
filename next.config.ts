@@ -34,11 +34,9 @@ const nextConfig: NextConfig = {
   /* defaults for vercel */
   reactStrictMode: true,
   poweredByHeader: false,
-  // Allow production builds to succeed even if TS reports errors in archived/legacy code or edge cases
-  // (dev still gets full type checking; this matches common mitigation patterns in the project's own audits).
-  typescript: {
-    ignoreBuildErrors: true,
-  },
+  // P2-15 (CI hygiene): ignoreBuildErrors REMOVED. Strict TS now enforced on builds for app/ and lib/ (tsconfig excludes only _archived_TheColony + node_modules).
+  // Run `npx tsc --noEmit --skipLibCheck` (as in CI) or full to surface; fix real errors in active sources only.
+  // Dev still full checks; prod builds now fail on TS issues in src (no legacy bypass). Clean at time of removal.
   images: {
     formats: ["image/avif", "image/webp"],
     remotePatterns: [
@@ -59,4 +57,25 @@ const nextConfig: NextConfig = {
 // These are completely optional (no-op without SENTRY_DSN / NEXT_PUBLIC_SENTRY_DSN).
 // Removed build wrapper (withSentryConfig) to eliminate any potential source-map-upload or auth errors during Vercel builds when tokens/org not configured.
 // Re-enable the wrapper later with proper SENTRY_AUTH_TOKEN + org/project for full source maps + releases.
+
+// P2-15 (Sentry source maps enable): 
+// To enable source map uploads for better error stack traces in Sentry (prod):
+// - Add SENTRY_AUTH_TOKEN (from sentry.io org settings > Auth Tokens) + SENTRY_ORG, SENTRY_PROJECT to Vercel env vars (Settings > Environment Variables; for build only).
+// - Re-introduce wrapper in this file:
+//   import { withSentryConfig } from '@sentry/nextjs';
+//   export default withSentryConfig(nextConfig, {
+//     // For all available options, see:
+//     // https://github.com/getsentry/sentry-webpack-plugin#options
+//     org: process.env.SENTRY_ORG,
+//     project: process.env.SENTRY_PROJECT,
+//     authToken: process.env.SENTRY_AUTH_TOKEN,
+//     sourcemaps: {
+//       assets: './**/*', // or specific .next/static etc
+//       ignore: ['**/_archived_**', '**/node_modules/**'],
+//     },
+//     release: { /* name, setCommits etc */ },
+//     // widenClientFileUpload: true,
+//   });
+// Placeholder comments only — do NOT activate wrapper until token is provisioned in Vercel (would fail builds otherwise, as prior note).
+// See also sentry.*.config.ts for DSN guarded inits.
 export default nextConfig;

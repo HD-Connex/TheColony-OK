@@ -37,7 +37,7 @@ export async function POST(req: Request) {
     target_type,
     target_id,
     content: safe,
-    approved: true, // auto-approve for members; flip to false + mod queue if abuse appears
+    approved: false, // P1: default to false for moderation queue (admin approves to surface); keep member post working, public/realtime only see approved
   }).select().single();
 
   if (error) return NextResponse.json({ error: "Failed to post" }, { status: 500 });

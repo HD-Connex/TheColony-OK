@@ -6,6 +6,7 @@ import { supabaseConfigured } from '@/lib/supabase';
 
 /**
  * Layer 3: Live Poll component starter (pairs with LiveChat).
+ * P2-16: polls wiring verified + enhanced (server getActivePoll + client LivePoll on /live sidebar now; channels `poll-${id}` + `live-poll-active-` on live_polls + live_poll_votes for realtime tally; liveEventId target matches chat. Direct RLS client ok (no extra /api needed).
  * Real-time vote tally via postgres_changes on live_poll_votes.
  * Optimistic vote + unique constraint enforcement.
  * A11y: radio group, live results region, disabled after vote/close.

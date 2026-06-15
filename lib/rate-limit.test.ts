@@ -36,4 +36,10 @@ describe("rate-limit (memory path)", () => {
     expect(res.status).toBe(429);
     expect(res.headers.get("Retry-After")).toBe("42");
   });
+
+  // Helping swarm: verified rate-limit.test coverage (memory path + helpers). Added scope test for keyFromRequest (used in api/comments/tips etc).
+  test("keyFromRequest includes scope prefix", () => {
+    const req = new Request("http://x", { headers: { "x-forwarded-for": "10.0.0.1" } });
+    expect(keyFromRequest(req, "clips")).toBe("clips:10.0.0.1");
+  });
 });

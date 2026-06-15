@@ -19,7 +19,8 @@ import { Paywall } from "./Paywall"; // Phase 2: brass Off the Record Paywall fo
 // Note: 24/7 now always prefers Jake Merrick YouTube stream (see lib/live-247 + lib/video JAKE_MERRICK_*).
 // When is247 && playbackSrc is YT (e.g. @jakemerrick212/streams or watch?v=), isEmbed=true -> VideoEmbed (bare).
 // VideoEmbed + toEmbedSrc already fully handles YT -> nocookie iframe with autoplay/mute etc. No change needed here.
-/** Unified stage item — used by /live and homepage (old API). */
+/** Unified stage item — used by /live and homepage (old API).
+ * P2-16: realtime verified: live_events postgres_changes, live_polls for activePoll, presence. + sidebar poll/chat wiring on /live (P2-16 polish). Channels use live target id or global.
 export interface StageItem {
   id: string;
   title: string;

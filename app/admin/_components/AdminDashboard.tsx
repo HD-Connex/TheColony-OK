@@ -25,7 +25,7 @@ interface Application {
 }
 
 export default function AdminDashboard({ currentUserRole }: Props) {
-  const [tab, setTab] = useState<"articles" | "contributors" | "live" | "clips" | "members" | "report-card">("articles");
+  const [tab, setTab] = useState<"articles" | "contributors" | "live" | "clips" | "members" | "report-card" | "comments">("articles");
   const [articles, setArticles] = useState<Article[]>([]);
   const [apps, setApps] = useState<Application[]>([]);
   const [liveEvents, setLiveEvents] = useState<any[]>([]);
@@ -34,6 +34,7 @@ export default function AdminDashboard({ currentUserRole }: Props) {
   const [reportOfficials, setReportOfficials] = useState<any[]>([]);
   const [reportIssues, setReportIssues] = useState<any[]>([]);
   const [reportGrades, setReportGrades] = useState<any[]>([]);
+  const [comments, setComments] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
 
@@ -109,6 +110,27 @@ export default function AdminDashboard({ currentUserRole }: Props) {
     setReportGrades(json.grades || []);
   }
 
+  async function loadComments() {
+    const res = await authedFetch("/api/admin/comments");
+    const json = await res.json().catch(() => ({}));
+    setComments(json.comments || []);
+  }
+
+  async function moderateComment(commentId: string, action: 'approve' | 'reject') {
+    setMsg(null);
+    const res = await authedFetch("/api/admin/comments", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ commentId, action }),
+    });
+    if (res.ok) {
+      setMsg(action === 'approve' ? "Comment approved (now visible to public)." : "Comment rejected (remains pending).");
+      loadComments();
+    } else {
+      setMsg("Moderate failed");
+    }
+  }
+
   useEffect(() => {
     if (tab === "articles") loadArticles();
     if (tab === "contributors") loadApps();
@@ -116,6 +138,7 @@ export default function AdminDashboard({ currentUserRole }: Props) {
     if (tab === "clips") loadClips();
     if (tab === "members") loadMembers();
     if (tab === "report-card") loadReportCard();
+    if (tab === "comments") loadComments();
   }, [tab]);
 
   async function approveApp(id: string) {
@@ -170,7 +193,7 @@ export default function AdminDashboard({ currentUserRole }: Props) {
   return (
     <div className="admin-cms">
       <nav className="admin-tabs" style={{ display: "flex", gap: "8px", margin: "16px 0", borderBottom: "3px solid var(--color-ink)", paddingBottom: 8 }}>
-        {["articles", "contributors", "live", "clips", "members", "report-card"].map((t) => (
+        {["articles", "contributors", "live", "clips", "members", "report-card", "comments"].map((t) => (
           <button
             key={t}
             onClick={() => setTab(t as any)}
@@ -424,6 +447,26 @@ export default function AdminDashboard({ currentUserRole }: Props) {
           <p className="fine-print" style={{ marginTop: 8 }}>
             After adding officials/grades, the public /report-card and /report-card/[county] pages will reflect them (public read via RLS).
           </p>
+        </section>
+      )}
+
+      {tab === "comments" && (
+        <section>
+          <h2 className="section-title">Comments Moderation Queue</h2>
+          <p className="fine-print">Pending (approved=false). Member posts go to queue (P1 change from auto-approve). Approve to surface in ThreadedComments on target; realtime only shows approved. Use PATCH via this surface.</p>
+          <button onClick={loadComments} className="btn btn--outline" style={{ marginBottom: 8 }}>Refresh</button>
+          {comments.length === 0 && <p className="fine-print">No pending comments.</p>}
+          <ul>
+            {comments.slice(0, 20).map((c: any) => (
+              <li key={c.id} style={{ marginBottom: 8, fontSize: 'var(--text-sm)', borderBottom: '1px solid var(--color-rule-soft)', paddingBottom: 6 }}>
+                <code>{c.id.slice(0,8)}…</code> • {c.target_type}:{String(c.target_id).slice(0,8)} • user {c.user_id?.slice(0,8)} • {new Date(c.created_at).toLocaleDateString()}
+                <div style={{ margin: '4px 0', background: '#faf8f0', padding: 4, border: '1px solid #111' }}>{String(c.content).slice(0, 160)}</div>
+                <button onClick={() => moderateComment(c.id, 'approve')} className="btn btn--primary btn--sm">Approve</button>
+                <button onClick={() => moderateComment(c.id, 'reject')} className="btn btn--outline btn--sm" style={{ marginLeft: 6 }}>Reject (keep false)</button>
+              </li>
+            ))}
+          </ul>
+          <p className="fine-print">Approving sets approved=true; public GET /api/comments + ThreadedComments + realtime will surface it. Member posting remains functional (queues now).</p>
         </section>
       )}
 

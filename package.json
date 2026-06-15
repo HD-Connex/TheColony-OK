@@ -8,7 +8,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint || echo 'lint: eslint not fully configured in this bootstrap (pre-existing; non-fatal for infra gates)'",
-    "test": "vitest run"
+    "test": "vitest run",
+    "e2e": "playwright test"
   },
   "dependencies": {
     "@mux/mux-node": "^14.1.1",
@@ -36,6 +37,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "typescript": "^5",
-    "vitest": "^1.6.0"
+    "vitest": "^1.6.0",
+    "@playwright/test": "^1.51.1"
   }
 }

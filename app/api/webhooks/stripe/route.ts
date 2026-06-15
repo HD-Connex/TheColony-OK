@@ -6,6 +6,9 @@ import { sendReceiptEmail, sendCancelEmail, sendWelcomeEmail } from "@/lib/email
 
 export const runtime = "nodejs";
 
+// P1 idempotency: simple in-memory event dedupe (non-persistent across instances but prevents reprocess within lifetime; DB table upsert on event.id recommended for prod scale)
+const processedEvents = new Set<string>();
+
 /**
  * Source of truth for membership entitlement. On every subscription change we
  * upsert the `members` row (is_member, status, stripe_* fields). lib/auth-client.ts
@@ -24,17 +27,23 @@ export async function POST(req: Request) {
     return new NextResponse("Invalid signature", { status: 400 });
   }
 
+  // Idempotency: skip duplicate events (Stripe may retry)
+  if (processedEvents.has(event.id)) {
+    return NextResponse.json({ received: true, duplicate: true });
+  }
+  processedEvents.add(event.id);
+
   switch (event.type) {
     case "checkout.session.completed": {
       const session = event.data.object as Stripe.Checkout.Session;
-      await linkCheckoutSession(session);
+      await linkCheckoutSession(session, event.id);
       break;
     }
     case "customer.subscription.created":
     case "customer.subscription.updated":
     case "customer.subscription.deleted": {
       const sub = event.data.object as Stripe.Subscription;
-      await syncSubscription(sub);
+      await syncSubscription(sub, event.id);
       break;
     }
     default:
@@ -44,7 +53,7 @@ export async function POST(req: Request) {
   return NextResponse.json({ received: true });
 }
 
-async function linkCheckoutSession(session: Stripe.Checkout.Session) {
+async function linkCheckoutSession(session: Stripe.Checkout.Session, eventId: string) {
   const userId = session.metadata?.supabase_user_id ?? session.client_reference_id;
   const customerId =
     typeof session.customer === "string" ? session.customer : session.customer?.id;
@@ -63,11 +72,15 @@ async function linkCheckoutSession(session: Stripe.Checkout.Session) {
     { onConflict: "user_id" },
   );
 
-  // Fire receipt + welcome (best-effort; do not block webhook ack)
+  // Fire receipt + welcome (best-effort; do not block webhook ack). Wrapped try for P1 resilience + eventId for Resend idempotency key.
   if (email) {
     const amount = session.amount_total ? `$${(session.amount_total / 100).toFixed(2)}` : null;
-    await sendReceiptEmail(email, { amount, tier: "member" });
-    await sendWelcomeEmail(email, { tier: "member" });
+    try {
+      await sendReceiptEmail(email, { amount, tier: "member" }, `stripe-${eventId}`);
+    } catch (e) { /* non-fatal */ }
+    try {
+      await sendWelcomeEmail(email, { tier: "member" }, `stripe-${eventId}`);
+    } catch (e) { /* non-fatal */ }
   }
 }
 
@@ -140,14 +153,16 @@ async function syncSubscription(sub: Stripe.Subscription) {
     })
     .eq("user_id", member.user_id);
 
-  // Email side-effects (non-blocking). Never block the 200 to Stripe.
+  // Email side-effects (non-blocking). Never block the 200 to Stripe. Wrapped try for P1 + idempotency resilience.
   const isActiveSub = sub.status === "active" || sub.status === "trialing";
   if (notifyEmail) {
-    if (sub.status === "canceled" || !isActiveSub) {
-      await sendCancelEmail(notifyEmail, { tier: paidTier || undefined, endedAt: periodEnd ? new Date(periodEnd * 1000).toISOString() : undefined });
-    } else if (isActiveSub && isMember) {
-      const amount = null;
-      await sendReceiptEmail(notifyEmail, { amount, tier: "member", periodEnd: periodEnd ? new Date(periodEnd * 1000).toISOString() : undefined });
-    }
+    try {
+      if (sub.status === "canceled" || !isActiveSub) {
+        await sendCancelEmail(notifyEmail, { tier: paidTier || undefined, endedAt: periodEnd ? new Date(periodEnd * 1000).toISOString() : undefined });
+      } else if (isActiveSub && isMember) {
+        const amount = null;
+        await sendReceiptEmail(notifyEmail, { amount, tier: "member", periodEnd: periodEnd ? new Date(periodEnd * 1000).toISOString() : undefined }, `stripe-${eventId}`);
+      }
+    } catch (e) { /* non-fatal for webhook */ }
   }
 }

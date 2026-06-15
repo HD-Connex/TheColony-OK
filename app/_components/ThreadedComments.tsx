@@ -24,7 +24,7 @@ interface Props {
 /**
  * Threaded comments (reuses live-chat realtime postgres_changes pattern).
  * Member gated for posting. Public read of approved.
- * Admin moderation happens in /admin (approved flag).
+ * Admin moderation happens in /admin (approved flag). P1: default queue + mod surface + nested UX polish + realtime UPDATE.
  */
 export default function ThreadedComments({ targetType, targetId, isMember, currentUserId }: Props) {
   const [comments, setComments] = useState<Comment[]>([]);
@@ -53,6 +53,24 @@ export default function ThreadedComments({ targetType, targetId, isMember, curre
           const c = payload.new as Comment;
           if (c.target_id === targetId && c.approved !== false) {
             setComments((prev) => [...prev, c]);
+          }
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "threaded_comments", filter: `target_type=eq.${targetType}` },
+        (payload) => {
+          const c = payload.new as Comment;
+          if (c.target_id === targetId && c.approved !== false) {
+            setComments((prev) => {
+              const idx = prev.findIndex((x) => x.id === c.id);
+              if (idx >= 0) {
+                const copy = [...prev];
+                copy[idx] = c;
+                return copy;
+              }
+              return [...prev, c];
+            });
           }
         }
       )
@@ -88,7 +106,7 @@ export default function ThreadedComments({ targetType, targetId, isMember, curre
     }
   }
 
-  // naive thread grouping
+  // naive thread grouping (P1 polish: reply counts + deeper indent UX)
   const roots = comments.filter((c) => !c.parent_id);
   const byParent = new Map<string, Comment[]>();
   comments.forEach((c) => {
@@ -98,14 +116,21 @@ export default function ThreadedComments({ targetType, targetId, isMember, curre
     }
   });
 
+  const totalComments = comments.length;
+  const replyCountFor = (id: string) => (byParent.get(id) || []).length;
+
   function renderThread(c: Comment, depth = 0) {
     const replies = byParent.get(c.id) || [];
+    const rc = replyCountFor(c.id);
+    const indent = Math.min(depth * 16, 120); // cap deep nesting for UX
     return (
-      <div key={c.id} style={{ marginLeft: depth * 12, borderLeft: depth ? "2px solid var(--color-rule-soft)" : "none", paddingLeft: depth ? 8 : 0, marginBottom: 8 }}>
+      <div key={c.id} style={{ marginLeft: indent, borderLeft: depth ? "2px solid var(--color-rule-soft)" : "none", paddingLeft: depth ? 8 : 0, marginBottom: 8 }}>
         <div style={{ fontSize: 13, background: "#faf8f0", padding: 6, border: "1px solid #111" }}>
           <span style={{ fontFamily: "monospace", opacity: 0.7 }}>{new Date(c.created_at).toLocaleTimeString()}</span>{" "}
           {c.content}
+          {rc > 0 && <span style={{ marginLeft: 6, fontSize: 10, opacity: 0.6 }}>({rc} {rc === 1 ? "reply" : "replies"})</span>}
           {isMember && <button onClick={() => setReplyTo(c.id)} style={{ marginLeft: 8, fontSize: 11 }}>reply</button>}
+          {depth > 3 && <span style={{ marginLeft: 6, fontSize: 9, opacity: 0.5 }}>deep</span>}
         </div>
         {replies.map((r) => renderThread(r, depth + 1))}
       </div>
@@ -114,7 +139,7 @@ export default function ThreadedComments({ targetType, targetId, isMember, curre
 
   return (
     <div className="threaded-comments" style={{ marginTop: 16 }}>
-      <h4 style={{ margin: "8px 0" }}>Discussion</h4>
+      <h4 style={{ margin: "8px 0" }}>Discussion {totalComments > 0 ? `(${totalComments})` : ""}</h4>
       <div style={{ maxHeight: 320, overflow: "auto", border: "2px solid #111", padding: 8, background: "#fff" }}>
         {roots.length === 0 && <p className="fine-print">No comments yet. Be the first (members only).</p>}
         {roots.map((r) => renderThread(r))}

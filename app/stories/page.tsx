@@ -5,7 +5,7 @@ import InnerPageShell from "../_components/InnerPageShell";
 import StoryCard from "../_components/StoryCard";
 import NewsletterSignup from "../_components/NewsletterSignup"; // Newsletter / The Briefing block (after filters/headers)
 import ContinueRail from "../_components/ContinueRail"; // Reuse enhanced ContinueRail for discovery breadth on stories list (site-wide)
-import { getArticles, type Article, getCountiesWithCounts } from "@/lib/articles";
+import { getArticles, type Article, getCountiesWithCounts, getArticlesCount } from "@/lib/articles";
 import { safeStockImage } from "@/lib/media-map";
 
 export const metadata: Metadata = {
@@ -31,16 +31,21 @@ function matchesCategory(article: Article, cat: string | undefined): boolean {
 export default async function StoriesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ cat?: string; county?: string }>;
+  searchParams: Promise<{ cat?: string; county?: string; page?: string }>;
 }) {
-  const { cat, county } = await searchParams;
+  const { cat, county, page: pageStr } = await searchParams;
   const activeKey = CATEGORIES.some((c) => c.key === cat) ? cat! : "all";
+  const PER_PAGE = 12;
+  const page = Math.max(1, parseInt(pageStr || "1", 10) || 1);
+  const offset = (page - 1) * PER_PAGE;
 
-  const [articles, countyOptions] = await Promise.all([
-    getArticles({ limit: 24, county }).catch((e) => { console.error("Failed loading stories", e); return []; }),
+  const [articles, countyOptions, totalCount] = await Promise.all([
+    getArticles({ limit: PER_PAGE, offset, county }).catch((e) => { console.error("Failed loading stories", e); return []; }),
     getCountiesWithCounts(),
+    getArticlesCount(county).catch(() => 0),
   ]);
   const filtered = articles.filter((a) => matchesCategory(a, activeKey));
+  const totalPages = Math.max(1, Math.ceil(totalCount / PER_PAGE));
 
   const filterOptions = CATEGORIES.map((c) => ({
     key: c.key,
@@ -104,6 +109,15 @@ export default async function StoriesPage({
           {filtered.map((a) => (
             <StoryCard key={a.id} a={a} />
           ))}
+        </div>
+      )}
+
+      {/* P1 pagination: simple offset/limit + count pager (non-breaking defaults; ?page= ) */}
+      {totalPages > 1 && (
+        <div style={{ marginTop: 16, display: 'flex', gap: 8, alignItems: 'center' }}>
+          {page > 1 && <a href={`/stories?${new URLSearchParams({ ...(cat && cat!=='all' ? {cat} : {}), ...(county ? {county} : {}), page: String(page-1) }).toString()}`} className="btn btn--sm btn--outline">← Prev</a>}
+          <span className="fine-print">Page {page} / {totalPages} (showing {filtered.length})</span>
+          {page < totalPages && <a href={`/stories?${new URLSearchParams({ ...(cat && cat!=='all' ? {cat} : {}), ...(county ? {county} : {}), page: String(page+1) }).toString()}`} className="btn btn--sm btn--outline">Next →</a>}
         </div>
       )}
 

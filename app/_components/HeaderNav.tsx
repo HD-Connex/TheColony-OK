@@ -97,12 +97,11 @@ export default function HeaderNav() {
   };
 
   // Desktop: full tabs + dropdowns visible. Hamburger + mobile ONLY on small screens.
-  // We still track isMobile for the drawer open state and any future mobile-only behaviors,
-  // but we NO LONGER gate the hamburger button itself on isMobile.
-  // The button is always in the DOM; pure CSS media queries (min-width: 1025px) + !important
-  // guarantee it is completely invisible and out of layout on any desktop viewport.
-  // This eliminates any possibility of JS state, hydration mismatch, or window size edge cases
-  // leaking a hamburger onto the desktop version.
+  // P2-16 mobile nav polish: ALWAYS render the .nav__mobile drawer in DOM (SSR safe, no conditional on isMobile).
+  // Visibility controlled purely by CSS (.nav__mobile {display:none} + .is-open {flex} + @media max-1024 {block for hamburger}).
+  // This fixes "Mobile nav menu unclear" / hydration/click timing issues from prior audit (isMobile state + hidden attr could mask functional toggle).
+  // Hamburger onClick always toggles state; on mobile viewport the class makes menu appear/clear. Desktop media hides completely.
+  // We still track isMobile (matchMedia) for potential future behaviors, but render gate removed.
   useEffect(() => {
     const mql = window.matchMedia("(max-width: 1024px)");
     const update = () => setIsMobile(mql.matches);
@@ -146,12 +145,9 @@ export default function HeaderNav() {
       </div>
 
       {/* Hamburger button is ALWAYS rendered (for mobile).
-          It is 100% hidden on any desktop viewport via the CSS rules below:
-          - base display: none
-          - @media (min-width: 1025px) { display: none !important }
-          This guarantees NO HAMBURGER MENU appears on the desktop version of the page,
-          regardless of JS isMobile state, hydration, or how the user resizes their browser.
-          The mobile drawer below remains gated on isMobile so it only exists when needed. */}
+          P2-16 polish: mobile drawer ALWAYS in DOM (no isMobile render gate, no hidden= attr).
+          CSS @media (max-width:1024px) + .is-open controls show/hide + layout. Desktop media hides .nav__mobile + hamburger entirely.
+          Makes hamburger fully functional/clear on mobile viewports (addresses audit "Mobile nav menu unclear"). Click toggles state reliably, class drives visibility. */}
       <button
         type="button"
         className="nav__hamburger"
@@ -165,29 +161,27 @@ export default function HeaderNav() {
         <span />
       </button>
 
-      {isMobile && (
-        <div className={`nav__mobile${mobileOpen ? " is-open" : ""}`} id="mobile-menu" hidden={!mobileOpen}>
-          {/* Flat list of all pages for mobile usability */}
-          <Link className={`nav__link ${isActive('/stories') ? "nav__link--active" : ""}`} href="/stories" onClick={closeAll}>Investigations</Link>
-          <Link className={`nav__link ${isActive('/news') ? "nav__link--active" : ""}`} href="/news" onClick={closeAll}>News</Link>
-          <Link className={`nav__link ${isActive('/podcasts') ? "nav__link--active" : ""}`} href="/podcasts" onClick={closeAll}>Podcasts</Link>
-          <Link className={`nav__link ${isActive('/shows') ? "nav__link--active" : ""}`} href="/shows" onClick={closeAll}>Shows</Link>
-          <Link className={`nav__link ${isActive('/live') ? "nav__link--active" : ""}`} href="/live" onClick={closeAll}>Live</Link>
-          <Link className={`nav__link ${isActive('/watch') ? "nav__link--active" : ""}`} href="/watch" onClick={closeAll}>Watch</Link>
-          <Link className={`nav__link ${isActive('/clips') ? "nav__link--active" : ""}`} href="/clips" onClick={closeAll}>Dispatches</Link>
-          <Link className={`nav__link ${isActive('/counties') ? "nav__link--active" : ""}`} href="/counties" onClick={closeAll}>Counties</Link>
-          <Link className={`nav__link ${isActive('/topics') ? "nav__link--active" : ""}`} href="/topics" onClick={closeAll}>Topics</Link>
-          <Link className={`nav__link ${isActive('/report-card') ? "nav__link--active" : ""}`} href="/report-card" onClick={closeAll}>Report Card</Link>
-          <Link className="nav__link" href="/blog" onClick={closeAll}>Blog</Link>
-          <Link className="nav__link" href="/my-feed" onClick={closeAll}>My Feed</Link>
-          <Link className="nav__link" href="/journalists" onClick={closeAll}>Journalists</Link>
-          <Link className="nav__link" href="/contributors/join" onClick={closeAll}>Masthead</Link>
-          <Link className="nav__link" href="/backroom" onClick={closeAll}>The Backroom</Link>
-          <Link className="nav__link" href="/search" onClick={closeAll}>Search</Link>
-          <Link className="btn btn--primary btn--full" href="/pricing" onClick={closeAll}>Join — $4.99/month</Link>
-          <Link className="btn btn--outline btn--full" href="/membership" onClick={closeAll}>Sign In</Link>
-        </div>
-      )}
+      <div className={`nav__mobile${mobileOpen ? " is-open" : ""}`} id="mobile-menu">
+        {/* Flat list of all pages for mobile usability */}
+        <Link className={`nav__link ${isActive('/stories') ? "nav__link--active" : ""}`} href="/stories" onClick={closeAll}>Investigations</Link>
+        <Link className={`nav__link ${isActive('/news') ? "nav__link--active" : ""}`} href="/news" onClick={closeAll}>News</Link>
+        <Link className={`nav__link ${isActive('/podcasts') ? "nav__link--active" : ""}`} href="/podcasts" onClick={closeAll}>Podcasts</Link>
+        <Link className={`nav__link ${isActive('/shows') ? "nav__link--active" : ""}`} href="/shows" onClick={closeAll}>Shows</Link>
+        <Link className={`nav__link ${isActive('/live') ? "nav__link--active" : ""}`} href="/live" onClick={closeAll}>Live</Link>
+        <Link className={`nav__link ${isActive('/watch') ? "nav__link--active" : ""}`} href="/watch" onClick={closeAll}>Watch</Link>
+        <Link className={`nav__link ${isActive('/clips') ? "nav__link--active" : ""}`} href="/clips" onClick={closeAll}>Dispatches</Link>
+        <Link className={`nav__link ${isActive('/counties') ? "nav__link--active" : ""}`} href="/counties" onClick={closeAll}>Counties</Link>
+        <Link className={`nav__link ${isActive('/topics') ? "nav__link--active" : ""}`} href="/topics" onClick={closeAll}>Topics</Link>
+        <Link className={`nav__link ${isActive('/report-card') ? "nav__link--active" : ""}`} href="/report-card" onClick={closeAll}>Report Card</Link>
+        <Link className="nav__link" href="/blog" onClick={closeAll}>Blog</Link>
+        <Link className="nav__link" href="/my-feed" onClick={closeAll}>My Feed</Link>
+        <Link className="nav__link" href="/journalists" onClick={closeAll}>Journalists</Link>
+        <Link className="nav__link" href="/contributors/join" onClick={closeAll}>Masthead</Link>
+        <Link className="nav__link" href="/backroom" onClick={closeAll}>The Backroom</Link>
+        <Link className="nav__link" href="/search" onClick={closeAll}>Search</Link>
+        <Link className="btn btn--primary btn--full" href="/pricing" onClick={closeAll}>Join — $4.99/month</Link>
+        <Link className="btn btn--outline btn--full" href="/membership" onClick={closeAll}>Sign In</Link>
+      </div>
     </>
   );
 }

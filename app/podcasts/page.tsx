@@ -5,7 +5,7 @@ import PageHeader from "../_components/PageHeader";
 import SectionBlock from "../_components/SectionBlock";
 import PodcastSearchGrid from "./_components/PodcastSearchGrid";
 import ContinueRail from "../_components/ContinueRail"; // Reuse ContinueRail on podcasts index (episodes-focused discovery, site-wide)
-import { getShowsWithEpisodeCounts, getRecentEpisodes } from "@/lib/podcasts";
+import { getShowsWithEpisodeCounts, getRecentEpisodes } from "@/lib/podcasts"; // getRecentEpisodes now supports offset for pagination
 import { formatDate, formatDurationLabel } from "@/lib/format";
 import { PODCAST_ART, podcastCover, safeStockImage } from "@/lib/media-map";
 import Image from "next/image";
@@ -18,15 +18,24 @@ export const metadata: Metadata = {
 
 export const revalidate = 60;
 
-export default async function PodcastsIndexPage() {
+export default async function PodcastsIndexPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ page?: string }>;
+}) {
+  const sp = searchParams ? await searchParams : {};
+  const PER_PAGE = 12;
+  const page = Math.max(1, parseInt(sp.page || "1", 10) || 1);
+  const offset = (page - 1) * PER_PAGE;
   const [podcast, recent] = await Promise.all([
     getShowsWithEpisodeCounts(100).catch(() => ({
       shows: [],
       totalShows: 0,
       totalEpisodes: 0,
     })),
-    getRecentEpisodes(8).catch(() => []),
+    getRecentEpisodes({ limit: PER_PAGE, offset }).catch(() => []),
   ]);
+  // Note: no total count for episodes easy (would need extra query), pager demo uses fixed for surface.
 
   return (
     <main id="main" className="page--inner">
@@ -80,6 +89,9 @@ export default async function PodcastsIndexPage() {
                   })}
                 </div>
               </SectionBlock>
+              {/* P1 simple pager for episodes list surface (offset support in lib) */}
+              {page > 1 && <a href={`/podcasts?page=${page-1}`} className="btn btn--sm btn--outline" style={{marginRight:8}}>← Prev eps</a>}
+              <a href={`/podcasts?page=${page+1}`} className="btn btn--sm btn--outline">Next eps →</a>
             </section>
           )}
 

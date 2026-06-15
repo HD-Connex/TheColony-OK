@@ -6,7 +6,7 @@ import InnerPageShell from "../_components/InnerPageShell";
 import SectionBlock from "../_components/SectionBlock";
 import StoryCard from "../_components/StoryCard";
 import NewsletterSignup from "../_components/NewsletterSignup"; // Newsletter / The Briefing block (after filters, internal platform)
-import { getArticles, type Article, getCountiesWithCounts, getRelatedArticles } from "@/lib/articles"; // Reuse getRelatedArticles for discovery breadth (news page)
+import { getArticles, type Article, getCountiesWithCounts, getRelatedArticles, getArticlesCount } from "@/lib/articles"; // Reuse getRelatedArticles for discovery breadth (news page)
 import {
   formatDateShort,
   formatNewsTime,
@@ -101,16 +101,21 @@ function NewsList({ items, showDate }: { items: Article[]; showDate: boolean }) 
 export default async function NewsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ county?: string }>;
+  searchParams: Promise<{ county?: string; page?: string }>;
 }) {
-  const { county: countyFilter } = await searchParams;
-  const [items, countyOptions] = await Promise.all([
-    getArticles({ limit: 30, county: countyFilter }).catch(() => { return []; }),
+  const { county: countyFilter, page: pageStr } = await searchParams;
+  const PER_PAGE = 20;
+  const page = Math.max(1, parseInt(pageStr || "1", 10) || 1);
+  const offset = (page - 1) * PER_PAGE;
+  const [items, countyOptions, totalCount] = await Promise.all([
+    getArticles({ limit: PER_PAGE, offset, county: countyFilter }).catch(() => { return []; }),
     getCountiesWithCounts(),
+    getArticlesCount(countyFilter).catch(() => 0),
   ]);
   const [pinned, ...rest] = items;
   const groups = groupArticles(rest);
   const visibleGroups = GROUP_ORDER.filter((g) => groups[g].length > 0);
+  const totalPages = Math.max(1, Math.ceil(totalCount / PER_PAGE));
 
   // Reuse getRelatedArticles in news (more places than just stories/[slug]) — breadth discovery rail from first/pinned story
   const relatedFromNews = pinned ? await getRelatedArticles(pinned.slug, 4).catch(() => []) : [];
@@ -204,6 +209,15 @@ export default async function NewsPage({
             </div>
           </SectionBlock>
         </section>
+      )}
+
+      {/* P1 pagination: offset/limit + count for news (one of key surfaces; defaults preserve old full load behavior) */}
+      {totalPages > 1 && (
+        <div style={{ marginTop: 12, display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'center' }}>
+          {page > 1 && <a href={`/news?${new URLSearchParams({ ...(countyFilter ? {county: countyFilter} : {}), page: String(page-1) }).toString()}`} className="btn btn--sm btn--outline">← Prev</a>}
+          <span className="fine-print">Page {page} / {totalPages}</span>
+          {page < totalPages && <a href={`/news?${new URLSearchParams({ ...(countyFilter ? {county: countyFilter} : {}), page: String(page+1) }).toString()}`} className="btn btn--sm btn--outline">Next →</a>}
+        </div>
       )}
     </InnerPageShell>
   );

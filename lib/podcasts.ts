@@ -74,9 +74,12 @@ export interface PlayableEpisode {
   chapters?: Array<{ t: number; label: string }>;
 }
 
-export async function getEpisodesByShowSlug(slug: string): Promise<Episode[]> {
+export async function getEpisodesByShowSlug(slug: string, opts: { limit?: number; offset?: number } = {}): Promise<Episode[]> {
+  const { limit = 50, offset = 0 } = opts;
   const sb = supabasePublic();
-  const { data } = await sb.from("episodes").select("*").eq("show_slug", slug).order("pub_date", { ascending: false });
+  const from = offset;
+  const to = offset + limit - 1;
+  const { data } = await sb.from("episodes").select("*").eq("show_slug", slug).order("pub_date", { ascending: false }).range(from, to);
   return (data ?? []) as Episode[];
 }
 
@@ -113,14 +116,17 @@ export interface RecentEpisode {
 }
 
 /** Latest published episodes across the podcast network (for index rails). */
-export async function getRecentEpisodes(limit = 6): Promise<RecentEpisode[]> {
+export async function getRecentEpisodes(opts: { limit?: number; offset?: number } = {}): Promise<RecentEpisode[]> {
+  const { limit = 6, offset = 0 } = opts;
   const sb = supabasePublic();
+  const from = offset;
+  const to = offset + limit - 1;
   const [{ data: episodes }, { data: shows }] = await Promise.all([
     sb
       .from("episodes")
       .select("id,slug,title,show_slug,pub_date,duration_s,thumbnail_url,cover_url")
       .order("pub_date", { ascending: false })
-      .limit(limit),
+      .range(from, to),
     sb.from("shows").select("slug,title,host").eq("active", true),
   ]);
 
