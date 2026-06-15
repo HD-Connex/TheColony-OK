@@ -4,10 +4,12 @@ import { getLiveEvents, eventsToStageItems, type LiveEvent } from "./live-events
 import { getContributors, type Contributor } from "./contributors";
 import { getVideoSeries } from "./series"; // assume exists or stub
 import { supabasePublic } from "./supabase";
+import { unstable_cache } from "next/cache"; // p2-14 cache hot: homepage bundle is top call site for home LCP surface + watch etc.
 
 // Simple trending helpers (Phase 1 discovery breadth): exported for reuse in homepage + /watch (and other discovery pages).
 // Avoids new lib/trending.ts file per "prefer edit existing" + no-new-files guideline. Data-driven via clips upvotes + recency for stories.
-export const getTrendingClips = async (limit = 8) => {
+// p2-14: wrapped trendingClips (hot for home + /watch) in cache (short reval).
+const getTrendingClipsImpl = async (limit = 8) => {
   try {
     const { data } = await supabasePublic()
       .from("clips")
@@ -21,6 +23,7 @@ export const getTrendingClips = async (limit = 8) => {
     return [] as any[];
   }
 };
+export const getTrendingClips = unstable_cache(getTrendingClipsImpl, ["trending-clips"], { revalidate: 30 });
 
 // Basic trending stories (reuse getArticles + recency + tier weight, for homepage/watch/related reuse).
 export async function getTrendingStories(limit = 6): Promise<Article[]> {
@@ -45,7 +48,8 @@ export interface HomepageBundle {
   liveItems: any[];
 }
 
-export async function getHomepageBundle(viewer?: { counties?: string[] }): Promise<HomepageBundle> {
+// p2-14: cache getHomepageBundle (core for home LCP + /watch discovery); 45s reval (balances live-ish data). Tags for future purge. getArticles inside now also cached -> compound win. Non-breaking API.
+const getHomepageBundleImpl = async (viewer?: { counties?: string[] }): Promise<HomepageBundle> => {
   const [articles, podcastData, live, contributors] = await Promise.all([
     getArticles({ limit: 12 }),
     getShowsWithEpisodeCounts(6),
@@ -90,4 +94,5 @@ export async function getHomepageBundle(viewer?: { counties?: string[] }): Promi
     opinionRail,
     liveItems,
   };
-}
+};
+export const getHomepageBundle = unstable_cache(getHomepageBundleImpl, ["homepage-bundle"], { revalidate: 45, tags: ["homepage", "articles", "live"] });

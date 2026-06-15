@@ -49,7 +49,14 @@ const nextConfig: NextConfig = {
   // No PWA plugin needed (Next built-in). assetlinks for TWA verification in public/.well-known (see vercel.json + MOBILE doc).
   // Offline shell in public/sw.js (v6, clips SWR + shell routes). Test: build produces manifest.webmanifest; /sw.js registers in SiteClient.
   async headers() {
-    return [{ source: "/:path*", headers: securityHeaders }];
+    return [
+      { source: "/:path*", headers: securityHeaders },
+      // p2-14 cache headers for CDN (s-maxage): example for stable public paths (robots, sitemap, manifest, health demo). Hot RSC use revalidate+unstable_cache.
+      // Focus on 3-4 hot: e.g. home/news benefit from reval 60 + lib caches; add per-route if api surfaces content.
+      { source: "/robots.txt", headers: [{ key: "Cache-Control", value: "public, s-maxage=3600, stale-while-revalidate" }] },
+      { source: "/sitemap.xml", headers: [{ key: "Cache-Control", value: "public, s-maxage=1800, stale-while-revalidate" }] },
+      { source: "/api/health", headers: [{ key: "Cache-Control", value: "public, s-maxage=15, stale-while-revalidate=30" }] },
+    ];
   },
 };
 

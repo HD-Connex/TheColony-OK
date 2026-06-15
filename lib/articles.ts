@@ -4,6 +4,7 @@ import { STORY_HERO, STORY_HERO_ALT, safeStockImage } from "./media-map";
 import { embedQuery } from "./semantic-search"; // Phase 2: generate embeddings on article ingest/publish for semantic search
 import { getRecommendations } from "./recommendations"; // Phase 2: AI recs replace naive category/recency
 import { getPaginateParams, type PaginateParams } from "./paginate"; // P1-10: pagination support for listings (avoids full scans)
+import { unstable_cache } from "next/cache"; // p2-14: runtime cache for hot reads (getArticles is called from home, news, header, related, topics, watch etc)
 
 export interface Article {
   id: string;
@@ -86,7 +87,10 @@ function enrichArticle(row: ArticleRow): Article {
   };
 }
 
-export async function getArticles(opts: { limit?: number; offset?: number; county?: string } & Partial<PaginateParams> = {}): Promise<Article[]> {
+// p2-14 cache: wrap hot getArticles (used in home hero/ticker, /news, /header, topics, related recs fallback, watch seed) with unstable_cache.
+// 60s revalidate matches page; tags allow on-demand reval e.g. on publish webhook later. Graceful: if cache layer down Next falls back (unstable is in-mem + persist).
+// Non-breaking: same signature/return, callers unchanged. Reuses rate-limit Upstash pattern idea (opt-in external) but prefer built-in for RSC dedup.
+const getArticlesImpl = async (opts: { limit?: number; offset?: number; county?: string } & Partial<PaginateParams> = {}): Promise<Article[]> => {
   const { county } = opts;
   const { limit, offset } = getPaginateParams(opts); // P1-10: use shared paginate (supports page/offset/limit, capped)
   const sb = supabasePublic();
@@ -114,7 +118,8 @@ export async function getArticles(opts: { limit?: number; offset?: number; count
     : joined.data ?? [];
 
   return (rows as Record<string, unknown>[]).map((r) => enrichArticle(normalizeRow(r)));
-}
+};
+export const getArticles = unstable_cache(getArticlesImpl, ["articles", "published-list"], { revalidate: 60, tags: ["articles"] });
 
 export async function getArticleBySlug(slug: string): Promise<Article | null> {
   const sb = supabasePublic();

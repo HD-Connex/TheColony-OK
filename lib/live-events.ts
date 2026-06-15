@@ -1,6 +1,7 @@
 // Live TV / events queries (streaming `live_events`), read via the anon client.
 import { supabasePublic } from "./supabase";
 import { resolveVideo, tierLocked, tierLabel, type Playback } from "./series";
+import { unstable_cache } from "next/cache"; // p2-14: cache live events (used home, /live, LiveNowBar, Continue etc); short TTL as semi-realtime.
 
 export interface LiveEvent {
   id: string;
@@ -26,7 +27,7 @@ export interface LiveBundle {
   replays: LiveEvent[];
 }
 
-export async function getLiveEvents(): Promise<LiveBundle> {
+const getLiveEventsImpl = async (): Promise<LiveBundle> => {
   const { data } = await supabasePublic().from("live_events").select(COLS).order("scheduled_start", { ascending: true });
   const all = (data as LiveEvent[]) ?? [];
 
@@ -51,7 +52,9 @@ export async function getLiveEvents(): Promise<LiveBundle> {
   }
 
   return { live, upcoming, replays };
-}
+};
+// p2-14 cache for live (4th hot path); 15s reval + tags. getLiveEventsClient reuses (still hits cache). Non-breaking.
+export const getLiveEvents = unstable_cache(getLiveEventsImpl, ["live-events"], { revalidate: 15, tags: ["live"] });
 
 export function playbackFor(e: LiveEvent): Playback {
   return resolveVideo({ video_url: e.video_url, mux_playback_id: e.mux_playback_id });

@@ -29,6 +29,8 @@ export async function GET() {
   return NextResponse.json(payload, {
     status: 200,
     headers: {
+      // p2-14: health uses no-store (correct for uptime timestamp), but example of s-maxage CDN header for other public hot read APIs.
+      // For CDN: 'Cache-Control': 'public, s-maxage=30, stale-while-revalidate=60' on stable content routes (e.g. sitemaps, public lists).
       'Cache-Control': 'no-store, no-cache, must-revalidate',
     },
   });

@@ -22,7 +22,9 @@ const MAX_LIMIT = 50;
 const DEFAULT_LIMIT = 12;
 
 export function getPaginateParams(params: PaginateParams): { limit: number; offset: number } {
-  let limit = params.limit ?? (params.page ? DEFAULT_LIMIT : DEFAULT_LIMIT);
+  // hygiene (P2 scale): simplify redundant default ternary; still caps to avoid scans. Used by articles.ts (now +unstable_cache p2-14 + batch recs p2-11 benefit paginated list queries).
+  // Ties to p2-12 indexes for (status, published_at) on filtered ranges.
+  let limit = params.limit ?? DEFAULT_LIMIT;
   limit = Math.max(1, Math.min(MAX_LIMIT, Math.floor(limit)));
 
   let offset = params.offset ?? 0;
