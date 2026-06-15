@@ -11,6 +11,7 @@ import LivePlatformTabs from "../_components/LivePlatformTabs";
 import ClipsTeaser from "../_components/ClipsTeaser";
 import LiveChat from "../_components/LiveChat";
 import LivePoll from "../_components/LivePoll";
+import ThreadedComments from "../_components/ThreadedComments"; // P2-16: ensure realtime channels (comments:live:${id}) + postgres for live targets wired in hub (alongside LiveChat/LivePoll)
 import { Paywall } from "../_components/Paywall";
 import NewsletterSignup from "../_components/NewsletterSignup"; // Teaser newsletter / The Briefing block in sidebar (compact internal variant)
 import { getLiveEvents, eventsToStageItems, tierLocked, tierLabel, type LiveEvent, isMembersOnly } from "@/lib/live-events";
@@ -170,6 +171,16 @@ export default async function LivePage({
                   Chat uses live_chat_messages with live_event_id=eq filter for threaded per-target. Migrations 0004/0005 enable publication. */}
               {activePoll && (
                 <LivePoll poll={activePoll} isMember={isActiveMemberUser} currentUserId={user?.id ?? null} />
+              )}
+
+              {/* P2-16: wire ThreadedComments for live target (uses its realtime postgres_changes INSERT/UPDATE on threaded_comments with target_type=live filter + channel `comments:live:${id}`; reuses P1 mod + nested). Complements LiveChat (simple messages) for full live discussion. */}
+              {live[0]?.id && (
+                <ThreadedComments
+                  targetType="live"
+                  targetId={live[0].id}
+                  isMember={isActiveMemberUser}
+                  currentUserId={user?.id ?? null}
+                />
               )}
 
               {/* Aesthetic life image for live section */}

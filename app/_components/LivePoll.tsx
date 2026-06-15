@@ -6,8 +6,8 @@ import { supabaseConfigured } from '@/lib/supabase';
 
 /**
  * Layer 3: Live Poll component starter (pairs with LiveChat).
- * P2-16: polls wiring verified + enhanced (server getActivePoll + client LivePoll on /live sidebar now; channels `poll-${id}` + `live-poll-active-` on live_polls + live_poll_votes for realtime tally; liveEventId target matches chat. Direct RLS client ok (no extra /api needed).
- * Real-time vote tally via postgres_changes on live_poll_votes.
+ * P2-16 (helped by p1-swarm): polls realtime complete - votes on `poll-${id}`, + live-poll-active-${target} on live_polls (now inside LivePoll too for self-contained updates to is_active etc when parent passes static poll e.g. /live sidebar). Matches LiveStage + doc claims. liveEventId target aligns with chat/comments. Direct RLS client ok. (verified post-edit)
+ * Real-time vote tally via postgres_changes on live_poll_votes; active status via live_polls.
  * Optimistic vote + unique constraint enforcement.
  * A11y: radio group, live results region, disabled after vote/close.
  * Perf: single poll fetch + subscribe; tally computed client or via RPC view.
@@ -35,6 +35,14 @@ export default function LivePoll({ poll, isMember, currentUserId }: LivePollProp
   const [loadError, setLoadError] = useState<string | null>(null);
   const mountedRef = useRef(true);
   const sb = supabaseBrowser();
+
+  // P2-16 realtime: maintain currentPoll locally (synced from prop) + sub to live-poll-active channel
+  // so is_active/closes etc update on live_polls changes (for /live sidebar static poll + stage).
+  // Complements LiveStage's live-poll-active- sub and votes sub here. Kills stale poll UI.
+  const [currentPoll, setCurrentPoll] = useState<Poll>(poll);
+  useEffect(() => {
+    setCurrentPoll(poll);
+  }, [poll]);
 
   const total = Object.values(votes).reduce((a, b) => a + b, 0);
 
@@ -83,11 +91,40 @@ export default function LivePoll({ poll, isMember, currentUserId }: LivePollProp
     void loadVotes();
 
     let channel: any = null;
+    let activeChannel: any = null;
+    const targetLiveId = poll.live_event_id;
     try {
       channel = sb
         .channel(`poll-${poll.id}`)
         .on('postgres_changes', { event: '*', schema: 'public', table: 'live_poll_votes', filter: `poll_id=eq.${poll.id}` }, () => {
           void loadVotes();
+        })
+        .subscribe();
+
+      // P2-16: live-poll-active channel on live_polls (per target like LiveStage) so this LivePoll reacts to poll activate/deactivate/close realtime
+      activeChannel = sb
+        .channel(`live-poll-active-${targetLiveId ?? "global"}`)
+        .on("postgres_changes", { event: "*", schema: "public", table: "live_polls", filter: targetLiveId ? `live_event_id=eq.${targetLiveId}` : "live_event_id=is.null" }, async () => {
+          // refetch our specific poll row to sync is_active/closes etc into local state (updates disabled state, UI)
+          try {
+            const { data } = await sb
+              .from("live_polls")
+              .select("id,live_event_id,question,options,is_active,closes_at")
+              .eq("id", poll.id)
+              .maybeSingle();
+            if (data && mountedRef.current) {
+              const raw = data as any;
+              const options = Array.isArray(raw.options) ? raw.options.map((o: any) => (typeof o === "string" ? o : o.label)) : [];
+              setCurrentPoll({
+                id: raw.id,
+                live_event_id: raw.live_event_id,
+                question: raw.question,
+                options,
+                is_active: raw.is_active,
+                closes_at: raw.closes_at,
+              } as Poll);
+            }
+          } catch {}
         })
         .subscribe();
     } catch {}
@@ -97,11 +134,14 @@ export default function LivePoll({ poll, isMember, currentUserId }: LivePollProp
       if (channel) {
         try { sb.removeChannel(channel); } catch {}
       }
+      if (activeChannel) {
+        try { sb.removeChannel(activeChannel); } catch {}
+      }
     };
   }, [poll.id, currentUserId, sb, loadVotes]);
 
   async function vote(optionIdx: number) {
-    if (!isMember || !currentUserId || userVote !== null || !poll.is_active) return;
+    if (!isMember || !currentUserId || userVote !== null || !currentPoll.is_active) return;
 
     // optimistic
     const prevVotes = { ...votes };
@@ -110,7 +150,7 @@ export default function LivePoll({ poll, isMember, currentUserId }: LivePollProp
     setUserVote(optionIdx);
 
     const { error: insertErr } = await sb.from('live_poll_votes').insert({
-      poll_id: poll.id,
+      poll_id: currentPoll.id,
       user_id: currentUserId,
       option_index: optionIdx,
     });
@@ -126,12 +166,12 @@ export default function LivePoll({ poll, isMember, currentUserId }: LivePollProp
   }
 
   return (
-    <div className="live-poll" role="group" aria-labelledby={`poll-q-${poll.id}`}>
-      <h4 id={`poll-q-${poll.id}`}>{poll.question}</h4>
-      {poll.closes_at && <p>Closes {new Date(poll.closes_at).toLocaleString()}</p>}
+    <div className="live-poll" role="group" aria-labelledby={`poll-q-${currentPoll.id}`}>
+      <h4 id={`poll-q-${currentPoll.id}`}>{currentPoll.question}</h4>
+      {currentPoll.closes_at && <p>Closes {new Date(currentPoll.closes_at).toLocaleString()}</p>}
 
       <div className="options" aria-live="polite">
-        {poll.options.map((opt, idx) => {
+        {currentPoll.options.map((opt, idx) => {
           const count = votes[idx] || 0;
           const pct = total > 0 ? Math.round((count / total) * 100) : 0;
           const voted = userVote === idx;
@@ -139,7 +179,7 @@ export default function LivePoll({ poll, isMember, currentUserId }: LivePollProp
             <button
               key={idx}
               onClick={() => vote(idx)}
-              disabled={!isMember || !poll.is_active || userVote !== null}
+              disabled={!isMember || !currentPoll.is_active || userVote !== null}
               aria-pressed={voted}
               className={`poll-option ${voted ? 'voted' : ''}`}
             >

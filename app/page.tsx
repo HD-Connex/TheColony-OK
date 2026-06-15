@@ -50,6 +50,9 @@ function authorName(a: Article): string {
 }
 
 export default async function HomePage() {
+  // p2-13 LCP: above-fold fetches prioritized with Promise.all (getArticles for hero/lead + getHomepageBundle for rails + live/podcast counts).
+  // All critical data for above-fold (hero, ticker, top stories, live, podcast network) resolved in parallel before render. No waterfall.
+  // (getHomepageBundle also calls getArticles/getLive etc internally but cached in p2-14 later.)
   const [latest, podcast, live, bundle] = await Promise.all([
     getArticles({ limit: 8 }),
     getShowsWithEpisodeCounts(4),
@@ -120,6 +123,17 @@ export default async function HomePage() {
           areaServed: "Oklahoma",
         }}
       />
+      {/* p2-13 LCP fix for 10.7s audit: preload link for primary hero/lead story image (topLead StoryCard visual is LCP candidate; uses storyHero mapping like cards).
+         Next.js priority on lead StoryCard also auto-injects <link preload> + fetchPriority high internally. This explicit aids above-fold image discovery.
+         Placed early in tree. */}
+      {topLead && (
+        <link
+          rel="preload"
+          as="image"
+          href={storyHero(topLead.slug, topLead.hero_url)}
+          // Note: for production with srcset/sizes add imageSrcSet etc but single asset ok for seed.
+        />
+      )}
 
       <main id="main">
         {/* Phase 4: cinematic hero + standardized MotionReveal on lead elements for motion polish.
@@ -227,6 +241,8 @@ export default async function HomePage() {
             </header>
 
             <div className="grid-feature">
+              {/* p2-13 LCP: topLead StoryCard gets priority (passed) + internal fetchPriority="high" + eager for primary hero visual (addresses 10.7s LCP from lead card img per audit/PERF_AUDIT.md).
+                 fetchPriority high tells browser to prioritize this over other images; pairs with preload link above. */}
               {topLead && <StoryCard a={topLead} variant="lead" priority />}
               <div>
                 {topSecondary.map((a, i) => (
@@ -239,6 +255,8 @@ export default async function HomePage() {
                         height={180}
                         sizes="(max-width: 768px) 100vw, 320px"
                         loading="lazy"
+                        // p2-13: added explicit fetchPriority high on first secondary (above-fold near hero) for LCP polish; non-leads stay lazy.
+                        fetchPriority={i === 0 ? "high" : undefined}
                       />
                     </div>
                     <div className="card__body">
@@ -406,6 +424,9 @@ export default async function HomePage() {
             </header>
 
             {/* Aesthetic lead image for life (brutalist filter per DS) */}
+            {/* p2-13 LCP: added fetchPriority="high" + loading eager to this lead/hero aesthetic image (above fold in hub section) + profile note.
+               Primary LCP still the topLead StoryCard but this is visible early visual. Pairs with preload + StoryCard high prio.
+               Bundle: framer split + above parallel + reval + preloads target the 10.7s LCP. */}
             <div className="section-lead-image">
               <Image
                 src={safeStockImage("hero")}
@@ -413,6 +434,8 @@ export default async function HomePage() {
                 width={1200}
                 height={400}
                 className="img-aesthetic"
+                loading="eager"
+                fetchPriority="high"
               />
             </div>
 

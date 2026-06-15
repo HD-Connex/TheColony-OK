@@ -11,6 +11,7 @@ import { STOCK } from "@/lib/media-map";
 import { JAKE_MERRICK_YT_LIVE_URL, isSoftLaunchTonight } from "@/lib/live-events"; // for scheduling + Jake YT src free bypass (kept free even post soft launch date)
 import LiveChat from "./LiveChat";
 import LivePoll, { type Poll } from "./LivePoll";
+import ThreadedComments from "./ThreadedComments"; // P2-16 helped: realtime channels for comments on live targets (in stage interactivity)
 import { useAuth, supabaseBrowser } from "@/lib/auth-client";
 import { refreshStageItems } from "@/lib/live-events";
 import { getActivePollClient } from "@/lib/live-polls";
@@ -334,6 +335,10 @@ export default function LiveStage({ items: initialItems = [], initialActiveId, c
             <LiveChat liveEventId={is247 ? null : activeId} isMember={isMember} currentUser={user} />
             {activePoll && (
               <LivePoll poll={activePoll} isMember={isMember} currentUserId={user?.id ?? null} />
+            )}
+            {/* P2-16: ensure comments realtime on live target in stage (when interactive): uses ThreadedComments' `comments:live:${activeId}` channel + postgres_changes (target_type filter) + P1 polish (UPDATE, counts, mod queue). Only for specific live events (not pure 24/7). */}
+            {!is247 && activeId && (
+              <ThreadedComments targetType="live" targetId={activeId} isMember={isMember} currentUserId={user?.id ?? null} />
             )}
           </div>
 

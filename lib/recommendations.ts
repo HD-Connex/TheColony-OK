@@ -30,10 +30,12 @@ export async function getSimilarByEmbedding(seedText: string, excludeIds: string
     // BATCH: collect ids per type to kill N+1 per-hit .eq single selects (p2-11)
     const epIds: string[] = [];
     const artIds: string[] = [];
+    const clipIds: string[] = [];
     for (const h of hits) {
       if (excludeIds.includes(h.content_id)) continue;
       if (h.content_type === "episode") epIds.push(h.content_id);
       else if (h.content_type === "article") artIds.push(h.content_id);
+      else if (h.content_type === "clip") clipIds.push(h.content_id);
     }
     // Single batched queries (replaces loop of individual .maybeSingle per hit)
     const epMap = new Map<string, any>();
@@ -53,6 +55,16 @@ export async function getSimilarByEmbedding(seedText: string, excludeIds: string
         .eq("status", "published");
       (artRows ?? []).forEach((d: any) => artMap.set(d.id, d));
     }
+    const clipMap = new Map<string, any>();
+    if (clipIds.length) {
+      // BATCH p2-11: clip resolution too (approved only) to support clip recs without N+1
+      const { data: clipRows } = await supabasePublic()
+        .from("clips")
+        .select("id,transcript,source_phrase,ep_id,start_s")
+        .in("id", clipIds)
+        .eq("approved", true);
+      (clipRows ?? []).forEach((d: any) => clipMap.set(d.id, d));
+    }
     const out: RecItem[] = [];
     for (const h of hits) {
       if (excludeIds.includes(h.content_id)) continue;
@@ -62,6 +74,14 @@ export async function getSimilarByEmbedding(seedText: string, excludeIds: string
       } else if (h.content_type === "article") {
         const data = artMap.get(h.content_id);
         if (data) out.push({ id: data.id, title: data.title, href: `/stories/${(data as any).slug}`, type: "article", score: h.similarity, dek: (data as any).dek });
+      } else if (h.content_type === "clip") {
+        const data = clipMap.get(h.content_id);
+        if (data) {
+          const title = data.transcript || data.source_phrase || "Citizen Dispatch";
+          // simple href (clips feed or jump via ep if known; non-breaking)
+          const href = data.ep_id ? `/clips` : `/clips`;
+          out.push({ id: data.id, title, href, type: "clip", score: h.similarity, dek: null });
+        }
       }
       if (out.length >= limit) break;
     }
@@ -99,10 +119,12 @@ export async function getCollaborativeRecs(seedId: string, seedType: string, lim
     // BATCH p2-11: collect ids per type then single .in() per type (kills N+1 loop of .eq/maybeSingle)
     const artIds: string[] = [];
     const epIds: string[] = [];
+    const clipIds: string[] = [];
     for (const [key] of ranked) {
       const [typ, id] = key.split(":");
       if (typ === "article") artIds.push(id);
       else if (typ === "episode") epIds.push(id);
+      else if (typ === "clip") clipIds.push(id);
     }
     const artMap = new Map<string, any>();
     if (artIds.length) {
@@ -121,6 +143,16 @@ export async function getCollaborativeRecs(seedId: string, seedType: string, lim
         .in("id", epIds);
       (epRows ?? []).forEach((d: any) => epMap.set(d.id, d));
     }
+    const clipMap = new Map<string, any>();
+    if (clipIds.length) {
+      // BATCH p2-11 collab too
+      const { data: clipRows } = await sb
+        .from("clips")
+        .select("id,transcript,source_phrase,ep_id,start_s")
+        .in("id", clipIds)
+        .eq("approved", true);
+      (clipRows ?? []).forEach((d: any) => clipMap.set(d.id, d));
+    }
     const out: RecItem[] = [];
     for (const [key] of ranked) {
       const [typ, id] = key.split(":");
@@ -130,6 +162,12 @@ export async function getCollaborativeRecs(seedId: string, seedType: string, lim
       } else if (typ === "episode") {
         const data = epMap.get(id);
         if (data) out.push({ id: data.id, title: (data as any).title, href: `/podcasts/${(data as any).show_slug}/${(data as any).slug || id}`, type: "episode", score: 0.6, dek: (data as any).description });
+      } else if (typ === "clip") {
+        const data = clipMap.get(id);
+        if (data) {
+          const title = data.transcript || data.source_phrase || "Citizen Dispatch";
+          out.push({ id: data.id, title, href: `/clips`, type: "clip", score: 0.6, dek: null });
+        }
       }
       if (out.length >= limit) break;
     }
