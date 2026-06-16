@@ -23,10 +23,10 @@ test.describe('Live hot path + nav smoke', () => {
 
   test('/live page has core sections and chat gate', async ({ page }) => {
     await page.goto('/live');
-    // Player/stage area
-    await expect(page.locator('.live-player, .live-stage, [data-247]')).toBeVisible({ timeout: 10000 });
+    // Player/stage area (use specific .live-stage root + .first() to avoid strict-mode multi-match from outer .live-player wrapper + nested player inside LiveStage)
+    await expect(page.locator('.live-stage').first()).toBeVisible({ timeout: 10000 });
     // Sidebar status + chat present (even if fallback "coming soon" or gated)
-    await expect(page.locator('.live-sidebar, .live-chat, .chat-header')).toBeVisible();
+    await expect(page.locator('.live-sidebar').first()).toBeVisible();
     // Schedule or replays section visible
     await expect(page.getByText(/Channel Guide|Replays|Schedule/i).first()).toBeVisible();
   });

@@ -355,7 +355,7 @@ FROM public.series ser WHERE ser.slug = 'colony-report'
 
 INSERT INTO public.video_episodes (id, series_id, slug, title, description, season_number, episode_number, status, tier_required, mux_playback_id, duration_seconds, thumbnail_url, video_url, badges, chapters, published_at)
 SELECT 'e8888888-8888-4888-8888-888888888888'::uuid, ser.id, 'underground-special', 'Special Report — Lobbyist Network', 'The forty shell companies. Maps and midnight deals that shape your rates.',
-  1, 16, 'published', 'member', NULL, 1800, 'https://images.pexels.com/photos/1103970/pexels-photo-1103970.jpeg?auto=compress&cs=tinysrgb&w=800', NULL, '["investigation","members"]'::jsonb, NULL,
+  1, 16, 'published', 'settler', NULL, 1800, 'https://images.pexels.com/photos/1103970/pexels-photo-1103970.jpeg?auto=compress&cs=tinysrgb&w=800', NULL, '["investigation","members"]'::jsonb, NULL,
   now() - interval '9 days'
 FROM public.series ser WHERE ser.slug = 'oklahoma-underground'
   AND NOT EXISTS (SELECT 1 FROM public.video_episodes ve WHERE ve.series_id = ser.id AND ve.slug = 'underground-special');

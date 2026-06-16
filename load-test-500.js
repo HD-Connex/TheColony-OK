@@ -3,8 +3,8 @@
 // Target: prod URL. Expects mostly 200s, no 5xx, reasonable times.
 // For soft launch verification: focus on /live which serves the Jake YT embed at 7pm EST, free.
 
-const TARGET = 'https://thecolony-app.vercel.app/live';
-const CONCURRENT = 500;
+const TARGET = process.env.LOAD_TARGET || 'http://127.0.0.1:3000/live';
+const CONCURRENT = parseInt(process.env.LOAD_CONCURRENT || '20', 10); // adapted for local smoke (use 500 + prod URL for full load test)
 const TIMEOUT_MS = 10000; // 10s timeout per request
 
 async function fetchWithTimeout(url, timeout) {
