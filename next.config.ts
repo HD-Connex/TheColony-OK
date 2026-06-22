@@ -43,6 +43,10 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "image.mux.com" },
       { protocol: "https", hostname: "*.supabase.co" },
       { protocol: "https", hostname: "i.ytimg.com" },
+      // Pexels stock CDN — used by lib/media-map STOCK fallbacks + seeded hero_url.
+      // Without this, next/image throws "url not allowed" → RSC 500 (e.g. the two
+      // story heroes oklahoma-budget-crisis / lobbyist-network-silence).
+      { protocol: "https", hostname: "images.pexels.com" },
     ],
   },
   // TWA/PWA Phase 8: manifest served via app/manifest.ts (standalone + icons/maskable in public/icon-*.png + screenshots).

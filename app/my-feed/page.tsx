@@ -32,12 +32,8 @@ export default function MyFeedPage() {
           setCounties(userCounties);
 
           if (userCounties.length > 0) {
-            // Fetch articles for those counties (simple, could be server but client for demo)
-            const artsRes = await fetch(`/api/admin/articles?limit=10`); // placeholder, in real use public get with county
-            // For demo, assume we filter client or use a public endpoint; here simulate
-            // Better: since no direct, use getArticles but since client, fetch from a new or use existing pattern.
-            // For this, we'll fetch recent and filter, or assume /stories with county but to keep simple.
-            const allArtsRes = await fetch("/api/admin/articles?limit=20"); // reuse admin for demo, or public
+            // Public published-articles endpoint (no admin auth); filter to the user's counties.
+            const allArtsRes = await fetch("/api/articles?limit=30");
             if (allArtsRes.ok) {
               const all = await allArtsRes.json();
               const filtered = (all.articles || []).filter((a: any) => a.county && userCounties.includes(a.county));

@@ -1,7 +1,8 @@
 // Resend email sender + template wiring.
 // Templates live in ../emails/*.ts (plain HTML strings for max deliverability, no extra deps).
 // All sends are fire-and-forget; errors are logged but never throw to callers.
-// P1: Resend idempotencyKey support added for webhooks. Bounce/complaint: stub Resend webhook at /api/webhooks/resend if needed (handle via Resend dashboard for now; no auto DB bounce flag yet).
+// P1: Resend idempotencyKey support added for webhooks. Bounce/complaint events are
+// handled by /api/webhooks/resend (Svix-verified) → sets newsletter_subscribers.unsubscribed_at.
 
 import { Resend } from "resend";
 import { welcomeHtml, type WelcomeProps } from "../emails/welcome";
