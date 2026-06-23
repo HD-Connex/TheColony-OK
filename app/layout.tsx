@@ -95,9 +95,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${fontDisplay.variable} ${fontSans.variable} ${fontMono.variable} ${fontSerif.variable}`}>
       <head>
-        {/* Phase 4: data-theme driven by SiteClient (localStorage + toggle). Default dark. Avoids FOUC via client setAttribute. See variables.css + main.css a11y/Lighthouse notes. */}
-        {/* Phase 3-05: Removed external Google Fonts links (now via next/font above).
-            Kept other preconnects for Stripe/YouTube/Rumble/Plausible perf. */}
+        <script dangerouslySetInnerHTML={{
+          __html: `(function(){try{var p=localStorage.getItem('colony:theme');if(!p||p==='system'){p=window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'}document.documentElement.dataset.theme=p}catch(e){}})()`
+        }} />
         <link rel="dns-prefetch" href="https://js.stripe.com" />
         <link rel="dns-prefetch" href="https://www.youtube.com" />
         <link rel="dns-prefetch" href="https://rumble.com" />

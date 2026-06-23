@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useAuth } from "@/lib/auth-client";
 import { MEMBERSHIP_PLANS } from "@/lib/tiers";
 import BillingPortalButton from "./BillingPortalButton";
+import AppearanceControl from "./AppearanceControl";
 
 export default function MembershipAccount() {
   const { user, isMember, loading, signOut } = useAuth();
@@ -18,13 +19,16 @@ export default function MembershipAccount() {
 
   if (!user) {
     return (
-      <div className="account-card">
-        <h2>Sign in required</h2>
-        <p>Sign in with your email to manage membership and account settings.</p>
-        <Link className="btn btn--primary" href="/membership">
-          Sign in with email
-        </Link>
-      </div>
+      <>
+        <div className="account-card">
+          <h2>Sign in required</h2>
+          <p>Sign in with your email to manage membership and account settings.</p>
+          <Link className="btn btn--primary" href="/membership">
+            Sign in with email
+          </Link>
+        </div>
+        <AppearanceControl />
+      </>
     );
   }
 
@@ -80,6 +84,8 @@ export default function MembershipAccount() {
           Request a full data export or deletion anytime at privacy@thecolonyok.com.
         </p>
       </div>
+
+      <AppearanceControl />
 
       {/* County feeds nav link (Phase 1 Heirloom Press); also links My Counties for prefs */}
       {isMember && (

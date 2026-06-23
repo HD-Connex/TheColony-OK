@@ -197,7 +197,7 @@
    running under the home indicator; cap height to viewport minus masthead and
    pad the last item past the iOS home-indicator safe area. */
 .nav__mobile.is-open {
-  max-height: calc(100dvh - 100%);
+  max-height: 80dvh;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   padding-bottom: env(safe-area-inset-bottom, 0);

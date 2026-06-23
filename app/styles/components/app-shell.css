@@ -201,16 +201,10 @@ a.miniplayer__title:hover {
   color: var(--color-paper);
 }
 
-/* Keep the floating theme toggle + scroll-to-top clear of the shell bars on mobile. */
+/* Hide floating theme toggle + scroll-to-top on mobile entirely. */
 @media (max-width: 1024px) {
   .theme-toggle,
   .scroll-to-top {
-    bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0) + var(--space-4));
-  }
-  body:has(.miniplayer) .theme-toggle,
-  body:has(.miniplayer) .scroll-to-top {
-    bottom: calc(
-      var(--tabbar-h) + var(--miniplayer-h) + env(safe-area-inset-bottom, 0) + var(--space-4)
-    );
+    display: none;
   }
 }

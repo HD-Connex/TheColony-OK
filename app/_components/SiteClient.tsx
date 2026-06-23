@@ -1,29 +1,24 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import * as Sentry from "@sentry/nextjs";
+import { useTheme } from './useTheme';
 
 /**
  * SiteClient (PWA bootstrap + Heirloom page reveals + Phase 4 theme toggle)
  * - Registers SW for offline shell + clips metadata cache (Phase 3)
  * - Orchestrated load reveal for masthead/folio/hero (stagger, reduced-motion safe)
  * - IntersectionObserver for .rule-draw and .develop elements
- * - Dark/light theme toggle persisted (data-theme on html); default dark (ink) per brutalist DS.
- *   Toggle appears as fixed brutalist button (bottom-right). Pure CSS vars swap. A11y: aria, labels.
+ * - Theme toggle (desktop only): driven by useTheme hook. Pure CSS vars swap. A11y: aria, labels.
  * - Phase 7: RUM CWV observers (LCP/INP/CLS via native PerformanceObserver) reporting to console + Sentry (see useEffect). Term "web-vitals" refers to the metrics (Core Web Vitals).
  */
 export default function SiteClient() {
-  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+  const { resolved, setPref } = useTheme();
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    // Theme init + persist (Phase 4)
     const root = document.documentElement;
-    const saved = (localStorage.getItem('colony:theme') as 'dark' | 'light' | null) || 'dark';
-    const initial = saved;
-    root.setAttribute('data-theme', initial);
-    setTheme(initial);
 
     // PWA SW
     if ('serviceWorker' in navigator) {
@@ -150,23 +145,15 @@ export default function SiteClient() {
     };
   }, []);
 
-  const toggleTheme = () => {
-    const next = theme === 'dark' ? 'light' : 'dark';
-    const root = document.documentElement;
-    root.setAttribute('data-theme', next);
-    localStorage.setItem('colony:theme', next);
-    setTheme(next);
-  };
-
   return (
     <button
       type="button"
-      onClick={toggleTheme}
+      onClick={() => setPref(resolved === 'dark' ? 'light' : 'dark')}
       className="theme-toggle btn btn--outline btn--sm"
-      aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
-      title={theme === 'dark' ? 'Light mode (paper)' : 'Dark mode (ink)'}
+      aria-label={resolved === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
+      title={resolved === 'dark' ? 'Light mode (paper)' : 'Dark mode (ink)'}
     >
-      {theme === 'dark' ? '☼ LIGHT' : '◉ DARK'}
+      {resolved === 'dark' ? '☼ LIGHT' : '◉ DARK'}
     </button>
   );
 }
