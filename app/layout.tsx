@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 import { Analytics } from "@vercel/analytics/next";
 import { Archivo_Black, Inter_Tight, JetBrains_Mono, Fraunces } from "next/font/google";
@@ -8,6 +8,9 @@ import Footer from "./_components/Footer";
 import SiteChrome from "./_components/SiteChrome";
 import SiteClient from "./_components/SiteClient";
 import ScrollToTop from "./_components/ScrollToTop";
+import PlayerProvider from "./_components/PlayerProvider";
+import MiniPlayer from "./_components/MiniPlayer";
+import BottomTabBar from "./_components/BottomTabBar";
 
 const SITE_URL = "https://thecolonyok.com";
 
@@ -45,6 +48,20 @@ const fontSerif = Fraunces({
   display: "swap",
   axes: ["opsz"],
 });
+
+// Mobile/PWA viewport: device-width + cover so the brutalist masthead bleeds into
+// the iOS notch / status-bar area in standalone (TWA/PWA), with safe-area insets
+// handled in CSS. themeColor matches the sticky header ink so the OS status bar
+// blends with the masthead instead of flashing white.
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: dark)", color: "#0a1f3d" },
+    { media: "(prefers-color-scheme: light)", color: "#f4f0e6" },
+  ],
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -93,9 +110,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="preload" as="image" href="/assets/images/stories/oklahoma-budget-crisis.jpg" fetchPriority="high" />
       </head>
       <body>
-        <SiteChrome header={<Header />} footer={<Footer />}>
-          {children}
-        </SiteChrome>
+        <PlayerProvider>
+          <SiteChrome header={<Header />} footer={<Footer />}>
+            {children}
+          </SiteChrome>
+          <MiniPlayer />
+          <BottomTabBar />
+        </PlayerProvider>
         <SiteClient />
         <ScrollToTop />
         <Script

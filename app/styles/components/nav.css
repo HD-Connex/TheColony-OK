@@ -7,6 +7,9 @@
   top: 0;
   z-index: var(--z-nav);
   box-shadow: 0 2px 0 rgba(0,0,0,0.15);
+  /* Notch / status-bar safe area for standalone PWA/TWA (viewportFit:cover).
+     Resolves to 0 on non-notched devices, so desktop/web is unaffected. */
+  padding-top: env(safe-area-inset-top, 0);
 }
 
 .nav {
@@ -188,6 +191,16 @@
 
 .nav__mobile .btn {
   margin: var(--space-3) var(--container-padding);
+}
+
+/* Long flat drawer (17 links + CTAs) must scroll on short viewports instead of
+   running under the home indicator; cap height to viewport minus masthead and
+   pad the last item past the iOS home-indicator safe area. */
+.nav__mobile.is-open {
+  max-height: calc(100dvh - 100%);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: env(safe-area-inset-bottom, 0);
 }
 
 /* ─── Breaking news bar ─── */

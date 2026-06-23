@@ -18,6 +18,7 @@
 @import "./components/system-pages.css";
 @import "./components/premium.css";
 @import "./components/blog.css";
+@import "./components/app-shell.css";
 
 /* ─── Layout (legacy main.css) ─── */
 .container {

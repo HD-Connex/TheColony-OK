@@ -1,0 +1,216 @@
+/* ─── Mobile App Shell ───────────────────────────────────────────────────────
+   FOX-style persistent bottom tab bar + global mini audio player.
+   Bottom tabs: mobile only (hidden ≥1025px). Mini-player: persistent on all
+   widths, sits above the tab bar on mobile and at the bottom edge on desktop.
+   Brutalist DS: ink bars, alarm rules/accents, mono labels, zero-radius.
+   Components: BottomTabBar.tsx, MiniPlayer.tsx, PlayerProvider.tsx. */
+
+:root {
+  --tabbar-h: 56px;
+  --miniplayer-h: 64px;
+}
+
+/* Reserve space so fixed bars never cover footer/content on mobile.
+   :has() gives the variable mini-player height only when it's actually mounted. */
+@media (max-width: 1024px) {
+  body {
+    padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0));
+  }
+  body:has(.miniplayer) {
+    padding-bottom: calc(
+      var(--tabbar-h) + var(--miniplayer-h) + env(safe-area-inset-bottom, 0)
+    );
+  }
+}
+@media (min-width: 1025px) {
+  body:has(.miniplayer) {
+    padding-bottom: calc(var(--miniplayer-h) + env(safe-area-inset-bottom, 0));
+  }
+}
+
+/* ─── Bottom tab bar (mobile only) ─── */
+.bottom-tabs {
+  display: none;
+}
+@media (max-width: 1024px) {
+  .bottom-tabs {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: var(--z-nav);
+    background: var(--color-ink);
+    border-top: var(--rule-slab) solid var(--color-alarm);
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+}
+
+.bottom-tabs__tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-height: var(--tabbar-h);
+  padding: 6px 0;
+  color: var(--color-paper);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+.bottom-tabs__tab:active {
+  background: rgba(255, 255, 255, 0.06);
+}
+.bottom-tabs__icon {
+  stroke: currentColor;
+}
+.bottom-tabs__label {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  letter-spacing: var(--track-wide);
+  text-transform: uppercase;
+  line-height: 1;
+}
+.bottom-tabs__tab.is-active {
+  color: var(--color-alarm);
+}
+
+/* ─── Global mini-player ─── */
+.miniplayer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: var(--z-modal);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  background: var(--color-ink);
+  color: var(--color-paper);
+  border-top: var(--rule-medium) solid var(--color-alarm);
+  box-shadow: 0 -2px 0 rgba(0, 0, 0, 0.2);
+  padding: var(--space-2) var(--space-3);
+  padding-bottom: calc(var(--space-2) + env(safe-area-inset-bottom, 0));
+  min-height: var(--miniplayer-h);
+}
+/* On mobile the mini-player rides directly above the tab bar. */
+@media (max-width: 1024px) {
+  .miniplayer {
+    bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0));
+    padding-bottom: var(--space-2);
+  }
+}
+
+.miniplayer__toggle,
+.miniplayer__close {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: var(--rule-hairline) solid var(--color-paper);
+  color: var(--color-paper);
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+.miniplayer__toggle {
+  border-color: var(--color-alarm);
+  color: var(--color-alarm);
+}
+.miniplayer__toggle:hover {
+  background: var(--color-alarm);
+  color: var(--color-paper);
+}
+.miniplayer__close:hover {
+  background: var(--color-paper);
+  color: var(--color-ink);
+}
+
+.miniplayer__art {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border: var(--rule-hairline) solid var(--color-border);
+}
+
+.miniplayer__info {
+  flex: 1;
+  min-width: 0;
+}
+.miniplayer__title {
+  display: block;
+  font-family: var(--font-sans);
+  font-weight: var(--weight-bold);
+  font-size: var(--text-sm);
+  color: var(--color-paper);
+  text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+a.miniplayer__title:hover {
+  color: var(--color-alarm);
+}
+.miniplayer__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  color: var(--color-text-muted);
+}
+.miniplayer__metalabel {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: var(--track-wide);
+}
+.miniplayer__scrubber {
+  width: 100%;
+  height: 3px;
+  margin-top: 4px;
+  accent-color: var(--color-alarm);
+  cursor: pointer;
+}
+
+/* Per-row "send to mini-player" action in the episode library. */
+.episode-row__mini {
+  flex-shrink: 0;
+  margin-left: auto;
+  align-self: center;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--track-wide);
+  text-transform: uppercase;
+  padding: var(--space-1) var(--space-2);
+  border: var(--rule-hairline) solid var(--color-alarm);
+  background: transparent;
+  color: var(--color-alarm);
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+.episode-row__mini:hover {
+  background: var(--color-alarm);
+  color: var(--color-paper);
+}
+
+/* Keep the floating theme toggle + scroll-to-top clear of the shell bars on mobile. */
+@media (max-width: 1024px) {
+  .theme-toggle,
+  .scroll-to-top {
+    bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0) + var(--space-4));
+  }
+  body:has(.miniplayer) .theme-toggle,
+  body:has(.miniplayer) .scroll-to-top {
+    bottom: calc(
+      var(--tabbar-h) + var(--miniplayer-h) + env(safe-area-inset-bottom, 0) + var(--space-4)
+    );
+  }
+}

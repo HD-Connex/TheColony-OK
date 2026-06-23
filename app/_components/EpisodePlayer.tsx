@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import AudioPlayer from "./AudioPlayer";
+import MiniPlayerButton from "./MiniPlayerButton";
+import { usePlayer } from "./PlayerProvider";
 import VideoPlayer from "./VideoPlayer";
 import VideoEmbed from "./VideoEmbed";
 import { formatDate, formatDuration, formatDurationLabel } from "@/lib/format";
@@ -221,6 +223,45 @@ export default function EpisodePlayer({ episodes: episodesProp, episode: episode
     requestAnimationFrame(() => playerRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }));
   };
 
+  // ─── Provider unification: hand the in-page player off to the global mini-player ───
+  // When the user navigates away while this episode is playing, audio continues in the
+  // persistent bar from the same position (Spotify "continue listening"). We mirror the
+  // latest state into a ref so the unmount cleanup runs exactly once with fresh values,
+  // and skip the handoff if the bar already owns this track (avoids re-toggling it off).
+  const { play: miniPlay, track: globalTrack } = usePlayer();
+  const handoffRef = useRef<{
+    playing: boolean;
+    time: number;
+    episode: PlayableEpisode | null;
+    globalId: string | null;
+  }>({ playing: false, time: 0, episode: null, globalId: null });
+  handoffRef.current = {
+    playing: mediaPlaying,
+    time: mediaTime,
+    episode: active ?? null,
+    globalId: globalTrack?.episodeId ?? null,
+  };
+  const miniPlayRef = useRef(miniPlay);
+  miniPlayRef.current = miniPlay;
+
+  useEffect(() => {
+    return () => {
+      const { playing, time, episode, globalId } = handoffRef.current;
+      if (!playing || !episode?.audio_url || episode.id === globalId) return;
+      try {
+        localStorage.setItem(`colony:progress:${episode.id}`, String(time));
+      } catch {
+        /* localStorage unavailable — bar will start from 0 */
+      }
+      miniPlayRef.current({
+        src: episode.audio_url,
+        title: episode.title,
+        episodeId: episode.id,
+        meta: `EPISODE ${episode.episode_no ?? "—"}`,
+      });
+    };
+  }, []);
+
   // Resolve a playable video src (reuse the same logic the shows use)
   const videoSrc = active?.video_url || (active?.mux_playback_id ? `https://stream.mux.com/${active.mux_playback_id}.m3u8` : null);
   const isEmbedVideo = videoSrc && !videoSrc.includes(".m3u8");
@@ -438,6 +479,17 @@ export default function EpisodePlayer({ episodes: episodesProp, episode: episode
                 </div>
                 <div className="episode-row__date">{formatDate(ep.pub_date)}</div>
               </div>
+              {playable && ep.audio_url && (
+                <MiniPlayerButton
+                  className="episode-row__mini"
+                  track={{
+                    src: ep.audio_url,
+                    title: ep.title,
+                    episodeId: ep.id,
+                    meta: `EPISODE ${ep.episode_no ?? "—"}`,
+                  }}
+                />
+              )}
             </div>
           );
         })}

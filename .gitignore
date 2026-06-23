@@ -18,5 +18,8 @@ terminals/
 !PHASE5*.md
 !PHASE*.log
 
+.claude/
+.serena/
+
 # nested repo
 thecolony-app/
