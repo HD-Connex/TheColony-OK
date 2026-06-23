@@ -3,6 +3,7 @@ import { tierFromPlanId } from "@/lib/contributor-tiers";
 import { isContributorPlanId } from "@/lib/contributor-plans";
 import { supabaseAdmin } from "@/lib/supabase";
 import { rateLimit, keyFromRequest, tooManyRequests } from "@/lib/rate-limit";
+import { isEmail } from "@/lib/validate";
 
 export const runtime = "nodejs";
 
@@ -17,10 +18,6 @@ interface ApplyBody {
   xHandle?: string;
   headshotUrl?: string;
   clips?: string[];
-}
-
-function isEmail(v: string): boolean {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
 }
 
 export async function POST(req: Request) {

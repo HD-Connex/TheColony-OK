@@ -55,8 +55,16 @@ function resolveWhisperProvider(): { endpoint: string; apiKey: string; model: st
 }
 
 function isDirectMediaUrl(url: string): boolean {
+  // Parse the host instead of substring-matching (a substring check would treat
+  // youtube.com.evil.example/ as YouTube). YouTube needs extraction, not direct fetch.
+  let host: string;
+  try {
+    host = new URL(url).hostname.toLowerCase();
+  } catch {
+    return false;
+  }
+  if (host === 'youtu.be' || host === 'youtube.com' || host.endsWith('.youtube.com')) return false;
   const u = url.toLowerCase();
-  if (u.includes('youtube.com') || u.includes('youtu.be') || u.includes('youtube')) return false; // needs extract; no direct
   return /\.(mp3|mp4|m4a|wav|webm|aac|ogg|m3u8?)/i.test(u) || u.includes('/audio/') || u.includes('media.');
 }
 

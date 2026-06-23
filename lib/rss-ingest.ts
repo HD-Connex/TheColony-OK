@@ -109,16 +109,26 @@ function textVal(v: unknown): string | null {
 }
 
 function stripTags(s: string): string {
-  return s.replace(/<[^>]+>/g, "");
+  // Apply repeatedly: a single pass over <[^>]+> can expose nested/overlapping
+  // tags (e.g. "<<b>script>" → "<script>"). Loop until the string stops shrinking.
+  let prev: string;
+  let out = s;
+  do {
+    prev = out;
+    out = out.replace(/<[^>]+>/g, "");
+  } while (out !== prev);
+  return out;
 }
 
 function decodeEntities(s: string): string {
+  // Decode &amp; LAST so we never re-activate an already-decoded entity
+  // (e.g. "&amp;lt;" must become "&lt;", not "<").
   return s
-    .replace(/&amp;/g, "&")
     .replace(/&lt;/g, "<")
     .replace(/&gt;/g, ">")
     .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'");
+    .replace(/&#39;/g, "'")
+    .replace(/&amp;/g, "&");
 }
 
 export function parseDuration(raw: string | null): number | null {

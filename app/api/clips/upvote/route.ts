@@ -14,11 +14,12 @@ export async function POST(req: Request) {
   if (!clip_id) return NextResponse.json({ error: "clip_id required" }, { status: 400 });
 
   const sb = supabaseAdmin();
-  // Simple increment (in prod use RPC for atomic)
-  const { data: current } = await sb.from("clips").select("upvotes").eq("id", clip_id).maybeSingle();
-  const newCount = (current?.upvotes ?? 0) + 1;
+  // Atomic increment via RPC (migration 0032) — avoids the read-then-write race that
+  // let concurrent/replayed requests clobber the count.
+  const { data: newCount, error } = await sb.rpc("increment_clip_upvotes", { p_clip_id: clip_id });
+  if (error) {
+    return NextResponse.json({ error: "Upvote failed" }, { status: 500 });
+  }
 
-  await sb.from("clips").update({ upvotes: newCount }).eq("id", clip_id);
-
-  return NextResponse.json({ ok: true, upvotes: newCount });
+  return NextResponse.json({ ok: true, upvotes: newCount ?? null });
 }

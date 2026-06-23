@@ -3,6 +3,7 @@ import { rateLimit, keyFromRequest, tooManyRequests } from "@/lib/rate-limit";
 import { sanitizeHtml, stripHtml } from "@/lib/sanitize";
 import { supabaseAdmin } from "@/lib/supabase";
 import { sendTipAckEmail } from "@/lib/email";
+import { isEmail } from "@/lib/validate";
 
 export const runtime = "nodejs";
 
@@ -12,10 +13,6 @@ interface TipBody {
   body?: string; // generic
   contact?: string; // optional reply-to / email
   email?: string; // for newsletter
-}
-
-function isEmail(v?: string): boolean {
-  return !!v && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
 }
 
 export async function POST(req: Request) {

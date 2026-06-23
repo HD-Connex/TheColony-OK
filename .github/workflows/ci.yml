@@ -10,6 +10,10 @@ on:
       - main
       - latest-for-testing
 
+# Least privilege: CI only needs to read the repo to install, lint, test, and build.
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
