@@ -151,7 +151,7 @@ export default function VideoPlayer({
 
     const onTime = () => {
       setCurrentTime(video.currentTime || 0);
-      if (!duration && video.duration && isFinite(video.duration)) setDuration(video.duration);
+      setDuration((prev) => (!prev && video.duration && isFinite(video.duration) ? video.duration : prev));
       updateLatency();
     };
     const onPlay = () => setIsPlaying(true);
@@ -245,7 +245,7 @@ export default function VideoPlayer({
       video.removeEventListener("error", onErr);
       video.removeEventListener("progress", onProgress);
     };
-  }, [src, reloadToken, isLive, duration]);
+  }, [src, reloadToken, isLive]);
 
   // --- Custom control actions ---
   const togglePlay = () => {
