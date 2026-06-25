@@ -122,7 +122,7 @@ export default function NewsletterForm({
   if (status === "ok") {
     return (
       <p className="newsletter__disclaimer" style={{ color: isPlate ? "var(--color-brass-deep)" : "#0a7" }}>
-        Check your email to confirm (double opt-in). Then {"you're"} on the list for the local briefing.
+        Check your email to confirm (double opt-in). Then you&apos;re on the list for the local briefing.
       </p>
     );
   }

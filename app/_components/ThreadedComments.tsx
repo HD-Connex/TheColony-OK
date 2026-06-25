@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { supabaseBrowser } from "@/lib/auth-client";
 import { supabaseConfigured } from "@/lib/supabase";
 
@@ -32,12 +32,12 @@ export default function ThreadedComments({ targetType, targetId, isMember, curre
   const [replyTo, setReplyTo] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
 
-  async function load() {
+  const load = useCallback(async () => {
     if (!supabaseConfigured()) return;
     const res = await fetch(`/api/comments?target_type=${targetType}&target_id=${targetId}`);
     const json = await res.json();
     setComments(json.comments || []);
-  }
+  }, [targetType, targetId]);
 
   useEffect(() => {
     let active = true;
@@ -86,7 +86,7 @@ export default function ThreadedComments({ targetType, targetId, isMember, curre
       active = false;
       supabaseBrowser().removeChannel(channel);
     };
-  }, [targetType, targetId]);
+  }, [targetType, targetId, load]);
 
   async function post(e?: React.FormEvent) {
     e?.preventDefault();

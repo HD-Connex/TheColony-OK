@@ -116,9 +116,9 @@ export default async function StoriesPage({
       {/* P1 pagination: simple offset/limit + count pager (non-breaking defaults; ?page= ) */}
       {totalPages > 1 && (
         <div style={{ marginTop: 16, display: 'flex', gap: 8, alignItems: 'center' }}>
-          {page > 1 && <a href={`/stories?${new URLSearchParams({ ...(cat && cat!=='all' ? {cat} : {}), ...(county ? {county} : {}), page: String(page-1) }).toString()}`} className="btn btn--sm btn--outline">← Prev</a>}
+          {page > 1 && <Link href={`/stories?${new URLSearchParams({ ...(cat && cat!=='all' ? {cat} : {}), ...(county ? {county} : {}), page: String(page-1) }).toString()}`} className="btn btn--sm btn--outline">← Prev</Link>}
           <span className="fine-print">Page {page} / {totalPages} (showing {filtered.length})</span>
-          {page < totalPages && <a href={`/stories?${new URLSearchParams({ ...(cat && cat!=='all' ? {cat} : {}), ...(county ? {county} : {}), page: String(page+1) }).toString()}`} className="btn btn--sm btn--outline">Next →</a>}
+          {page < totalPages && <Link href={`/stories?${new URLSearchParams({ ...(cat && cat!=='all' ? {cat} : {}), ...(county ? {county} : {}), page: String(page+1) }).toString()}`} className="btn btn--sm btn--outline">Next →</Link>}
         </div>
       )}
 

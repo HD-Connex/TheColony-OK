@@ -138,7 +138,7 @@ export default function LivePoll({ poll, isMember, currentUserId }: LivePollProp
         try { sb.removeChannel(activeChannel); } catch {}
       }
     };
-  }, [poll.id, currentUserId, sb, loadVotes]);
+  }, [poll.id, poll.live_event_id, currentUserId, sb, loadVotes]);
 
   async function vote(optionIdx: number) {
     if (!isMember || !currentUserId || userVote !== null || !currentPoll.is_active) return;

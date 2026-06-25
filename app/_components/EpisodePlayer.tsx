@@ -47,7 +47,7 @@ export interface PlayableEpisode {
  *  Real video podcast episodes (e.g. colony-report video demo) surface toggle, VIDEO badge, visualizer, chapters from DB. */
 export default function EpisodePlayer({ episodes: episodesProp, episode: episodeProp, transcript }: { episodes?: PlayableEpisode[]; episode?: PlayableEpisode; transcript?: Transcript | null }) {
   // Support singular for per-ep dedicated page + array for library
-  const episodes = episodesProp || (episodeProp ? [episodeProp] : []);
+  const episodes = useMemo(() => episodesProp || (episodeProp ? [episodeProp] : []), [episodesProp, episodeProp]);
   const firstPlayable = useMemo(() => episodes.find((e) => e.audio_url) ?? null, [episodes]);
   const [activeId, setActiveId] = useState<string | null>(firstPlayable?.id ?? null);
   const [mode, setMode] = useState<"video" | "audio">("video"); // default video when available

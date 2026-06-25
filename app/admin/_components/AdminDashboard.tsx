@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 
 type Role = "admin" | "editor" | "contributor" | "member";
 
@@ -66,7 +66,7 @@ export default function AdminDashboard({ currentUserRole }: Props) {
     return fetch(input, { ...init, headers });
   }
 
-  async function loadArticles() {
+  const loadArticles = useCallback(async () => {
     setLoading(true);
     try {
       const res = await authedFetch("/api/admin/articles");
@@ -74,47 +74,47 @@ export default function AdminDashboard({ currentUserRole }: Props) {
       setArticles(json.articles || []);
     } catch {}
     setLoading(false);
-  }
+  }, []);
 
-  async function loadApps() {
+  const loadApps = useCallback(async () => {
     if (!isAdminOrEditor) return;
     const res = await authedFetch("/api/admin/contributors/applications");
     const json = await res.json().catch(() => ({}));
     setApps(json.applications || []);
-  }
+  }, [isAdminOrEditor]);
 
-  async function loadLive() {
+  const loadLive = useCallback(async () => {
     const res = await authedFetch("/api/admin/live");
     const json = await res.json().catch(() => ({}));
     setLiveEvents(json.events || []);
-  }
+  }, []);
 
-  async function loadClips() {
+  const loadClips = useCallback(async () => {
     const res = await authedFetch("/api/admin/clips?approved=false");
     const json = await res.json().catch(() => ({}));
     setClips(json.clips || []);
-  }
+  }, []);
 
-  async function loadMembers() {
+  const loadMembers = useCallback(async () => {
     if (currentUserRole !== "admin") return;
     const res = await authedFetch("/api/admin/members");
     const json = await res.json().catch(() => ({}));
     setMembers(json.members || []);
-  }
+  }, [currentUserRole]);
 
-  async function loadReportCard() {
+  const loadReportCard = useCallback(async () => {
     const res = await authedFetch("/api/admin/report-card");
     const json = await res.json().catch(() => ({}));
     setReportOfficials(json.officials || []);
     setReportIssues(json.issues || []);
     setReportGrades(json.grades || []);
-  }
+  }, []);
 
-  async function loadComments() {
+  const loadComments = useCallback(async () => {
     const res = await authedFetch("/api/admin/comments");
     const json = await res.json().catch(() => ({}));
     setComments(json.comments || []);
-  }
+  }, []);
 
   async function moderateComment(commentId: string, action: 'approve' | 'reject') {
     setMsg(null);
