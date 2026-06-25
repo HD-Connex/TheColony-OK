@@ -84,7 +84,7 @@ RETURNS TABLE (
 )
 LANGUAGE sql
 STABLE
-SET search_path = ''
+SET search_path = 'extensions'
 AS $$
   SELECT
     ce.id,
