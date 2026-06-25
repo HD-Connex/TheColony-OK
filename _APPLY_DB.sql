@@ -399,7 +399,8 @@ BEGIN
   END IF;
 END $$;
 
-CREATE EXTENSION IF NOT EXISTS vector;
+CREATE SCHEMA IF NOT EXISTS extensions;
+CREATE EXTENSION IF NOT EXISTS vector WITH SCHEMA extensions;
 
 -- ─── Transcripts (Whisper / Mux / provider output) ───
 
