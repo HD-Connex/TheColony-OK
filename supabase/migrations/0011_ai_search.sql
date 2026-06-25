@@ -106,10 +106,12 @@ GRANT EXECUTE ON FUNCTION public.match_content_embeddings(vector(1536), int, flo
 ALTER TABLE public.transcripts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.content_embeddings ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY IF NOT EXISTS "transcripts_public_read" ON public.transcripts
+DROP POLICY IF EXISTS "transcripts_public_read" ON public.transcripts;
+CREATE POLICY "transcripts_public_read" ON public.transcripts
   FOR SELECT USING (true);
 
-CREATE POLICY IF NOT EXISTS "content_embeddings_public_read" ON public.content_embeddings
+DROP POLICY IF EXISTS "content_embeddings_public_read" ON public.content_embeddings;
+CREATE POLICY "content_embeddings_public_read" ON public.content_embeddings
   FOR SELECT USING (true);
 
 -- No INSERT/UPDATE/DELETE policies for anon/authenticated.
