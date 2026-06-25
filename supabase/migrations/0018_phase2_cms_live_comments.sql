@@ -57,6 +57,7 @@ ALTER TABLE public.tips
 UPDATE public.tips SET kind = 'tip' WHERE kind IS NULL;
 ALTER TABLE public.tips ALTER COLUMN kind SET NOT NULL;
 -- Add check constraint after column is populated
+ALTER TABLE public.tips DROP CONSTRAINT IF EXISTS tips_kind_check;
 ALTER TABLE public.tips ADD CONSTRAINT tips_kind_check CHECK (kind IN ('tip', 'newsletter'));
 
 -- Create indexes (idempotent)
