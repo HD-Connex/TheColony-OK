@@ -33,6 +33,7 @@ CREATE INDEX IF NOT EXISTS idx_members_status ON public.members(status) WHERE is
 
 ALTER TABLE public.members ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "members_read_own" ON public.members;
 CREATE POLICY "members_read_own" ON public.members
   FOR SELECT USING (auth.uid() = user_id);
 

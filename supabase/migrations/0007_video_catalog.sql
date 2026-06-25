@@ -65,9 +65,11 @@ CREATE INDEX IF NOT EXISTS idx_video_episodes_slug ON public.video_episodes(slug
 ALTER TABLE public.series ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.video_episodes ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "series_public_read" ON public.series;
 CREATE POLICY "series_public_read" ON public.series
   FOR SELECT USING (status = 'published');
 
+DROP POLICY IF EXISTS "video_episodes_public_read" ON public.video_episodes;
 CREATE POLICY "video_episodes_public_read" ON public.video_episodes
   FOR SELECT USING (status = 'published');
 

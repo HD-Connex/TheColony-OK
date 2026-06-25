@@ -31,6 +31,7 @@ CREATE INDEX IF NOT EXISTS threaded_comments_approved_idx ON public.threaded_com
 
 -- Update public read policy to only approved (tighten previous loose policy).
 DROP POLICY IF EXISTS "comments_public_read" ON public.threaded_comments;
+DROP POLICY IF EXISTS "comments_public_read_approved" ON public.threaded_comments;
 CREATE POLICY "comments_public_read_approved" ON public.threaded_comments
   FOR SELECT USING (approved = true);
 

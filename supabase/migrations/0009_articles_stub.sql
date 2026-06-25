@@ -24,6 +24,7 @@ CREATE INDEX IF NOT EXISTS idx_articles_category ON public.articles(category) WH
 
 ALTER TABLE public.articles ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "articles_public_read" ON public.articles;
 CREATE POLICY "articles_public_read" ON public.articles
   FOR SELECT USING (status = 'published');
 

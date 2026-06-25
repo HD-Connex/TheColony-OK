@@ -26,6 +26,7 @@ CREATE INDEX IF NOT EXISTS idx_contributors_tier_status
 
 ALTER TABLE public.contributors ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "contributors_public_read_active" ON public.contributors;
 CREATE POLICY "contributors_public_read_active" ON public.contributors
   FOR SELECT USING (status = 'active');
 

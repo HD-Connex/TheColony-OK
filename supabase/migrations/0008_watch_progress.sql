@@ -17,15 +17,19 @@ CREATE INDEX IF NOT EXISTS idx_watch_progress_user_recent
 
 ALTER TABLE public.watch_progress ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "watch_progress_select_own" ON public.watch_progress;
 CREATE POLICY "watch_progress_select_own" ON public.watch_progress
   FOR SELECT USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "watch_progress_insert_own" ON public.watch_progress;
 CREATE POLICY "watch_progress_insert_own" ON public.watch_progress
   FOR INSERT WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "watch_progress_update_own" ON public.watch_progress;
 CREATE POLICY "watch_progress_update_own" ON public.watch_progress
   FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "watch_progress_delete_own" ON public.watch_progress;
 CREATE POLICY "watch_progress_delete_own" ON public.watch_progress
   FOR DELETE USING (auth.uid() = user_id);
 

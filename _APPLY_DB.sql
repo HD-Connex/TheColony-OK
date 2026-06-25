@@ -30,6 +30,7 @@ CREATE INDEX IF NOT EXISTS idx_live_events_scheduled ON public.live_events(sched
 
 ALTER TABLE public.live_events ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "live_events_public_read" ON public.live_events;
 CREATE POLICY "live_events_public_read" ON public.live_events
   FOR SELECT USING (true);
 
@@ -116,17 +117,22 @@ ALTER TABLE live_polls ENABLE ROW LEVEL SECURITY;
 ALTER TABLE live_poll_votes ENABLE ROW LEVEL SECURITY;
 
 -- Read: public for chat (transparency) or member-only? Start public read for engagement, write member.
+DROP POLICY IF EXISTS "live_chat_read" ON live_chat_messages;
 CREATE POLICY "live_chat_read" ON live_chat_messages FOR SELECT USING (true); -- or (auth.role() = 'authenticated' AND is_member())
+DROP POLICY IF EXISTS "live_chat_insert" ON live_chat_messages;
 CREATE POLICY "live_chat_insert" ON live_chat_messages FOR INSERT WITH CHECK (
   auth.uid() IS NOT NULL AND
   COALESCE((SELECT is_member FROM public.members WHERE user_id = auth.uid()), false)
 );
 
 -- Similar for polls (read active, vote if member)
+DROP POLICY IF EXISTS "live_polls_read" ON live_polls;
 CREATE POLICY "live_polls_read" ON live_polls FOR SELECT USING (is_active OR auth.uid() = created_by);
+DROP POLICY IF EXISTS "live_polls_vote" ON live_poll_votes;
 CREATE POLICY "live_polls_vote" ON live_poll_votes FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
 
 -- Update/delete own or admin (simple)
+DROP POLICY IF EXISTS "live_chat_own_update" ON live_chat_messages;
 CREATE POLICY "live_chat_own_update" ON live_chat_messages FOR UPDATE USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
 -- Admin full via service or separate policy.
 
@@ -210,6 +216,7 @@ CREATE INDEX IF NOT EXISTS idx_members_status ON public.members(status) WHERE is
 
 ALTER TABLE public.members ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "members_read_own" ON public.members;
 CREATE POLICY "members_read_own" ON public.members
   FOR SELECT USING (auth.uid() = user_id);
 
@@ -285,9 +292,11 @@ CREATE INDEX IF NOT EXISTS idx_video_episodes_slug ON public.video_episodes(slug
 ALTER TABLE public.series ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.video_episodes ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "series_public_read" ON public.series;
 CREATE POLICY "series_public_read" ON public.series
   FOR SELECT USING (status = 'published');
 
+DROP POLICY IF EXISTS "video_episodes_public_read" ON public.video_episodes;
 CREATE POLICY "video_episodes_public_read" ON public.video_episodes
   FOR SELECT USING (status = 'published');
 
@@ -317,15 +326,19 @@ CREATE INDEX IF NOT EXISTS idx_watch_progress_user_recent
 
 ALTER TABLE public.watch_progress ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "watch_progress_select_own" ON public.watch_progress;
 CREATE POLICY "watch_progress_select_own" ON public.watch_progress
   FOR SELECT USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "watch_progress_insert_own" ON public.watch_progress;
 CREATE POLICY "watch_progress_insert_own" ON public.watch_progress
   FOR INSERT WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "watch_progress_update_own" ON public.watch_progress;
 CREATE POLICY "watch_progress_update_own" ON public.watch_progress
   FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "watch_progress_delete_own" ON public.watch_progress;
 CREATE POLICY "watch_progress_delete_own" ON public.watch_progress
   FOR DELETE USING (auth.uid() = user_id);
 
@@ -360,6 +373,7 @@ CREATE INDEX IF NOT EXISTS idx_articles_category ON public.articles(category) WH
 
 ALTER TABLE public.articles ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "articles_public_read" ON public.articles;
 CREATE POLICY "articles_public_read" ON public.articles
   FOR SELECT USING (status = 'published');
 
@@ -564,6 +578,7 @@ CREATE INDEX IF NOT EXISTS idx_contributors_tier_status
 
 ALTER TABLE public.contributors ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "contributors_public_read_active" ON public.contributors;
 CREATE POLICY "contributors_public_read_active" ON public.contributors
   FOR SELECT USING (status = 'active');
 
@@ -666,9 +681,13 @@ alter table clips enable row level security;
 alter table threaded_comments enable row level security;
 
 -- Policies (owner full, public approved clips, member comments)
+DROP POLICY IF EXISTS "clips_owner_all" ON clips;
 create policy "clips_owner_all" on clips for all using (auth.uid() = user_id);
+DROP POLICY IF EXISTS "clips_public_approved_read" ON clips;
 create policy "clips_public_approved_read" on clips for select using (approved = true);
+DROP POLICY IF EXISTS "comments_owner_all" ON threaded_comments;
 create policy "comments_owner_all" on threaded_comments for all using (auth.uid() = user_id);
+DROP POLICY IF EXISTS "comments_public_read" ON threaded_comments;
 create policy "comments_public_read" on threaded_comments for select using (true); -- tighten with member check via entitlements later
 
 -- Note: For premium member comments, integrate with existing members table or gift/perks (per vercel:auth + audit stubs).
@@ -690,12 +709,15 @@ CREATE INDEX IF NOT EXISTS idx_watchlist_user ON public.watchlist(user_id, creat
 
 ALTER TABLE public.watchlist ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "watchlist_select_own" ON public.watchlist;
 CREATE POLICY "watchlist_select_own" ON public.watchlist
   FOR SELECT USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "watchlist_insert_own" ON public.watchlist;
 CREATE POLICY "watchlist_insert_own" ON public.watchlist
   FOR INSERT WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "watchlist_delete_own" ON public.watchlist;
 CREATE POLICY "watchlist_delete_own" ON public.watchlist
   FOR DELETE USING (auth.uid() = user_id);
 
@@ -717,15 +739,19 @@ CREATE INDEX IF NOT EXISTS idx_downloads_expires ON public.downloads(expires_at)
 
 ALTER TABLE public.downloads ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "downloads_select_own" ON public.downloads;
 CREATE POLICY "downloads_select_own" ON public.downloads
   FOR SELECT USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "downloads_insert_own" ON public.downloads;
 CREATE POLICY "downloads_insert_own" ON public.downloads
   FOR INSERT WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "downloads_update_own" ON public.downloads;
 CREATE POLICY "downloads_update_own" ON public.downloads
   FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "downloads_delete_own" ON public.downloads;
 CREATE POLICY "downloads_delete_own" ON public.downloads
   FOR DELETE USING (auth.uid() = user_id);
 
@@ -832,6 +858,7 @@ CREATE INDEX IF NOT EXISTS threaded_comments_approved_idx ON public.threaded_com
 
 -- Update public read policy to only approved (tighten previous loose policy).
 DROP POLICY IF EXISTS "comments_public_read" ON public.threaded_comments;
+DROP POLICY IF EXISTS "comments_public_read_approved" ON public.threaded_comments;
 CREATE POLICY "comments_public_read_approved" ON public.threaded_comments
   FOR SELECT USING (approved = true);
 
@@ -1020,6 +1047,7 @@ alter table public.backroom_posts enable row level security;
 -- 4. Policies: select + insert ONLY for active members (is_member=true in members table)
 -- Matches plan spec + reuse of existing members.is_member pattern from 0006/0015/0018/ entitlements.
 
+DROP POLICY IF EXISTS "backroom_threads_member_select" ON public.backroom_threads;
 create policy "backroom_threads_member_select" on public.backroom_threads
   for select
   using (
@@ -1030,6 +1058,7 @@ create policy "backroom_threads_member_select" on public.backroom_threads
     )
   );
 
+DROP POLICY IF EXISTS "backroom_threads_member_insert" ON public.backroom_threads;
 create policy "backroom_threads_member_insert" on public.backroom_threads
   for insert
   with check (
@@ -1041,6 +1070,7 @@ create policy "backroom_threads_member_insert" on public.backroom_threads
     )
   );
 
+DROP POLICY IF EXISTS "backroom_posts_member_select" ON public.backroom_posts;
 create policy "backroom_posts_member_select" on public.backroom_posts
   for select
   using (
@@ -1051,6 +1081,7 @@ create policy "backroom_posts_member_select" on public.backroom_posts
     )
   );
 
+DROP POLICY IF EXISTS "backroom_posts_member_insert" ON public.backroom_posts;
 create policy "backroom_posts_member_insert" on public.backroom_posts
   for insert
   with check (
@@ -1155,8 +1186,11 @@ DROP POLICY IF EXISTS "officials_public_read" ON public.officials;
 DROP POLICY IF EXISTS "scorecard_issues_public_read" ON public.scorecard_issues;
 DROP POLICY IF EXISTS "grades_public_read" ON public.grades;
 
+DROP POLICY IF EXISTS "officials_public_read" ON public.officials;
 create policy "officials_public_read" on public.officials for select using (true);
+DROP POLICY IF EXISTS "scorecard_issues_public_read" ON public.scorecard_issues;
 create policy "scorecard_issues_public_read" on public.scorecard_issues for select using (true);
+DROP POLICY IF EXISTS "grades_public_read" ON public.grades;
 create policy "grades_public_read" on public.grades for select using (true);
 
 -- No public insert/update/delete policies (writes go through admin API using service role).
@@ -1215,7 +1249,9 @@ alter table public.article_topics enable row level security;
 DROP POLICY IF EXISTS "topics_public_read" ON public.topics;
 DROP POLICY IF EXISTS "article_topics_public_read" ON public.article_topics;
 
+DROP POLICY IF EXISTS "topics_public_read" ON public.topics;
 create policy "topics_public_read" on public.topics for select using (true);
+DROP POLICY IF EXISTS "article_topics_public_read" ON public.article_topics;
 create policy "article_topics_public_read" on public.article_topics for select using (true);
 
 -- No public write policies (admin/service role only, consistent with articles admin flows).
@@ -1294,12 +1330,15 @@ DROP POLICY IF EXISTS "contributor_follows_select_own" ON public.contributor_fol
 DROP POLICY IF EXISTS "contributor_follows_insert_own" ON public.contributor_follows;
 DROP POLICY IF EXISTS "contributor_follows_delete_own" ON public.contributor_follows;
 
+DROP POLICY IF EXISTS "contributor_follows_select_own" ON public.contributor_follows;
 CREATE POLICY "contributor_follows_select_own" ON public.contributor_follows
   FOR SELECT USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "contributor_follows_insert_own" ON public.contributor_follows;
 CREATE POLICY "contributor_follows_insert_own" ON public.contributor_follows
   FOR INSERT WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "contributor_follows_delete_own" ON public.contributor_follows;
 CREATE POLICY "contributor_follows_delete_own" ON public.contributor_follows
   FOR DELETE USING (auth.uid() = user_id);
 
@@ -1345,12 +1384,15 @@ CREATE POLICY "video_episodes_public_read" ON public.video_episodes
 DROP POLICY IF EXISTS "comments_owner_all" ON public.threaded_comments;
 DROP POLICY IF EXISTS "comments_member_insert" ON public.threaded_comments;
 
+DROP POLICY IF EXISTS "comments_owner_update" ON public.threaded_comments;
 CREATE POLICY "comments_owner_update" ON public.threaded_comments
   FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "comments_owner_delete" ON public.threaded_comments;
 CREATE POLICY "comments_owner_delete" ON public.threaded_comments
   FOR DELETE USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "comments_member_insert" ON public.threaded_comments;
 CREATE POLICY "comments_member_insert" ON public.threaded_comments
   FOR INSERT WITH CHECK (
     auth.uid() = user_id AND
@@ -1436,27 +1478,33 @@ CREATE INDEX IF NOT EXISTS idx_watch_progress_user_updated ON public.watch_progr
 drop policy if exists "clips_owner_all" on public.clips;
 drop policy if exists "clips_public_approved_read" on public.clips;
 
+DROP POLICY IF EXISTS "clips_owner_select" ON public.clips;
 create policy "clips_owner_select" on public.clips
   for select using (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "clips_owner_insert" ON public.clips;
 create policy "clips_owner_insert" on public.clips
   for insert with check (auth.uid() = user_id and approved = false);
 
 -- Owners may edit their own clips but can never set/keep approved = true.
+DROP POLICY IF EXISTS "clips_owner_update" ON public.clips;
 create policy "clips_owner_update" on public.clips
   for update using (auth.uid() = user_id)
   with check (auth.uid() = user_id and approved = false);
 
+DROP POLICY IF EXISTS "clips_owner_delete" ON public.clips;
 create policy "clips_owner_delete" on public.clips
   for delete using (auth.uid() = user_id);
 
 -- Admins/editors moderate any clip (approve, edit, remove).
+DROP POLICY IF EXISTS "clips_admin_all" ON public.clips;
 create policy "clips_admin_all" on public.clips
   for all
   using (exists (select 1 from public.members m where m.user_id = auth.uid() and m.role in ('admin', 'editor')))
   with check (exists (select 1 from public.members m where m.user_id = auth.uid() and m.role in ('admin', 'editor')));
 
 -- Public can read approved clips (restored from 0014).
+DROP POLICY IF EXISTS "clips_public_approved_read" ON public.clips;
 create policy "clips_public_approved_read" on public.clips
   for select using (approved = true);
 
