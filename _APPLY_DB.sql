@@ -466,6 +466,7 @@ RETURNS TABLE (
 )
 LANGUAGE sql
 STABLE
+SET search_path = ''
 AS $$
   SELECT
     ce.id,
