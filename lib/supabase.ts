@@ -89,8 +89,8 @@ export function supabaseConfigured(): boolean {
 }
 
 /**
- * Convenience singleton export for legacy / docs compatibility ("export const supabase = supabasePublic()").
+ * Tolerant singleton for legacy / docs compatibility ("export const supabase = supabasePublic()").
+ * Returns null at module evaluation time if env vars are missing (build-safe).
  * Prefer explicit supabasePublic() or supabaseAdmin() calls for clarity.
- * (Created lazily on first access via the function.)
  */
-export const supabase = supabasePublic();
+export const supabase: SupabaseClient | null = supabaseConfigured() ? supabasePublic() : null;
