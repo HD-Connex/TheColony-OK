@@ -56,5 +56,12 @@ export function assertPublicHttpUrl(raw: string): URL {
   if (isBlockedHost(u.hostname)) {
     throw new Error("URL host is not allowed");
   }
+  const allowed = process.env.ALLOWED_TRANSCRIBE_MEDIA_HOSTS;
+  if (allowed) {
+    const hosts = allowed.split(",").map((h) => h.trim().toLowerCase());
+    if (!hosts.includes(u.hostname.toLowerCase())) {
+      throw new Error(`URL host "${u.hostname}" is not in the allow-list`);
+    }
+  }
   return u;
 }

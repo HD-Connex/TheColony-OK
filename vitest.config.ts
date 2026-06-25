@@ -13,5 +13,8 @@ export default defineConfig({
     environment: "node",
     include: ["**/*.test.ts", "**/*.test.tsx"],
     exclude: ["node_modules", ".next", "dist", "**/.worktrees/**", ".worktrees/**", "**/route.test.ts", "**/jobs/**", "**/clips/**"],
+    env: {
+      ALLOWED_TRANSCRIBE_MEDIA_HOSTS: "stream.mux.com,cdn.example.com",
+    },
   },
 });
