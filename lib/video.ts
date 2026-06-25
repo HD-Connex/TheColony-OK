@@ -28,6 +28,9 @@ function youtubeLiveEmbed(channelId: string): string {
     mute: "1",
     rel: "0",
     modestbranding: "1",
+    // playsinline=1: keep playback inline on iOS Safari instead of forcing native
+    // fullscreen the moment the stream starts. Critical for the mobile live path.
+    playsinline: "1",
   });
   return `https://www.youtube-nocookie.com/embed/live_stream?${params}`;
 }
@@ -62,13 +65,13 @@ export function toEmbedSrc(url: string): string | null {
 
     const watchId = url.match(/[?&]v=([^&]+)/)?.[1] || url.match(/youtu\.be\/([^?]+)/)?.[1];
     if (watchId) {
-      const params = new URLSearchParams({ autoplay: "1", mute: "1", rel: "0", modestbranding: "1" });
+      const params = new URLSearchParams({ autoplay: "1", mute: "1", rel: "0", modestbranding: "1", playsinline: "1" });
       return `https://www.youtube-nocookie.com/embed/${watchId}?${params}`;
     }
 
     const embedId = url.match(/embed\/([^?]+)/)?.[1];
     if (embedId && embedId !== "live_stream") {
-      const params = new URLSearchParams({ autoplay: "1", mute: "1", rel: "0", modestbranding: "1" });
+      const params = new URLSearchParams({ autoplay: "1", mute: "1", rel: "0", modestbranding: "1", playsinline: "1" });
       return `https://www.youtube-nocookie.com/embed/${embedId}?${params}`;
     }
 
@@ -79,7 +82,7 @@ export function toEmbedSrc(url: string): string | null {
 
     if (/\/streams(?:\?|$|\/)/.test(url) || /youtube\.com\/@[^/?#]+(?:\/|$)/.test(url)) {
       const videoId = JAKE_MERRICK_PLACEHOLDER_VIDEO_ID;
-      const params = new URLSearchParams({ autoplay: "1", mute: "1", rel: "0", modestbranding: "1" });
+      const params = new URLSearchParams({ autoplay: "1", mute: "1", rel: "0", modestbranding: "1", playsinline: "1" });
       return `https://www.youtube-nocookie.com/embed/${videoId}?${params}`;
     }
 

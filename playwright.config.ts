@@ -26,7 +26,18 @@ export default defineConfig({
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
     },
-    // Expand later: firefox, mobile etc. for elite coverage.
+    // Mobile profiles run ONLY the mobile spec (desktop-oriented specs like
+    // live.spec.ts assume a wide nav and would false-fail on small viewports).
+    {
+      name: 'iphone-13',
+      testMatch: /mobile\.spec\.ts/,
+      use: { ...devices['iPhone 13'] },
+    },
+    {
+      name: 'pixel-7',
+      testMatch: /mobile\.spec\.ts/,
+      use: { ...devices['Pixel 7'] },
+    },
   ],
   webServer: {
     command: 'npm run start',

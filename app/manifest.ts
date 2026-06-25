@@ -5,12 +5,15 @@ export default function manifest(): MetadataRoute.Manifest {
     name: 'The Colony OK - Rural Conservative Hub',
     short_name: 'The Colony',
     description: 'Oklahoma-rooted reader-funded conservative media with live, podcasts, exclusives. Hyper-local rural depth. Member clips, offline PWA.',
+    id: '/',
     start_url: '/?utm_source=pwa',
     scope: '/',
     display: 'standalone',
     background_color: '#F5F0E6', // cream per DS
     theme_color: '#0A2540', // navy per DS
-    orientation: "portrait",
+    // Don't lock orientation: a video product needs landscape for fullscreen viewing
+    // and rotation in standalone/TWA. (Was "portrait".)
+    orientation: "any",
     categories: ["news", "entertainment", "education"],
     icons: [
       {
