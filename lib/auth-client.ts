@@ -75,11 +75,11 @@ export function useAuth(): AuthState {
   }, []);
 
   useEffect(() => {
+    let active = true;
     if (!user) {
-      setMemberFlag(false);
+      // memberFlag defaults to false; no setState needed on null user
       return;
     }
-    let active = true;
     supabaseBrowser()
       .from("members")
       .select("is_member, status")

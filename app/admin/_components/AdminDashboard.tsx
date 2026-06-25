@@ -132,14 +132,19 @@ export default function AdminDashboard({ currentUserRole }: Props) {
   }
 
   useEffect(() => {
-    if (tab === "articles") loadArticles();
-    if (tab === "contributors") loadApps();
-    if (tab === "live") loadLive();
-    if (tab === "clips") loadClips();
-    if (tab === "members") loadMembers();
-    if (tab === "report-card") loadReportCard();
-    if (tab === "comments") loadComments();
-  }, [tab]);
+    let active = true;
+    const load = async () => {
+      if (tab === "articles") await loadArticles();
+      else if (tab === "contributors") await loadApps();
+      else if (tab === "live") await loadLive();
+      else if (tab === "clips") await loadClips();
+      else if (tab === "members") await loadMembers();
+      else if (tab === "report-card") await loadReportCard();
+      else if (tab === "comments") await loadComments();
+    };
+    if (active) void load();
+    return () => { active = false; };
+  }, [tab, loadArticles, loadApps, loadLive, loadClips, loadMembers, loadReportCard, loadComments]);
 
   async function approveApp(id: string) {
     setMsg(null);

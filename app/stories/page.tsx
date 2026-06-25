@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import Link from "next/link";
 import FilterBar from "../_components/FilterBar";
 import InnerPageShell from "../_components/InnerPageShell";
 import StoryCard from "../_components/StoryCard";
@@ -75,7 +76,7 @@ export default async function StoriesPage({
           ))}
         </select>
         <button className="btn btn--sm btn--outline" type="submit">Filter</button>
-        {(county || activeKey !== "all") && <a href="/stories" className="btn btn--sm">Clear all</a>}
+        {(county || activeKey !== "all") && <Link href="/stories" className="btn btn--sm">Clear all</Link>}
       </form>
 
       {/* Newsletter signup / The Briefing block: after filters/headers in stories (inline variant for flow) */}

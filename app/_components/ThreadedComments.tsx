@@ -40,7 +40,11 @@ export default function ThreadedComments({ targetType, targetId, isMember, curre
   }
 
   useEffect(() => {
-    load();
+    let active = true;
+
+    (async () => {
+      if (active) await load();
+    })();
 
     if (!supabaseConfigured()) return;
 
@@ -50,6 +54,7 @@ export default function ThreadedComments({ targetType, targetId, isMember, curre
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "threaded_comments", filter: `target_type=eq.${targetType}` },
         (payload) => {
+          if (!active) return;
           const c = payload.new as Comment;
           if (c.target_id === targetId && c.approved !== false) {
             setComments((prev) => [...prev, c]);
@@ -60,6 +65,7 @@ export default function ThreadedComments({ targetType, targetId, isMember, curre
         "postgres_changes",
         { event: "UPDATE", schema: "public", table: "threaded_comments", filter: `target_type=eq.${targetType}` },
         (payload) => {
+          if (!active) return;
           const c = payload.new as Comment;
           if (c.target_id === targetId && c.approved !== false) {
             setComments((prev) => {
@@ -77,6 +83,7 @@ export default function ThreadedComments({ targetType, targetId, isMember, curre
       .subscribe();
 
     return () => {
+      active = false;
       supabaseBrowser().removeChannel(channel);
     };
   }, [targetType, targetId]);

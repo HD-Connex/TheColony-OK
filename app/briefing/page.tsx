@@ -54,7 +54,7 @@ export default async function BriefingPage() {
   const membership = user ? await getMembership(user.id).catch(() => ({ isMember: false })) : { isMember: false };
 
   const sb = supabasePublic();
-  const since = new Date(Date.now() - 1000 * 3600 * 24 * 3).toISOString(); // last ~3d for "daily"
+  const since = new Date(new Date().getTime() - 1000 * 3600 * 24 * 3).toISOString();
 
   const [{ data: arts }, { data: eps }] = await Promise.all([
     sb.from("articles").select("id,slug,title,dek,published_at,county").eq("status", "published").gte("published_at", since).order("published_at", { ascending: false }).limit(12),
@@ -90,7 +90,7 @@ export default async function BriefingPage() {
       )}
 
       <section style={{ marginBottom: "var(--space-4)" }}>
-        <h2 style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-lg)", marginBottom: "var(--space-2)" }}>▼ TODAY'S BRIEFING — {new Date().toLocaleDateString()}</h2>
+        <h2 style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-lg)", marginBottom: "var(--space-2)" }}>▼ TODAY&apos;S BRIEFING — {new Date().toLocaleDateString()}</h2>
         <div className="article__body" style={{ borderLeft: "4px solid var(--color-brass)", paddingLeft: "var(--space-3)", background: "var(--color-paper)" }}>
           {sanitizeHtml(briefing.summary)}
         </div>

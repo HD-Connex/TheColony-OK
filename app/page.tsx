@@ -70,7 +70,7 @@ export default async function HomePage() {
   const schedule = [...live.live, ...live.upcoming].slice(0, 3);
   const isOnAir = live.live.length > 0;
   const countdownTarget =
-    nextLive?.scheduled_start ?? new Date(Date.now() + 4 * 3_600_000).toISOString();
+    nextLive?.scheduled_start ?? new Date(new Date().getTime() + 4 * 3_600_000).toISOString();
 
   const liveItems: StageItem[] = eventsToStageItems([...live.live, ...live.replays], whenLabel);
 

@@ -9,6 +9,21 @@ interface Props {
   variant?: "ink" | "alarm" | "block";
 }
 
+const Unit = ({ value, unit, reduced }: { value: string; unit: string; reduced: boolean | null }) => (
+  <div className="countdown__unit">
+    <motion.span
+      className="countdown__value"
+      key={value + unit}
+      initial={reduced ? false : { scale: 1.08, opacity: 0.7 }}
+      animate={{ scale: 1, opacity: 1 }}
+      transition={{ duration: 0.2 }}
+    >
+      {value}
+    </motion.span>
+    <span className="countdown__unit-label">{unit}</span>
+  </div>
+);
+
 export default function Countdown({ target, label, variant = "ink" }: Props) {
   const [parts, setParts] = useState({ h: "--", m: "--", s: "--" });
   const reduced = useReducedMotion();
@@ -34,30 +49,15 @@ export default function Countdown({ target, label, variant = "ink" }: Props) {
     return () => clearInterval(id);
   }, [target]);
 
-  const Unit = ({ value, unit }: { value: string; unit: string }) => (
-    <div className="countdown__unit">
-      <motion.span
-        className="countdown__value"
-        key={value + unit}
-        initial={reduced ? false : { scale: 1.08, opacity: 0.7 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 0.2 }}
-      >
-        {value}
-      </motion.span>
-      <span className="countdown__unit-label">{unit}</span>
-    </div>
-  );
-
   const variantClass =
     variant === "alarm" ? "countdown--alarm" : variant === "block" ? "countdown--block" : "countdown--ink";
 
   return (
     <div className={`countdown ${variantClass}`}>
       {label && <span className="countdown__label">{label}</span>}
-      <Unit value={parts.h} unit="HRS" />
-      <Unit value={parts.m} unit="MIN" />
-      <Unit value={parts.s} unit="SEC" />
+      <Unit value={parts.h} unit="HRS" reduced={reduced} />
+      <Unit value={parts.m} unit="MIN" reduced={reduced} />
+      <Unit value={parts.s} unit="SEC" reduced={reduced} />
     </div>
   );
 }

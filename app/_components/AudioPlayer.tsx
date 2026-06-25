@@ -46,13 +46,7 @@ export default function AudioPlayer({ src, title, episodeId, meta, previewSecond
   const [gated, setGated] = useState(false);
   const storeKey = `colony:resume:${episodeId}`;
 
-  // Read latest membership inside event handlers without re-binding listeners.
-  const isMemberRef = useRef(false);
-  isMemberRef.current = isMember;
-  const cap = previewSeconds;
-  const gatedFor = (t: number) => !isMemberRef.current && cap > 0 && t >= cap;
-
-  useEffect(() => { if (isMember) setGated(false); }, [isMember]);
+  const gatedFor = useCallback((t: number) => !isMember && previewSeconds > 0 && t >= previewSeconds, [isMember, previewSeconds]);
 
   // Expose audio element to parent (e.g. EpisodePlayer for WebAudio visualizer + dual-source sync).
   // Runs after mount so ref is populated; cleans on unmount or prop change.
@@ -129,8 +123,8 @@ export default function AudioPlayer({ src, title, episodeId, meta, previewSecond
       setTime(el.currentTime);
       if (gatedFor(el.currentTime)) {
         el.pause();
-        el.currentTime = cap;
-        setTime(cap);
+        el.currentTime = previewSeconds;
+        setTime(previewSeconds);
         setGated(true);
       }
     };
@@ -162,7 +156,7 @@ export default function AudioPlayer({ src, title, episodeId, meta, previewSecond
     const el = ref.current;
     if (!el) return;
     let value = Number(e.target.value);
-    if (!isMemberRef.current && cap > 0 && value > cap) value = cap; // can't seek past the preview
+    if (!isMember && previewSeconds > 0 && value > previewSeconds) value = previewSeconds; // can't seek past the preview
     el.currentTime = value;
   };
 

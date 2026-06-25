@@ -69,7 +69,7 @@ export default function MembershipAccount() {
         <div className="account-card press-pass">
           <div className="foil" style={{ fontSize: "1.5rem", letterSpacing: "0.1em" }}>PRESS PASS</div>
           <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", marginTop: "var(--space-2)" }}>
-            MEMBER N° {user.id.slice(0, 4).toUpperCase()} · SINCE {new Date(user.created_at || Date.now()).getFullYear()}
+            MEMBER N° {user.id.slice(0, 4).toUpperCase()} · SINCE {user.created_at ? new Date(user.created_at).getFullYear() : new Date().getFullYear()}
           </div>
           <div style={{ fontSize: "var(--text-xs)", color: "var(--color-text-secondary)", marginTop: "var(--space-1)" }}>
             THE COLONY OK · READER-FUNDED

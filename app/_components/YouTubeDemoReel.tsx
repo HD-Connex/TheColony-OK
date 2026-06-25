@@ -168,7 +168,7 @@ export default function YouTubeDemoReel({ items, onExit }: YouTubeDemoReelProps)
       }
       // Do not delete the global onYouTubeIframeAPIReady — other potential uses or future loads
     };
-  }, [videoIds.join("|")]); // re-init if the list of IDs changes
+  }, [videoIds]); // re-init if the list of IDs changes
 
   if (videoIds.length === 0) {
     return (

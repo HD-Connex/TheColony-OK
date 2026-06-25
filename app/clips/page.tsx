@@ -92,8 +92,11 @@ export default function ClipsFeedPage() {
   }
 
   useEffect(() => {
-    void loadClips(page);
-  }, [filter, page]);
+    let active = true;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (active) void loadClips(page);
+    return () => { active = false; };
+  }, [filter, page, loadClips]);
 
   // Upvote reuses existing /api/clips/upvote (public, rate-limited, denorm increment)
   async function handleUpvote(clipId: string, currentUpvotes: number) {
