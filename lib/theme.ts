@@ -10,6 +10,7 @@ export function getStoredPref(): ThemePref {
 
 export function resolveTheme(pref: ThemePref): 'light' | 'dark' {
   if (pref === 'system') {
+    if (typeof window === 'undefined') return 'dark';
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   }
   return pref;

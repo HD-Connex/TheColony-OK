@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { supabaseBrowser } from "@/lib/auth-client";
 import { supabaseConfigured } from "@/lib/supabase";
 
@@ -32,15 +32,19 @@ export default function ThreadedComments({ targetType, targetId, isMember, curre
   const [replyTo, setReplyTo] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
 
-  async function load() {
+  const load = useCallback(async () => {
     if (!supabaseConfigured()) return;
     const res = await fetch(`/api/comments?target_type=${targetType}&target_id=${targetId}`);
     const json = await res.json();
     setComments(json.comments || []);
-  }
+  }, [targetType, targetId]);
 
   useEffect(() => {
-    load();
+    let active = true;
+
+    (async () => {
+      if (active) await load();
+    })();
 
     if (!supabaseConfigured()) return;
 
@@ -50,6 +54,7 @@ export default function ThreadedComments({ targetType, targetId, isMember, curre
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "threaded_comments", filter: `target_type=eq.${targetType}` },
         (payload) => {
+          if (!active) return;
           const c = payload.new as Comment;
           if (c.target_id === targetId && c.approved !== false) {
             setComments((prev) => [...prev, c]);
@@ -60,6 +65,7 @@ export default function ThreadedComments({ targetType, targetId, isMember, curre
         "postgres_changes",
         { event: "UPDATE", schema: "public", table: "threaded_comments", filter: `target_type=eq.${targetType}` },
         (payload) => {
+          if (!active) return;
           const c = payload.new as Comment;
           if (c.target_id === targetId && c.approved !== false) {
             setComments((prev) => {
@@ -77,9 +83,10 @@ export default function ThreadedComments({ targetType, targetId, isMember, curre
       .subscribe();
 
     return () => {
+      active = false;
       supabaseBrowser().removeChannel(channel);
     };
-  }, [targetType, targetId]);
+  }, [targetType, targetId, load]);
 
   async function post(e?: React.FormEvent) {
     e?.preventDefault();

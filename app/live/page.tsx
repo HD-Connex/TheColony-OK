@@ -48,7 +48,7 @@ export default async function LivePage({
   const schedule = [...live, ...upcoming].slice(0, 3);
   const isOnAir = live.length > 0;
   const countdownTarget =
-    nextLive?.scheduled_start ?? new Date(Date.now() + 4 * 3_600_000).toISOString();
+    nextLive?.scheduled_start ?? new Date(new Date().getTime() + 4 * 3_600_000).toISOString();
 
   // Phase 2: SSR + new Supabase client + entitlements for "Off the Record" visibility check on primary live.
   // (Client-side LiveStage also gates on switch using useAuth isMember for full queue support.)
@@ -90,7 +90,10 @@ export default async function LivePage({
           <LivePlatformTabs />
 
           <section className="live-section section--tight" aria-label="Current broadcast">
-            <div className="live-player">
+            {/* Plain host (NOT .live-player): LiveStage renders its own 16/9 .live-player
+                internally. Wrapping the whole stage in an aspect-ratio box clipped/overflowed
+                the header+queue+interactivity on mobile. */}
+            <div className="live-stage-host">
               <LiveStageMount
                 items={items}
                 initialActiveId={live[0]?.id ?? null}

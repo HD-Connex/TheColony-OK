@@ -58,25 +58,31 @@ export default function SiteClient() {
     // Simple, one-time buffered observers; reuses SiteClient client lifecycle (theme/PWA/observer pattern).
     // Tags with vital + page path for Sentry dashboards/alerts (e.g. LCP>2500ms, high INP).
     if (typeof window !== 'undefined' && 'PerformanceObserver' in window) {
-      const reportVital = (name: 'LCP' | 'CLS' | 'INP', value: number, details?: Record<string, unknown>) => {
-        const isCLS = name === 'CLS';
-        const display = isCLS ? value.toFixed(3) : Math.round(value);
+      // Buffer the latest values and flush ONE Sentry event when the page is hidden.
+      // Reporting per-entry (esp. INP 'event' + CLS 'layout-shift') floods Sentry on
+      // mobile (quota/cost) and adds main-thread work to the metric we're measuring.
+      const vitals: { LCP?: number; CLS?: number; INP?: number } = {};
+      const reportVital = (name: 'LCP' | 'CLS' | 'INP', value: number, _details?: Record<string, unknown>) => {
+        if (name === 'INP') vitals.INP = Math.max(vitals.INP ?? 0, value); // worst interaction wins
+        else vitals[name] = value; // LCP = latest candidate, CLS = cumulative-so-far
         if (process.env.NODE_ENV !== 'production') {
-          console.log(`[RUM] ${name}: ${display}`, details || {});
+          console.log(`[RUM] ${name}: ${name === 'CLS' ? value.toFixed(3) : Math.round(value)}`);
         }
+      };
+
+      let flushed = false;
+      const flushVitals = () => {
+        if (flushed || (vitals.LCP == null && vitals.CLS == null && vitals.INP == null)) return;
+        flushed = true;
         try {
-          // Graceful: capture even if Sentry not fully configured (dsn-less is no-op per sentry.*.config + env audit).
-          Sentry.captureMessage(`Web Vital: ${name}`, {
+          // Graceful: no-op when Sentry DSN unset (per sentry.*.config guards).
+          Sentry.captureMessage('Web Vitals', {
             level: 'info',
-            tags: {
-              vital: name,
-              page: window.location?.pathname || 'unknown',
-              source: 'rum-siteclient',
-            },
+            tags: { page: window.location?.pathname || 'unknown', source: 'rum-siteclient' },
             extra: {
-              value: display,
-              rawValue: value,
-              ...details,
+              LCP: vitals.LCP != null ? Math.round(vitals.LCP) : undefined,
+              CLS: vitals.CLS != null ? Number(vitals.CLS.toFixed(3)) : undefined,
+              INP: vitals.INP != null ? Math.round(vitals.INP) : undefined,
               url: window.location?.href,
               ts: Date.now(),
             },
@@ -85,6 +91,10 @@ export default function SiteClient() {
           // Degrade silently (no Sentry DSN or runtime block).
         }
       };
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') flushVitals();
+      });
+      window.addEventListener('pagehide', flushVitals);
 
       // LCP (Largest Contentful Paint) — primary perf metric from audit (hero driven).
       try {

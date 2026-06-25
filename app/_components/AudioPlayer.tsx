@@ -46,13 +46,7 @@ export default function AudioPlayer({ src, title, episodeId, meta, previewSecond
   const [gated, setGated] = useState(false);
   const storeKey = `colony:resume:${episodeId}`;
 
-  // Read latest membership inside event handlers without re-binding listeners.
-  const isMemberRef = useRef(false);
-  isMemberRef.current = isMember;
-  const cap = previewSeconds;
-  const gatedFor = (t: number) => !isMemberRef.current && cap > 0 && t >= cap;
-
-  useEffect(() => { if (isMember) setGated(false); }, [isMember]);
+  const gatedFor = useCallback((t: number) => !isMember && previewSeconds > 0 && t >= previewSeconds, [isMember, previewSeconds]);
 
   // Expose audio element to parent (e.g. EpisodePlayer for WebAudio visualizer + dual-source sync).
   // Runs after mount so ref is populated; cleans on unmount or prop change.
@@ -105,7 +99,7 @@ export default function AudioPlayer({ src, title, episodeId, meta, previewSecond
       if (gatedFor(el.currentTime)) { setGated(true); return; }
       void el.play();
     } else el.pause();
-  }, []);
+  }, [gatedFor]);
 
   const cycleSpeed = useCallback(() => {
     const el = ref.current;
@@ -114,6 +108,11 @@ export default function AudioPlayer({ src, title, episodeId, meta, previewSecond
     el.playbackRate = next;
     setSpeed(next);
   }, [speed]);
+
+  const gatedForRef = useRef(gatedFor);
+  const previewRef = useRef(previewSeconds);
+  useEffect(() => { gatedForRef.current = gatedFor; });
+  useEffect(() => { previewRef.current = previewSeconds; });
 
   // Restore saved position once metadata (duration) is known.
   useEffect(() => {
@@ -127,10 +126,10 @@ export default function AudioPlayer({ src, title, episodeId, meta, previewSecond
     };
     const onTime = () => {
       setTime(el.currentTime);
-      if (gatedFor(el.currentTime)) {
+      if (gatedForRef.current(el.currentTime)) {
         el.pause();
-        el.currentTime = cap;
-        setTime(cap);
+        el.currentTime = previewRef.current;
+        setTime(previewRef.current);
         setGated(true);
       }
     };
@@ -146,7 +145,7 @@ export default function AudioPlayer({ src, title, episodeId, meta, previewSecond
       el.removeEventListener("play", onPlay);
       el.removeEventListener("pause", onPause);
     };
-  }, [storeKey]);
+  }, [storeKey, setGated, setTime, setPlaying, setDuration, setReady]);
 
   // Persist position (throttled) + on page hide.
   useEffect(() => {
@@ -162,7 +161,7 @@ export default function AudioPlayer({ src, title, episodeId, meta, previewSecond
     const el = ref.current;
     if (!el) return;
     let value = Number(e.target.value);
-    if (!isMemberRef.current && cap > 0 && value > cap) value = cap; // can't seek past the preview
+    if (!isMember && previewSeconds > 0 && value > previewSeconds) value = previewSeconds; // can't seek past the preview
     el.currentTime = value;
   };
 

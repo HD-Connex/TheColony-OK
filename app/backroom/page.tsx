@@ -139,17 +139,21 @@ export default function BackroomPage() {
 
   // Initial load + when current thread changes
   useEffect(() => {
-    if (isMember) {
-      void loadThreads();
-    }
+    let active = true;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (isMember && active) void loadThreads();
+    return () => { active = false; };
   }, [isMember, loadThreads]);
 
   useEffect(() => {
+    let active = true;
     if (currentThreadId) {
-      void loadPosts(currentThreadId);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      if (active) void loadPosts(currentThreadId);
     } else {
       setPosts([]);
     }
+    return () => { active = false; };
   }, [currentThreadId, loadPosts]);
 
   // Create new thread (title only; posts follow)

@@ -40,9 +40,8 @@ export default function LivePoll({ poll, isMember, currentUserId }: LivePollProp
   // so is_active/closes etc update on live_polls changes (for /live sidebar static poll + stage).
   // Complements LiveStage's live-poll-active- sub and votes sub here. Kills stale poll UI.
   const [currentPoll, setCurrentPoll] = useState<Poll>(poll);
-  useEffect(() => {
-    setCurrentPoll(poll);
-  }, [poll]);
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { setCurrentPoll(poll); }, [poll]);
 
   const total = Object.values(votes).reduce((a, b) => a + b, 0);
 
@@ -87,8 +86,10 @@ export default function LivePoll({ poll, isMember, currentUserId }: LivePollProp
   }, [poll.id, currentUserId, sb]);
 
   useEffect(() => {
+    let active = true;
     mountedRef.current = true;
-    void loadVotes();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (active) void loadVotes();
 
     let channel: any = null;
     let activeChannel: any = null;
@@ -101,18 +102,16 @@ export default function LivePoll({ poll, isMember, currentUserId }: LivePollProp
         })
         .subscribe();
 
-      // P2-16: live-poll-active channel on live_polls (per target like LiveStage) so this LivePoll reacts to poll activate/deactivate/close realtime
       activeChannel = sb
         .channel(`live-poll-active-${targetLiveId ?? "global"}`)
         .on("postgres_changes", { event: "*", schema: "public", table: "live_polls", filter: targetLiveId ? `live_event_id=eq.${targetLiveId}` : "live_event_id=is.null" }, async () => {
-          // refetch our specific poll row to sync is_active/closes etc into local state (updates disabled state, UI)
           try {
             const { data } = await sb
               .from("live_polls")
               .select("id,live_event_id,question,options,is_active,closes_at")
               .eq("id", poll.id)
               .maybeSingle();
-            if (data && mountedRef.current) {
+            if (data && active) {
               const raw = data as any;
               const options = Array.isArray(raw.options) ? raw.options.map((o: any) => (typeof o === "string" ? o : o.label)) : [];
               setCurrentPoll({
@@ -130,6 +129,7 @@ export default function LivePoll({ poll, isMember, currentUserId }: LivePollProp
     } catch {}
 
     return () => {
+      active = false;
       mountedRef.current = false;
       if (channel) {
         try { sb.removeChannel(channel); } catch {}
@@ -138,7 +138,7 @@ export default function LivePoll({ poll, isMember, currentUserId }: LivePollProp
         try { sb.removeChannel(activeChannel); } catch {}
       }
     };
-  }, [poll.id, currentUserId, sb, loadVotes]);
+  }, [poll.id, poll.live_event_id, currentUserId, sb, loadVotes]);
 
   async function vote(optionIdx: number) {
     if (!isMember || !currentUserId || userVote !== null || !currentPoll.is_active) return;

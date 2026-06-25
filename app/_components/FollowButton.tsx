@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { supabaseBrowser } from "@/lib/auth-client";
 
 /**
@@ -23,43 +23,49 @@ export default function FollowButton({ contributorId, className, compact }: Foll
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchStatus = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const { data } = await supabaseBrowser().auth.getSession();
-      const token = data.session?.access_token;
-      if (!token) {
-        setFollowing(false);
-        return;
-      }
-
-      const res = await fetch(`/api/contributors/follow?contributorId=${encodeURIComponent(contributorId)}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      if (res.status === 401) {
-        setFollowing(false);
-        return;
-      }
-
-      const json = await res.json();
-      if (!res.ok) {
-        setError(json.error ?? "Could not load follow status.");
-        return;
-      }
-
-      setFollowing(Boolean(json.following));
-    } catch {
-      setError("Could not load follow status.");
-    } finally {
-      setLoading(false);
-    }
-  }, [contributorId]);
-
   useEffect(() => {
-    fetchStatus();
-  }, [fetchStatus]);
+    let active = true;
+    setLoading(true); // eslint-disable-line react-hooks/set-state-in-effect
+    setError(null);
+
+    (async () => {
+      try {
+        const { data } = await supabaseBrowser().auth.getSession();
+        const token = data.session?.access_token;
+        if (!token) {
+          if (!active) return;
+          setFollowing(false);
+          return;
+        }
+
+        const res = await fetch(`/api/contributors/follow?contributorId=${encodeURIComponent(contributorId)}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (!active) return;
+        if (res.status === 401) {
+          setFollowing(false);
+          return;
+        }
+
+        const json = await res.json();
+        if (!res.ok) {
+          setError(json.error ?? "Could not load follow status.");
+          return;
+        }
+
+        setFollowing(Boolean(json.following));
+      } catch {
+        if (!active) return;
+        setError("Could not load follow status.");
+      } finally {
+        if (!active) return;
+        setLoading(false);
+      }
+    })();
+
+    return () => { active = false; };
+  }, [contributorId]);
 
   async function handleClick() {
     setPending(true);

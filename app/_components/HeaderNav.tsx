@@ -6,6 +6,46 @@ import { usePathname } from "next/navigation";
 
 type NavItem = { href: string; label: string };
 
+type DropdownProps = { id: string; label: string; items: NavItem[]; isOpen: boolean; onToggle: (id: string | null) => void; isActive: (href: string) => boolean; closeAll: () => void };
+
+function Dropdown({ id, label, items, isOpen, onToggle, isActive, closeAll }: DropdownProps) {
+  const hasActive = items.some((i) => isActive(i.href));
+
+  return (
+    <div
+      className="nav__dropdown"
+      onMouseEnter={() => onToggle(id)}
+      onMouseLeave={() => onToggle(null)}
+    >
+      <button
+        type="button"
+        className={`nav__link nav__dropdown-trigger ${hasActive ? "nav__link--active" : ""}`}
+        onClick={() => onToggle(isOpen ? null : id)}
+        aria-expanded={isOpen}
+        aria-haspopup="true"
+      >
+        {label} <span className="nav__caret">▾</span>
+      </button>
+      <div
+        className={`nav__dropdown-menu ${isOpen ? "is-open" : ""}`}
+        role="menu"
+      >
+        {items.map((item) => (
+          <Link
+            key={item.href}
+            href={item.href}
+            className={`nav__dropdown-item ${isActive(item.href) ? "active" : ""}`}
+            onClick={closeAll}
+            role="menuitem"
+          >
+            {item.label}
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function HeaderNav() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
@@ -51,50 +91,7 @@ export default function HeaderNav() {
     { href: "/backroom", label: "Backroom" },
   ];
 
-  const Dropdown = ({ id, label, items }: { id: string; label: string; items: NavItem[] }) => {
-    const isOpen = openDropdown === id;
-    const hasActive = items.some((i) => isActive(i.href));
 
-    return (
-      <div
-        className="nav__dropdown"
-        onMouseEnter={() => setOpenDropdown(id)}
-        onMouseLeave={() => setOpenDropdown(null)}
-      >
-        <button
-          type="button"
-          className={`nav__link nav__dropdown-trigger ${hasActive ? "nav__link--active" : ""}`}
-          onClick={() => setOpenDropdown(isOpen ? null : id)}
-          aria-expanded={isOpen}
-          aria-haspopup="true"
-        >
-          {label} <span className="nav__caret">▾</span>
-        </button>
-        {/* Menu content is always rendered (for reliable CSS :hover on desktop).
-            Visibility is controlled by CSS:
-            - Base: display:none (add this if not present)
-            - Desktop hover: .nav__dropdown:hover .nav__dropdown-menu { display:block }
-            - JS open state: .is-open class also forces display:block (for click toggle / a11y)
-            This makes dropdowns "actually working" on desktop even if mouse events have any timing quirk. */}
-        <div
-          className={`nav__dropdown-menu ${isOpen ? "is-open" : ""}`}
-          role="menu"
-        >
-          {items.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`nav__dropdown-item ${isActive(item.href) ? "active" : ""}`}
-              onClick={closeAll}
-              role="menuitem"
-            >
-              {item.label}
-            </Link>
-          ))}
-        </div>
-      </div>
-    );
-  };
 
   // Desktop: full tabs + dropdowns visible. Hamburger + mobile ONLY on small screens.
   // P2-16 mobile nav polish: ALWAYS render the .nav__mobile drawer in DOM (SSR safe, no conditional on isMobile).
@@ -126,9 +123,9 @@ export default function HeaderNav() {
               {item.label}
             </Link>
           ))}
-          <Dropdown id="media" label="Media" items={mediaItems} />
-          <Dropdown id="local" label="Local" items={localItems} />
-          <Dropdown id="community" label="Community" items={communityItems} />
+          <Dropdown id="media" label="Media" items={mediaItems} isOpen={openDropdown === "media"} onToggle={setOpenDropdown} isActive={isActive} closeAll={closeAll} />
+          <Dropdown id="local" label="Local" items={localItems} isOpen={openDropdown === "local"} onToggle={setOpenDropdown} isActive={isActive} closeAll={closeAll} />
+          <Dropdown id="community" label="Community" items={communityItems} isOpen={openDropdown === "community"} onToggle={setOpenDropdown} isActive={isActive} closeAll={closeAll} />
         </div>
 
         <div className="nav__actions">
