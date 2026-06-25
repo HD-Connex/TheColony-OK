@@ -2,6 +2,18 @@
 // Returns a validated URL object (fetch THAT object, not the raw string, so the
 // taint-tracker sees the value pass through this barrier). Rejects non-HTTP(S)
 // schemes and hosts that point at the local network / cloud metadata.
+// Also enforces an explicit hostname allow-list for outbound media fetches.
+
+const ALLOWED_MEDIA_HOSTS = (process.env.ALLOWED_TRANSCRIBE_MEDIA_HOSTS || "")
+  .split(",")
+  .map((h) => h.trim().toLowerCase())
+  .filter(Boolean);
+
+function isAllowedHost(hostname: string): boolean {
+  if (ALLOWED_MEDIA_HOSTS.length === 0) return false;
+  const host = hostname.toLowerCase();
+  return ALLOWED_MEDIA_HOSTS.some((allowed) => host === allowed || host.endsWith(`.${allowed}`));
+}
 
 function isBlockedIpv4(host: string): boolean {
   const m = host.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
@@ -52,6 +64,9 @@ export function assertPublicHttpUrl(raw: string): URL {
   }
   if (u.protocol !== "https:" && u.protocol !== "http:") {
     throw new Error(`Unsupported URL scheme: ${u.protocol}`);
+  }
+  if (!isAllowedHost(u.hostname)) {
+    throw new Error("URL host is not in allow-list");
   }
   if (isBlockedHost(u.hostname)) {
     throw new Error("URL host is not allowed");
