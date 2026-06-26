@@ -1,4 +1,7 @@
-import { createClient, SupabaseClient } from "@supabase/supabase-js";
+import { createClient, SupabaseClient, type WebSocketLikeConstructor } from "@supabase/supabase-js";
+import ws from "ws";
+
+const wsTransport = ws as unknown as WebSocketLikeConstructor;
 
 let admin: SupabaseClient | null = null;
 let pub: SupabaseClient | null = null;
@@ -38,7 +41,7 @@ export function supabaseAdmin(): SupabaseClient {
   if (!url || !key) {
     throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY");
   }
-  admin = createClient(url, key, { auth: { persistSession: false } });
+  admin = createClient(url, key, { auth: { persistSession: false }, realtime: { transport: wsTransport } });
   return admin;
 }
 
@@ -68,10 +71,11 @@ export function supabasePublic(): SupabaseClient {
     // Safe placeholder so pages/components using supabasePublic() don't explode before hydration or in partial envs.
     pub = createClient("https://placeholder.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsYWNlaG9sZGVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTAwMDAwMDAsImV4cCI6MjAwMDAwMDAwMH0.placeholder", {
       auth: { persistSession: false },
+      realtime: { transport: wsTransport },
     });
     return pub;
   }
-  pub = createClient(url, key, { auth: { persistSession: false } });
+  pub = createClient(url, key, { auth: { persistSession: false }, realtime: { transport: wsTransport } });
   return pub;
 }
 
@@ -85,8 +89,8 @@ export function supabaseConfigured(): boolean {
 }
 
 /**
- * Convenience singleton export for legacy / docs compatibility ("export const supabase = supabasePublic()").
+ * Tolerant singleton for legacy / docs compatibility ("export const supabase = supabasePublic()").
+ * Returns null at module evaluation time if env vars are missing (build-safe).
  * Prefer explicit supabasePublic() or supabaseAdmin() calls for clarity.
- * (Created lazily on first access via the function.)
  */
-export const supabase = supabasePublic();
+export const supabase: SupabaseClient | null = supabaseConfigured() ? supabasePublic() : null;

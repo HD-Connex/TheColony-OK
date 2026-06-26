@@ -31,12 +31,15 @@ CREATE POLICY "video_episodes_public_read" ON public.video_episodes
 DROP POLICY IF EXISTS "comments_owner_all" ON public.threaded_comments;
 DROP POLICY IF EXISTS "comments_member_insert" ON public.threaded_comments;
 
+DROP POLICY IF EXISTS "comments_owner_update" ON public.threaded_comments;
 CREATE POLICY "comments_owner_update" ON public.threaded_comments
   FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "comments_owner_delete" ON public.threaded_comments;
 CREATE POLICY "comments_owner_delete" ON public.threaded_comments
   FOR DELETE USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "comments_member_insert" ON public.threaded_comments;
 CREATE POLICY "comments_member_insert" ON public.threaded_comments
   FOR INSERT WITH CHECK (
     auth.uid() = user_id AND

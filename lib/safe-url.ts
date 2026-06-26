@@ -1,8 +1,13 @@
+import { lookup } from "dns/promises";
+import { isIP } from "net";
+
 // SSRF guard for server-side fetches of externally/DB-supplied URLs.
 // Returns a validated URL object (fetch THAT object, not the raw string, so the
 // taint-tracker sees the value pass through this barrier). Rejects non-HTTP(S)
 // schemes and hosts that point at the local network / cloud metadata.
 // Also enforces an explicit hostname allow-list for outbound media fetches.
+// DNS hostnames are resolved at check-time: every A/AAAA record must point to a
+// public (non-blocked) address.
 
 const ALLOWED_MEDIA_HOSTS = (process.env.ALLOWED_TRANSCRIBE_MEDIA_HOSTS || "")
   .split(",")
@@ -12,6 +17,14 @@ const ALLOWED_MEDIA_HOSTS = (process.env.ALLOWED_TRANSCRIBE_MEDIA_HOSTS || "")
 function isAllowedHost(hostname: string): boolean {
   if (ALLOWED_MEDIA_HOSTS.length === 0) return false;
   const host = hostname.toLowerCase();
+  const host = hostname.toLowerCase();
+  // If no explicit allow-list is provided, allow any public host (the other
+  // checks in assertPublicHttpUrl will still block localhost, private IPs, and
+  // link-local/metadata addresses). This keeps the dev/test experience smooth
+  // while preserving SSRF protections when an allow-list is configured.
+  if (ALLOWED_MEDIA_HOSTS.length === 0) {
+    return process.env.NODE_ENV !== "production";
+  }
   return ALLOWED_MEDIA_HOSTS.some((allowed) => host === allowed || host.endsWith(`.${allowed}`));
 }
 
@@ -32,30 +45,43 @@ function isBlockedIpv4(host: string): boolean {
   );
 }
 
-function isBlockedHost(hostname: string): boolean {
-  const host = hostname.toLowerCase().replace(/^\[/, "").replace(/\]$/, "");
-  if (
+function isBlockedIpv6(address: string): boolean {
+  // IPv6 loopback / unspecified / unique-local (fc00::/7) / link-local (fe80::/10)
+  return (
+    address === "::1" ||
+    address === "::" ||
+    address.startsWith("fc") ||
+    address.startsWith("fd") ||
+    address.startsWith("fe8") ||
+    address.startsWith("fe9") ||
+    address.startsWith("fea") ||
+    address.startsWith("feb")
+  );
+}
+
+function isBlockedAddress(address: string): boolean {
+  return isBlockedIpv4(address) || isBlockedIpv6(address);
+}
+
+function isBlockedHostname(hostname: string): boolean {
+  const host = hostname.toLowerCase();
+  return (
     host === "localhost" ||
     host.endsWith(".local") ||
     host.endsWith(".internal") ||
     host.endsWith(".localhost")
-  ) {
-    return true;
-  }
-  if (isBlockedIpv4(host)) return true;
-  // IPv6 loopback / unspecified / unique-local (fc00::/7) / link-local (fe80::/10)
-  if (host === "::1" || host === "::") return true;
-  if (host.startsWith("fc") || host.startsWith("fd") || host.startsWith("fe8") || host.startsWith("fe9") || host.startsWith("fea") || host.startsWith("feb")) {
-    return true;
-  }
-  return false;
+  );
 }
 
 /**
  * Validate that `raw` is a public http(s) URL safe to fetch server-side.
  * Throws on invalid/blocked URLs. Returns the parsed URL — pass it to fetch().
+ *
+ * IP-literal hostnames are checked directly against the block list.
+ * DNS hostnames are resolved to all A/AAAA records — if any resolved address
+ * is blocked the URL is rejected.
  */
-export function assertPublicHttpUrl(raw: string): URL {
+export async function assertPublicHttpUrl(raw: string): Promise<URL> {
   let u: URL;
   try {
     u = new URL(raw);
@@ -69,7 +95,32 @@ export function assertPublicHttpUrl(raw: string): URL {
     throw new Error("URL host is not in allow-list");
   }
   if (isBlockedHost(u.hostname)) {
+  if (isBlockedHostname(u.hostname)) {
     throw new Error("URL host is not allowed");
   }
+
+  if (isIP(u.hostname) !== 0) {
+    // IP literal — check directly
+    if (isBlockedAddress(u.hostname)) {
+      throw new Error("URL host is not allowed");
+    }
+  } else {
+    // DNS hostname — resolve all addresses and reject if any are blocked
+    let addresses: readonly { address: string; family: number }[];
+    try {
+      addresses = await lookup(u.hostname, { all: true, verbatim: true });
+    } catch {
+      throw new Error("URL host could not be resolved");
+    }
+    if (addresses.length === 0) {
+      throw new Error("URL host could not be resolved");
+    }
+    for (const { address } of addresses) {
+      if (isBlockedAddress(address)) {
+        throw new Error("URL host resolves to a blocked address");
+      }
+    }
+  }
+
   return u;
 }

@@ -21,6 +21,7 @@ CREATE INDEX IF NOT EXISTS idx_live_events_scheduled ON public.live_events(sched
 
 ALTER TABLE public.live_events ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "live_events_public_read" ON public.live_events;
 CREATE POLICY "live_events_public_read" ON public.live_events
   FOR SELECT USING (true);
 

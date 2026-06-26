@@ -174,10 +174,13 @@ a.miniplayer__title:hover {
 }
 .miniplayer__scrubber {
   width: 100%;
-  height: 3px;
-  margin-top: 4px;
+  /* Taller element = easier to grab on touch; the visual track stays slim via
+     the UA range styling + accent-color. */
+  height: 20px;
+  margin-top: 2px;
   accent-color: var(--color-alarm);
   cursor: pointer;
+  touch-action: manipulation;
 }
 
 /* Per-row "send to mini-player" action in the episode library. */
