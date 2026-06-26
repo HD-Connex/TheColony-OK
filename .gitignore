@@ -20,6 +20,9 @@ terminals/
 
 .claude/
 .serena/
+.config/
+bun.lock
+test-results/
 
 # nested repo
 thecolony-app/
