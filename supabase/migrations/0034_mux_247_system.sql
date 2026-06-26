@@ -156,10 +156,20 @@ CREATE INDEX IF NOT EXISTS idx_playback_sessions_playback_id ON public.playback_
 CREATE INDEX IF NOT EXISTS idx_playback_sessions_viewer ON public.playback_sessions(viewer_id);
 CREATE INDEX IF NOT EXISTS idx_playback_sessions_start ON public.playback_sessions(session_start DESC);
 
--- Enable Realtime on the schedule and program tables
-ALTER PUBLICATION supabase_realtime ADD TABLE public.programs;
-ALTER PUBLICATION supabase_realtime ADD TABLE public.schedules;
-ALTER PUBLICATION supabase_realtime ADD TABLE public.player_configs;
+-- Enable Realtime on the schedule and program tables (idempotent)
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_publication_tables WHERE pubname = 'supabase_realtime' AND schemaname = 'public' AND tablename = 'programs') THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.programs;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_publication_tables WHERE pubname = 'supabase_realtime' AND schemaname = 'public' AND tablename = 'schedules') THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.schedules;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_publication_tables WHERE pubname = 'supabase_realtime' AND schemaname = 'public' AND tablename = 'player_configs') THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.player_configs;
+  END IF;
+END;
+$$;
 
 -- ── 3. Views ──
 
@@ -224,8 +234,10 @@ LIMIT 5;
 
 -- Programs: public read for active, admin write
 ALTER TABLE public.programs ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS programs_public_read ON public.programs;
 CREATE POLICY programs_public_read ON public.programs
   FOR SELECT USING (status = 'active');
+DROP POLICY IF EXISTS programs_admin_all ON public.programs;
 CREATE POLICY programs_admin_all ON public.programs
   FOR ALL USING (
     auth.role() = 'service_role' OR
@@ -234,8 +246,10 @@ CREATE POLICY programs_admin_all ON public.programs
 
 -- Schedules: public read for active, admin write
 ALTER TABLE public.schedules ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS schedules_public_read ON public.schedules;
 CREATE POLICY schedules_public_read ON public.schedules
   FOR SELECT USING (is_active = true);
+DROP POLICY IF EXISTS schedules_admin_all ON public.schedules;
 CREATE POLICY schedules_admin_all ON public.schedules
   FOR ALL USING (
     auth.role() = 'service_role' OR
@@ -244,8 +258,10 @@ CREATE POLICY schedules_admin_all ON public.schedules
 
 -- Player configs: public read, admin write
 ALTER TABLE public.player_configs ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS player_configs_public_read ON public.player_configs;
 CREATE POLICY player_configs_public_read ON public.player_configs
   FOR SELECT USING (true);
+DROP POLICY IF EXISTS player_configs_admin_all ON public.player_configs;
 CREATE POLICY player_configs_admin_all ON public.player_configs
   FOR ALL USING (
     auth.role() = 'service_role' OR
@@ -254,8 +270,10 @@ CREATE POLICY player_configs_admin_all ON public.player_configs
 
 -- Playback sessions: insert any, read own, admin read all
 ALTER TABLE public.playback_sessions ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS playback_sessions_insert ON public.playback_sessions;
 CREATE POLICY playback_sessions_insert ON public.playback_sessions
   FOR INSERT WITH CHECK (true);
+DROP POLICY IF EXISTS playback_sessions_read_own ON public.playback_sessions;
 CREATE POLICY playback_sessions_read_own ON public.playback_sessions
   FOR SELECT USING (
     viewer_id = auth.uid() OR
@@ -266,18 +284,22 @@ CREATE POLICY playback_sessions_read_own ON public.playback_sessions
 
 -- mux schema tables: service_role only
 ALTER TABLE mux.assets ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS mux_service_role ON mux.assets;
 CREATE POLICY mux_service_role ON mux.assets
   FOR ALL USING (auth.role() = 'service_role');
 
 ALTER TABLE mux.live_streams ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS mux_ls_service_role ON mux.live_streams;
 CREATE POLICY mux_ls_service_role ON mux.live_streams
   FOR ALL USING (auth.role() = 'service_role');
 
 ALTER TABLE mux.uploads ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS mux_uploads_service_role ON mux.uploads;
 CREATE POLICY mux_uploads_service_role ON mux.uploads
   FOR ALL USING (auth.role() = 'service_role');
 
 ALTER TABLE mux.events ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS mux_events_service_role ON mux.events;
 CREATE POLICY mux_events_service_role ON mux.events
   FOR ALL USING (auth.role() = 'service_role');
 
@@ -294,12 +316,12 @@ AS $$
 DECLARE
   current_max INTEGER;
 BEGIN
-  SELECT COALESCE(MAX(position), 0) + 1 INTO current_max FROM public.schedules WHERE is_active = true;
+  SELECT COALESCE(MAX("position"), 0) + 1 INTO current_max FROM public.schedules WHERE is_active = true;
   UPDATE public.schedules
-  SET position = position + 1
-  WHERE is_active = true;
+  SET "position" = "position" + 1
+  WHERE is_active = true AND program_id <> target_program_id;
   UPDATE public.schedules
-  SET position = 1
+  SET "position" = 1
   WHERE program_id = target_program_id AND is_active = true;
 END;
 $$;
@@ -314,7 +336,7 @@ RETURNS TABLE(
   duration_seconds DOUBLE PRECISION,
   fallback_playback_id TEXT,
   is_premium BOOLEAN,
-  position INTEGER
+  "position" INTEGER
 )
 LANGUAGE plpgsql
 STABLE
@@ -330,12 +352,12 @@ BEGIN
     COALESCE(s.duration_override, p.duration_seconds, 0),
     p.fallback_playback_id,
     p.is_premium,
-    s.position
+    s."position"
   FROM public.schedules s
   JOIN public.programs p ON p.id = s.program_id
   WHERE s.is_active = true AND p.status = 'active'
-    AND s.position > current_position
-  ORDER BY s.position
+    AND s."position" > current_position
+  ORDER BY s."position"
   LIMIT 1;
 END;
 $$;

@@ -136,7 +136,7 @@ export default function EliteMux24x7Player({
       const r = retryRef.current;
       r.lastError = error?.message ?? "Unknown error";
 
-      analytics.onError(r.lastError);
+      analytics.onError(r.lastError ?? "unknown");
 
       setResilience((prev) => ({
         ...prev,
@@ -337,7 +337,7 @@ export default function EliteMux24x7Player({
           preload="auto"
           poster={resolvedThumbnail}
           placeholder={resolvedThumbnail}
-          preferredRendition="highest"
+          maxResolution="2160p"
           accentColor="#EC1024"
           defaultHiddenCaptions
           onPlaying={onPlaying}

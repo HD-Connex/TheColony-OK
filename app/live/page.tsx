@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import dynamic from "next/dynamic";
 import Image from "next/image";
 import Breadcrumbs from "../_components/Breadcrumbs";
 import PageHeader from "../_components/PageHeader";
@@ -7,6 +8,8 @@ import JsonLd from "../_components/JsonLd";
 import Countdown from "../_components/Countdown";
 import LiveStageMount from "../_components/LiveStageMount";
 import { type StageItem } from "../_components/LiveStage";
+
+const EliteMux24x7Player = dynamic(() => import("../_components/EliteMux24x7Player"), { ssr: false });
 import LivePlatformTabs from "../_components/LivePlatformTabs";
 import ClipsTeaser from "../_components/ClipsTeaser";
 import LiveChat from "../_components/LiveChat";
@@ -94,12 +97,16 @@ export default async function LivePage({
                 internally. Wrapping the whole stage in an aspect-ratio box clipped/overflowed
                 the header+queue+interactivity on mobile. */}
             <div className="live-stage-host">
-              <LiveStageMount
-                items={items}
-                initialActiveId={live[0]?.id ?? null}
-                prefer247={prefer247}
-                hideInteractivity
-              />
+              {prefer247 ? (
+                <EliteMux24x7Player />
+              ) : (
+                <LiveStageMount
+                  items={items}
+                  initialActiveId={live[0]?.id ?? null}
+                  prefer247={prefer247}
+                  hideInteractivity
+                />
+              )}
             </div>
 
             <div className="live-sidebar">
