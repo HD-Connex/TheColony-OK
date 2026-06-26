@@ -59,7 +59,7 @@ export default function LiveStage({ items: initialItems = [], initialActiveId, c
   const [viewerCount, setViewerCount] = useState(0);
   // Sync default guarantees 24/7 playbackSrc on first render (no flash of off-air when no live events or async env).
   // getCurrentLiveChannel enriches with currentProgram when available.
-  // Jake Merrick YouTube demo stream (JAKE_MERRICK_STREAMS_URL) is the permanent primary for is247 fallback.
+  // Jake Merrick YouTube demo stream (JAKE_MERRICK_CHANNEL_URL) is the permanent primary for is247 fallback.
   const [channel247, setChannel247] = useState<Live247Channel | null>(COLONY_247);
   const [activePoll, setActivePoll] = useState<Poll | null>(null);
   const [demoReelActive, setDemoReelActive] = useState(false);
