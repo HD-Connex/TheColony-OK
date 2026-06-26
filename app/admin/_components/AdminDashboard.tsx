@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, useRef } from "react";
 
 type Role = "admin" | "editor" | "contributor" | "member";
 
@@ -483,6 +483,65 @@ export default function AdminDashboard({ currentUserRole }: Props) {
       )}
 
       <p style={{ marginTop: 32 }} className="fine-print">All actions call server routes that re-validate requireAdmin. Middleware is only a hint.</p>
+    </div>
+  );
+}
+
+function AdminContentUpload({ onSaved }: { onSaved: () => void }) {
+  const [file, setFile] = useState<File | null>(null);
+  const [folder, setFolder] = useState("images");
+  const [uploading, setUploading] = useState(false);
+  const [result, setResult] = useState<string | null>(null);
+
+  async function handleUpload() {
+    if (!file) return;
+    setUploading(true);
+    setResult(null);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      fd.append("folder", folder);
+      const headers: Record<string, string> = {};
+      try {
+        const { supabaseBrowser } = await import("@/lib/auth-client");
+        const { data } = await supabaseBrowser().auth.getSession();
+        const token = data.session?.access_token;
+        if (token) headers["Authorization"] = `Bearer ${token}`;
+      } catch {}
+      const res = await fetch("/api/admin/upload", { method: "POST", headers, body: fd });
+      const json = await res.json();
+      if (res.ok) {
+        setResult(json.url);
+        onSaved();
+      } else {
+        setResult(`Error: ${json.error}`);
+      }
+    } catch (e) {
+      setResult(`Error: ${e}`);
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  return (
+    <div style={{ border: "3px solid #111", padding: 12, background: "#fff", marginBottom: 16 }}>
+      <input type="file" onChange={(e) => setFile(e.target.files?.[0] || null)} style={{ marginBottom: 6 }} />
+      <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 6 }}>
+        <select value={folder} onChange={(e) => setFolder(e.target.value)}>
+          <option value="images">images</option>
+          <option value="audio">audio</option>
+          <option value="video">video</option>
+          <option value="pdf">pdf</option>
+          <option value="uploads">uploads</option>
+        </select>
+        <button onClick={handleUpload} disabled={!file || uploading} className="btn btn--primary">{uploading ? "Uploading..." : "Upload"}</button>
+      </div>
+      {result && (
+        <div>
+          <p className="fine-print">Result:</p>
+          <input readOnly value={result} style={{ width: "100%" }} onClick={(e) => e.currentTarget.select()} />
+        </div>
+      )}
     </div>
   );
 }
