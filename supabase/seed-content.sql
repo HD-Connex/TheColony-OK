@@ -104,7 +104,7 @@ INSERT INTO public.episodes (id, show_id, show_slug, guid, slug, title, descript
 SELECT 'c5555555-5555-4555-8555-555555555555'::uuid, s.id, s.slug, 'seed:colony-report:mux-demo', 'mux-demo',
   'Ep. 44 — Mux HLS Test Broadcast',
   'Demo episode using mux_playback_id path. Pipeline jobs report from the patch.',
-  'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3', NULL, 'muxseed001colony', 'https://images.pexels.com/photos/3756697/pexels-photo-3756697.jpeg?auto=compress&cs=tinysrgb&w=800',
+  'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3', NULL, NULL, 'https://images.pexels.com/photos/3756697/pexels-photo-3756697.jpeg?auto=compress&cs=tinysrgb&w=800',
   '[{"t":0,"label":"Intro"},{"t":120,"label":"Energy Patch Update"},{"t":480,"label":"Q&A from Members"}]'::jsonb,
   'Jake Merrick', 1320, 44, now() - interval '3 days'
 FROM public.shows s WHERE s.slug = 'colony-report'
@@ -124,7 +124,7 @@ INSERT INTO public.episodes (id, show_id, show_slug, guid, slug, title, descript
 SELECT gen_random_uuid(), s.id, s.slug, 'seed:faith-and-freedom:ep-020', 'ep-020',
   'Ep. 020 — Faith in the Schoolhouse',
   'Parents, pastors, and the 2026 curriculum fights. Live clips from Lawton and Edmond.',
-  'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3', NULL, 'muxseed002faith', 'https://images.pexels.com/photos/3756697/pexels-photo-3756697.jpeg?auto=compress&cs=tinysrgb&w=800',
+  'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3', NULL, NULL, 'https://images.pexels.com/photos/3756697/pexels-photo-3756697.jpeg?auto=compress&cs=tinysrgb&w=800',
   '[{"t":0,"label":"Opening Prayer"},{"t":90,"label":"Lawton Town Hall"},{"t":600,"label":"Call to Action"}]'::jsonb,
   'Pastor Dan Hollis', 2700, 20, now() - interval '1 day'
 FROM public.shows s WHERE s.slug = 'faith-and-freedom'
@@ -165,7 +165,7 @@ INSERT INTO public.episodes (id, show_id, show_slug, guid, slug, title, descript
 SELECT gen_random_uuid(), s.id, s.slug, 'seed:oklahoma-underground:ep-015', 'ep-015',
   'Ep. 015 — Lobbyist Shells in the Oil Patch',
   'How out-of-state firms hide influence in energy policy. Maps, LLCs, and midnight amendments.',
-  'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3', NULL, 'muxseed003underground', NULL, NULL,
+  'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3', NULL, NULL, NULL, NULL,
   'Rachel Torres', 2400, 15, now() - interval '7 days'
 FROM public.shows s WHERE s.slug = 'oklahoma-underground'
   AND NOT EXISTS (SELECT 1 FROM public.episodes e WHERE e.show_slug='oklahoma-underground' AND e.slug='ep-015');
@@ -308,7 +308,7 @@ FROM public.series ser WHERE ser.slug = 'colony-report'
 
 INSERT INTO public.video_episodes (id, series_id, slug, title, description, season_number, episode_number, status, tier_required, mux_playback_id, duration_seconds, thumbnail_url, video_url, badges, chapters, published_at)
 SELECT 'e2222222-2222-4222-8222-222222222222'::uuid, ser.id, 'ep-102-members', 'Ep. 102 — Members Deep Dive', 'Extended cut. The lobbyist network and who really wrote the carve-outs.',
-  1, 102, 'published', 'settler', 'muxseed101colony', 3600, 'https://images.pexels.com/photos/3756697/pexels-photo-3756697.jpeg?auto=compress&cs=tinysrgb&w=800', NULL, '["members-only"]'::jsonb, NULL,
+  1, 102, 'published', 'settler', NULL, 3600, 'https://images.pexels.com/photos/3756697/pexels-photo-3756697.jpeg?auto=compress&cs=tinysrgb&w=800', NULL, '["members-only"]'::jsonb, NULL,
   now() - interval '4 days'
 FROM public.series ser WHERE ser.slug = 'colony-report'
   AND NOT EXISTS (SELECT 1 FROM public.video_episodes ve WHERE ve.series_id = ser.id AND ve.slug = 'ep-102-members');
@@ -323,7 +323,7 @@ FROM public.series ser WHERE ser.slug = 'faith-and-freedom'
 
 INSERT INTO public.video_episodes (id, series_id, slug, title, description, season_number, episode_number, status, tier_required, mux_playback_id, duration_seconds, thumbnail_url, video_url, badges, chapters, published_at)
 SELECT 'e4444444-4444-4444-8444-444444444444'::uuid, ser.id, 'patriot-207', 'Ep. 207 — Federal Overreach (Video Cut)', 'The live special in full video. Constitution, ranchers, and drillers.',
-  2, 207, 'published', 'free', 'muxseedpatriot01', 3600, 'https://images.pexels.com/photos/3184357/pexels-photo-3184357.jpeg?auto=compress&cs=tinysrgb&w=800', NULL, '[]'::jsonb, NULL,
+  2, 207, 'published', 'free', NULL, 3600, 'https://images.pexels.com/photos/3184357/pexels-photo-3184357.jpeg?auto=compress&cs=tinysrgb&w=800', NULL, '[]'::jsonb, NULL,
   now() - interval '6 days'
 FROM public.series ser WHERE ser.slug = 'patriot-hour'
   AND NOT EXISTS (SELECT 1 FROM public.video_episodes ve WHERE ve.series_id = ser.id AND ve.slug = 'patriot-207');
@@ -340,7 +340,7 @@ FROM public.series ser WHERE ser.slug = 'oklahoma-underground'
 
 INSERT INTO public.video_episodes (id, series_id, slug, title, description, season_number, episode_number, status, tier_required, mux_playback_id, duration_seconds, thumbnail_url, video_url, badges, chapters, published_at)
 SELECT 'e6666666-6666-4666-8666-666666666666'::uuid, ser.id, 'ag-003', 'Ag Report 003 — Harvest and Mandates', 'Soil, yields, and the federal rules that ignore flyover reality. With OSU guests.',
-  1, 3, 'published', 'free', 'muxseedag01', 2400, 'https://images.pexels.com/photos/162395/hay-bales-field-agriculture-162395.jpeg?auto=compress&cs=tinysrgb&w=800', NULL, '[]'::jsonb, NULL,
+  1, 3, 'published', 'free', NULL, 2400, 'https://images.pexels.com/photos/162395/hay-bales-field-agriculture-162395.jpeg?auto=compress&cs=tinysrgb&w=800', NULL, '[]'::jsonb, NULL,
   now() - interval '7 days'
 FROM public.series ser WHERE ser.slug = 'ag-report'
   AND NOT EXISTS (SELECT 1 FROM public.video_episodes ve WHERE ve.series_id = ser.id AND ve.slug = 'ag-003');

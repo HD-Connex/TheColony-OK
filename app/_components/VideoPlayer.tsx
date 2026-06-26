@@ -155,7 +155,10 @@ export default function VideoPlayer({
       updateLatency();
     };
     const onErr = () => {
-      setError("Stream error — tap reconnect");
+      const msg = video.error?.message?.includes("Mux") || /stream\.mux\.com/.test(src)
+        ? "Video asset not available (Mux playback error)"
+        : "Stream error — tap reconnect";
+      setError(msg);
     };
     const onProgress = () => updateLatency();
 
@@ -219,6 +222,14 @@ export default function VideoPlayer({
       };
       inst.on("hlsManifestParsed" as any, handleManifest);
       inst.on("hlsLevelSwitched" as any, () => setCurrentLevel(inst.currentLevel ?? -1));
+      inst.on("hlsError" as any, (_evt: any, data: any) => {
+        if (data?.fatal) {
+          const muxMsg = /stream\.mux\.com/.test(src)
+            ? "Video asset not available (Mux playback error)"
+            : "Stream error";
+          setError(muxMsg);
+        }
+      });
 
       // Initial latency tick
       setTimeout(updateLatency, 800);
