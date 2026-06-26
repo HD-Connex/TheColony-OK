@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import type { Article } from "@/lib/articles";
-import { tierBadgeClass, tierLabel } from "@/lib/contributor-tiers";
+import { tierBadgeClass, contributorTierLabel } from "@/lib/contributor-tiers";
 import { formatDate } from "@/lib/format";
 import { hostPhoto, storyHero, safeStockImage, stockUnoptimized } from "@/lib/media-map";
 import WatchlistButton from "./WatchlistButton"; // Reuse existing WatchlistButton (and /api/watchlist) on story/episode/clip cards when seriesId context available (discovery breadth)
@@ -67,7 +67,7 @@ export default function StoryCard({ a, variant = "default", watchSeriesId, prior
               </motion.div>
             )}
             <Link href={`/contributors/${c.slug}`}>{c.name}</Link>
-            <span className={`badge ${tierBadgeClass(c.tier)}`}>{tierLabel(c.tier)}</span>
+            <span className={`badge ${tierBadgeClass(c.tier)}`}>{contributorTierLabel(c.tier)}</span>
             {promoted && c.location && <span>· {c.location}</span>}
           </div>
         )}

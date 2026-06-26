@@ -197,6 +197,11 @@
   border-bottom-color: var(--color-alarm);
 }
 
+@media (max-width: 480px) {
+  .tabs { overflow-x: auto; }
+  .tabs__tab { padding: var(--space-3) var(--space-3); font-size: 0.6rem; white-space: nowrap; }
+}
+
 .tab-panel { display: none; }
 .tab-panel[aria-hidden="false"],
 .tab-panel--active { display: block; }

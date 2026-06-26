@@ -141,8 +141,6 @@
 }
 
 /* ─── Paywall gate ─── */
-.paywall { position: relative; }
-
 .paywall__fade {
   position: absolute;
   bottom: 0;

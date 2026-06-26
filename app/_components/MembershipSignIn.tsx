@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth-client";
 
 interface MembershipSignInProps {
@@ -15,12 +16,14 @@ export default function MembershipSignIn({ embedded = false }: MembershipSignInP
   const [pending, setPending] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const searchParams = useSearchParams();
+  const redirectAfter = searchParams.get("redirect") || undefined;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
     setPending(true);
-    const { error: err } = await signInWithEmail(email.trim());
+    const { error: err } = await signInWithEmail(email.trim(), { redirectTo: `/membership/account${redirectAfter ? `?redirect=${encodeURIComponent(redirectAfter)}` : ""}` });
     setPending(false);
     if (err) {
       setError(err);

@@ -39,6 +39,16 @@ export default async function Header() {
       <a className="skip-link" href="#main">
         Skip to main content
       </a>
+
+      <div className="breaking-bar" role="region" aria-label="Breaking news">
+        <span className="breaking-bar__label">▼ FILED</span>
+        <div className="ticker">
+          <div className="ticker__track">
+            <TickerItems items={tickerItems} />
+          </div>
+        </div>
+      </div>
+
       <div className="container">
         <nav className="nav" aria-label="Main navigation">
           <Link className="nav__logo" href="/">
@@ -54,15 +64,6 @@ export default async function Header() {
           </Link>
           <HeaderNav />
         </nav>
-      </div>
-
-      <div className="breaking-bar" role="region" aria-label="Breaking news">
-        <span className="breaking-bar__label">▼ FILED</span>
-        <div className="ticker">
-          <div className="ticker__track">
-            <TickerItems items={tickerItems} />
-          </div>
-        </div>
       </div>
     </header>
   );

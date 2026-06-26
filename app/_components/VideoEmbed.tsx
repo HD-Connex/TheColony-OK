@@ -30,6 +30,8 @@ export default function VideoEmbed({
       loading={bare ? "eager" : "lazy"}
       allow="accelerometer; autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
       allowFullScreen
+      sandbox="allow-scripts allow-same-origin allow-popups allow-presentation"
+      referrerPolicy="no-referrer"
     />
   );
 

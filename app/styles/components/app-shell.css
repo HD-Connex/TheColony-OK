@@ -52,15 +52,21 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3px;
+  gap: 2px;
   min-height: var(--tabbar-h);
-  padding: 6px 0;
+  min-width: 44px;
+  padding: 6px 2px;
   color: var(--color-paper);
   text-decoration: none;
   transition: color var(--transition-fast);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 .bottom-tabs__tab:active {
   background: rgba(255, 255, 255, 0.06);
+}
+.bottom-tabs__tab:hover {
+  color: var(--color-alarm);
 }
 .bottom-tabs__icon {
   stroke: currentColor;
@@ -105,8 +111,8 @@
 .miniplayer__toggle,
 .miniplayer__close {
   flex-shrink: 0;
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -143,7 +149,7 @@
 }
 .miniplayer__title {
   display: block;
-  font-family: var(--font-sans);
+  font-family: var(--font-body);
   font-weight: var(--weight-bold);
   font-size: var(--text-sm);
   color: var(--color-paper);

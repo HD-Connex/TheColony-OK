@@ -186,6 +186,13 @@
   .podcast-grid > .podcast-card { border-right: none; }
 }
 
+@media (max-width: 480px) {
+  .podcast-filter { flex-direction: column; align-items: stretch; }
+  .podcast-filter__input { max-width: none; }
+  .podcast-card__show-name { font-size: var(--text-base); }
+  .podcast-card__body { padding: var(--space-4); }
+}
+
 /* ─── Podcast index filter ─── */
 .podcast-filter {
   display: flex;
@@ -227,14 +234,15 @@
   border-top: var(--rule-medium) solid var(--color-text-primary);
   border-bottom: var(--rule-hairline) solid var(--color-border);
   scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
 }
 
 .episode-rail__card {
-  flex: 0 0 min(280px, 72vw);
+  flex: 0 0 min(260px, 70vw);
   display: grid;
-  grid-template-columns: 96px 1fr;
-  gap: var(--space-4);
-  padding: var(--space-4);
+  grid-template-columns: 80px 1fr;
+  gap: var(--space-3);
+  padding: var(--space-3);
   text-decoration: none;
   color: inherit;
   border-right: var(--rule-hairline) solid var(--color-border);
@@ -244,7 +252,7 @@
 .episode-rail__card:hover { background-color: rgba(255, 255, 255, 0.04); }
 
 .episode-rail__thumb {
-  aspect-ratio: 1;
+  aspect-ratio: 16 / 9;
   overflow: hidden;
   border: var(--rule-hairline) solid var(--color-border);
   background: var(--color-ink-soft);

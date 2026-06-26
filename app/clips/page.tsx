@@ -67,7 +67,7 @@ export default function ClipsFeedPage() {
           start_s,
           ep_id,
           county,
-          episodes:ep_id ( title, slug )
+          episodes:ep_id ( title, slug, show_slug )
         `)
         .eq('approved', true)
         .order('upvotes', { ascending: false })

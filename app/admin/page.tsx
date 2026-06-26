@@ -1,4 +1,5 @@
-import { requireAdmin } from "@/lib/admin-auth";
+import { requireAdmin, getUserRole, roleAtLeast } from "@/lib/admin-auth";
+import type { Role } from "@/lib/admin-auth";
 import { redirect } from "next/navigation";
 import AdminDashboard from "./_components/AdminDashboard";
 import { headers } from "next/headers";
@@ -37,12 +38,11 @@ export default async function AdminIndex() {
   });
   admin = await requireAdmin(req, "editor");
 
-  // If no bearer but SSR user present, do role lookup via requireAdmin primitives (still reuses the lib).
+  // If no bearer but SSR user present, do role lookup via admin-auth primitives.
   if (!admin && user) {
-    const { getUserRole, roleAtLeast } = await import("@/lib/admin-auth");
     const role = await getUserRole(user.id);
-    if (roleAtLeast(role as any, "editor")) {
-      admin = { user, role: role as any };
+    if (roleAtLeast(role, "editor")) {
+      admin = { user, role };
     }
   }
 

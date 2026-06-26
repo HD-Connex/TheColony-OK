@@ -48,18 +48,17 @@ export default function ClipsUploadForm({ epId }: { epId?: string }) {
       if (title) formData.append('title', title); // backend can ignore for now
 
       const headers: Record<string, string> = {};
-      // Get fresh token from Supabase browser client (real member flow)
+      // Get fresh Supabase session token — required for backend Bearer auth
       try {
         const sb = supabaseBrowser();
         const { data: { session } } = await sb.auth.getSession();
         if (session?.access_token) {
           headers['Authorization'] = `Bearer ${session.access_token}`;
-        } else if (user) {
-          // Fallback for MVP (backend still has loose "member" stub)
-          headers['Authorization'] = 'Bearer member';
+        } else {
+          throw new Error('No active session — sign in to upload');
         }
-      } catch {
-        if (user) headers['Authorization'] = 'Bearer member';
+      } catch (err: any) {
+        throw new Error(err.message || 'Authentication required');
       }
 
       const res = await fetch('/api/clips/upload', {

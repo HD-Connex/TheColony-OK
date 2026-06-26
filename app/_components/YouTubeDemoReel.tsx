@@ -147,9 +147,14 @@ export default function YouTubeDemoReel({ items, onExit }: YouTubeDemoReelProps)
       document.head.appendChild(tag);
     }
 
+    // Save any previous callback so we don't clobber other consumers
+    const prevCallback = (window as any).onYouTubeIframeAPIReady;
+
     // Global callback that YT calls when API is ready
     (window as any).onYouTubeIframeAPIReady = () => {
       createPlayer();
+      // Chain to previous callback so other components still work
+      if (typeof prevCallback === "function") prevCallback();
     };
 
     // If the API is already loaded (e.g. previous demo), create immediately
@@ -160,13 +165,14 @@ export default function YouTubeDemoReel({ items, onExit }: YouTubeDemoReelProps)
     // Cleanup
     return () => {
       destroyed = true;
+      // Restore previous callback on unmount
+      (window as any).onYouTubeIframeAPIReady = prevCallback;
       if (playerRef.current) {
         try {
           playerRef.current.destroy();
         } catch {}
         playerRef.current = null;
       }
-      // Do not delete the global onYouTubeIframeAPIReady — other potential uses or future loads
     };
   }, [videoIds]); // re-init if the list of IDs changes
 

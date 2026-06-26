@@ -59,8 +59,9 @@ export async function POST(req: Request) {
   // Phase 2 auto: upload auto-generated caption (SRT snippet from phrase) to Blob for the moment clip. Non-fatal if no token.
   let captionUrl: string | null = null;
   try {
-    const srt = `1\n00:00:00,000 --> 00:00:${Math.min(30, Math.floor((end_s || start_s + 12) - start_s) || 12).toString().padStart(2,'0')},000\n${safePhrase}\n`;
-    const blob = await put(`captions/moment-${clip.id}.srt`, srt, { access: "public", contentType: "text/srt" });
+    const duration = Math.max(1, Math.min(30, Math.floor(((end_s && end_s > start_s ? end_s : start_s + 12) - start_s)) || 12));
+    const srt = `1\n00:00:00,000 --> 00:00:${String(duration).padStart(2, '0')},000\n${safePhrase}\n`;
+    const blob = await put(`captions/moment-${clip.id}.srt`, srt, { access: "public", contentType: "text/plain" });
     captionUrl = blob.url;
   } catch (e) {
     // graceful: no BLOB_READ_WRITE_TOKEN or network — clip still created

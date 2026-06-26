@@ -67,9 +67,12 @@ export async function getLiveStream(liveStreamId: string) {
 /** Enable generated subtitles/captions on a Mux asset (for auto-transcripts on VOD/live recordings). */
 export async function enableGeneratedSubtitles(assetId: string, language = "en") {
   try {
-    // Mux API: POST /video/v1/assets/{ASSET_ID}/generated-subtitles
-    await (mux().video as any).assets.createGeneratedSubtitle(assetId, {
+    // Mux SDK v14: createTrack on the asset to trigger auto-generated subtitles
+    await (mux().video as any).assets.createTrack(assetId, {
       language_code: language,
+      type: "text",
+      text_type: "subtitles",
+      closed_captions: false,
     });
   } catch (e) {
     // Non-fatal — captions are nice-to-have

@@ -514,6 +514,9 @@
   font-size: var(--text-base);
   line-height: var(--leading-relaxed);
 }
+@media (max-width: 768px) {
+  .compare-table { display: block; overflow-x: auto; }
+}
 
 .compare-table th,
 .compare-table td {

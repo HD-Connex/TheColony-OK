@@ -152,13 +152,13 @@ export default async function WatchPage({
     const img = safeStockImage("show", s.slug, s.poster_url ?? s.hero_url);
     const meta = [s.pillar, s.type, s.is_oklahoma ? "OK" : null].filter(Boolean).join(" · ");
     return (
-      <Link href={`/shows/${s.slug}`} className="series-card" style={{ minWidth: 180, flex: "0 0 auto" }}>
+      <Link href={`/shows/${s.slug}`} className="series-card" style={{ minWidth: 160, maxWidth: 220, flex: "0 0 auto" }}>
         <div className="series-card__poster">
           <Image
             src={img}
             alt={s.title}
             fill
-            sizes="180px"
+            sizes="(max-width: 768px) 160px, 180px"
             style={{ objectFit: "cover" }}
             unoptimized={!!(s.poster_url ?? s.hero_url)?.startsWith("http")}
           />
@@ -181,9 +181,9 @@ export default async function WatchPage({
     const dur = ep.duration_seconds ? `${Math.floor(ep.duration_seconds / 60)}m` : "";
     const num = ep.episode_number != null ? `S${ep.season_number ?? 1}·E${ep.episode_number}` : "";
     return (
-      <Link href={`/shows/${s.slug}/${ep.slug}`} className="card card--article" style={{ minWidth: 220, flex: "0 0 auto", border: "var(--rule-hairline) solid var(--color-border)" }}>
+      <Link href={`/shows/${s.slug}/${ep.slug}`} className="card card--article" style={{ minWidth: 200, maxWidth: 280, flex: "0 0 auto", border: "var(--rule-hairline) solid var(--color-border)" }}>
         <div className="card__image" style={{ aspectRatio: "16/9", position: "relative" }}>
-          <Image src={thumb} alt={ep.title} fill sizes="220px" style={{ objectFit: "cover" }} />
+          <Image src={thumb} alt={ep.title} fill sizes="(max-width: 768px) 200px, 220px" style={{ objectFit: "cover" }} />
           {dur && <span style={{ position: "absolute", bottom: 4, right: 4, fontSize: "10px", background: "var(--color-ink)", color: "var(--color-paper)", padding: "1px 4px" }}>{dur}</span>}
         </div>
         <div className="card__body" style={{ padding: "var(--space-3)" }}>
@@ -203,7 +203,7 @@ export default async function WatchPage({
   };
 
   const LiveTile = ({ e, isLive }: { e: LiveEvent; isLive?: boolean }) => (
-    <Link href="/live" className="card" style={{ minWidth: 200, flex: "0 0 auto", border: "var(--rule-hairline) solid var(--color-border)", padding: "var(--space-4)" }}>
+    <Link href="/live" className="card" style={{ minWidth: 180, maxWidth: 280, flex: "0 0 auto", border: "var(--rule-hairline) solid var(--color-border)", padding: "var(--space-4)" }}>
       <div className="card__meta">
         <span className="card__category">{isLive ? "LIVE" : "SCHEDULED"}</span>
         <span className="card__date">{whenLabel(e)}</span>
@@ -220,7 +220,7 @@ export default async function WatchPage({
     const epInfo = (c.episodes as any) || {};
     const viewHref = c.ep_id ? `/podcasts/${epInfo.show_slug || "colony-report"}/${epInfo.slug || c.ep_id}${c.start_s != null ? `?t=${c.start_s}` : ""}` : "/clips";
     return (
-      <Link href={viewHref} className="card" style={{ minWidth: 200, flex: "0 0 auto", border: "var(--rule-hairline) solid var(--color-border)", padding: "var(--space-3)" }}>
+      <Link href={viewHref} className="card" style={{ minWidth: 180, maxWidth: 260, flex: "0 0 auto", border: "var(--rule-hairline) solid var(--color-border)", padding: "var(--space-3)" }}>
         <div className="card__meta" style={{ fontSize: "10px" }}>
           <span className="card__category">{c.dispatch_type === "citizen_dispatch" ? "CITIZEN DISPATCH" : "MEMBER CLIP"}</span>
           <span>{new Date(c.created_at).toLocaleDateString().toUpperCase()}</span>
@@ -236,7 +236,7 @@ export default async function WatchPage({
   };
 
   const PodcastShowTile = ({ p }: { p: ShowWithCount }) => (
-    <Link href={`/podcasts/${p.slug}`} className="card" style={{ minWidth: 180, flex: "0 0 auto", border: "var(--rule-hairline) solid var(--color-border)", padding: "var(--space-4)" }}>
+    <Link href={`/podcasts/${p.slug}`} className="card" style={{ minWidth: 160, maxWidth: 220, flex: "0 0 auto", border: "var(--rule-hairline) solid var(--color-border)", padding: "var(--space-4)" }}>
       <div className="card__meta">
         <span className="card__category">PODCAST</span>
         <span>{p.episodes} EPS</span>

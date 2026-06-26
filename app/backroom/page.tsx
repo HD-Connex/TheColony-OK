@@ -287,7 +287,7 @@ export default function BackroomPage() {
 
         {loadError && <p className="fine-print" style={{ color: 'var(--color-alarm)' }}>{loadError}</p>}
 
-        <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: 'var(--space-6)', alignItems: 'start' }}>
+        <div className="backroom-layout">
           {/* Threads list (sidebar) */}
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-3)' }}>
@@ -310,7 +310,7 @@ export default function BackroomPage() {
               </button>
             </form>
 
-            <div style={{ maxHeight: 420, overflow: 'auto', border: 'var(--rule-medium) solid var(--color-border)', background: 'var(--color-paper)' }}>
+            <div style={{ maxHeight: 'min(420px, 50vh)', overflow: 'auto', border: 'var(--rule-medium) solid var(--color-border)', background: 'var(--color-paper)' }}>
               {threads.length === 0 && (
                 <p className="fine-print" style={{ padding: 'var(--space-4)', color: 'var(--color-ink)' }}>No threads yet. Be the first to start one.</p>
               )}
@@ -357,7 +357,7 @@ export default function BackroomPage() {
                 </div>
 
                 {/* Posts list — reuse ThreadedComments visual/thread pattern (flat per thread) */}
-                <div style={{ maxHeight: 420, overflow: 'auto', border: 'var(--rule-medium) solid var(--color-ink)', padding: 'var(--space-4)', background: 'var(--color-paper)', marginBottom: 'var(--space-4)' }}>
+                <div style={{ maxHeight: 'min(420px, 50vh)', overflow: 'auto', border: 'var(--rule-medium) solid var(--color-ink)', padding: 'var(--space-4)', background: 'var(--color-paper)', marginBottom: 'var(--space-4)' }}>
                   {posts.length === 0 && (
                     <p className="fine-print">No posts yet in this thread. Say something off the record.</p>
                   )}

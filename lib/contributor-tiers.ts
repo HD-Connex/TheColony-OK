@@ -13,7 +13,7 @@ const TIER_BADGE_CLASSES: Record<TierId, string> = {
   contributor: 'tier-badge tier-badge--contributor',
 };
 
-export function tierLabel(tier: string): string {
+export function contributorTierLabel(tier: string): string {
   return TIER_LABELS[tier as TierId] ?? 'Contributor';
 }
 

@@ -310,6 +310,10 @@
 .schedule-item__time { color: var(--color-paper); }
 .schedule-item__show { color: var(--color-text-secondary); }
 
+@media (max-width: 480px) {
+  .schedule-item { grid-template-columns: 1fr; gap: var(--space-1); }
+}
+
 .schedule-item--current .schedule-item__time { color: var(--color-alarm); }
 .schedule-item--current .schedule-item__show { color: var(--color-paper); }
 
@@ -517,3 +521,12 @@
 /* /live stage host — a plain grid cell (LiveStage owns its own 16/9 .live-player).
    min-width:0 stops the 2fr grid column from being blown out by wide children. */
 .live-stage-host { min-width: 0; }
+
+/* Wrapper for the player area in LiveStage — replaces the outer .live-player to avoid
+   double-nesting with VideoPlayer/VideoEmbed/YouTubeDemoReel which each provide their own
+   .live-player. This wrapper just establishes positioning context without adding a second
+   aspect-ratio box. */
+.live-player-wrapper {
+  position: relative;
+  min-height: 0;
+}

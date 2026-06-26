@@ -4,7 +4,7 @@ import ContributorCard from "../_components/ContributorCard";
 import FollowButton from "../_components/FollowButton"; // Basic follow UI (reuses WatchlistButton patterns) for contributors
 import Link from "next/link";
 import { getContributorsByTier, getContributorsLeaderboard } from "@/lib/contributors"; // Reuse + new leaderboard/stats helpers
-import { tierLabel } from "@/lib/contributor-tiers";
+import { contributorTierLabel } from "@/lib/contributor-tiers";
 import type { TierId } from "@/lib/contributor-tiers";
 
 export const metadata: Metadata = {
@@ -72,7 +72,7 @@ export default async function ContributorsPage() {
             }`}
             key={tier}
           >
-            <h2 className="contrib-directory__tier-title">▼ {tierLabel(tier).toUpperCase()}</h2>
+            <h2 className="contrib-directory__tier-title">▼ {contributorTierLabel(tier).toUpperCase()}</h2>
             <div className="contrib-directory__grid">
               {contributors.map((c) => (
                 <div key={c.id}>

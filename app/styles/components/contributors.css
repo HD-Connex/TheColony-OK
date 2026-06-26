@@ -126,6 +126,9 @@
   letter-spacing: var(--track-wide);
   text-transform: uppercase;
 }
+@media (max-width: 768px) {
+  .exposure-table { display: block; overflow-x: auto; }
+}
 
 .exposure-table th,
 .exposure-table td {

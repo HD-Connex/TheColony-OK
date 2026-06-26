@@ -1,14 +1,16 @@
 /* ─── Masthead ─── */
 .site-header {
   background-color: var(--color-ink);
-  border-top: var(--rule-medium) solid var(--color-alarm);
   border-bottom: var(--rule-slab) solid var(--color-alarm);
   position: sticky;
   top: 0;
   z-index: var(--z-nav);
   box-shadow: 0 2px 0 rgba(0,0,0,0.15);
-  /* Notch / status-bar safe area for standalone PWA/TWA (viewportFit:cover).
-     Resolves to 0 on non-notched devices, so desktop/web is unaffected. */
+}
+
+/* Breaking bar sits flush to top edge (behind notch if viewportFit:cover).
+   Nav below gets safe-area padding instead. */
+.breaking-bar {
   padding-top: env(safe-area-inset-top, 0);
 }
 
@@ -64,6 +66,9 @@
   display: flex;
   align-items: center;
   gap: var(--space-6);
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .nav__link {
@@ -181,7 +186,13 @@
   grid-column: 1 / -1;
 }
 
-.nav__mobile.is-open { display: flex; }
+.nav__mobile.is-open {
+  display: flex;
+  max-height: 80dvh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
 
 .nav__mobile .nav__link {
   padding: var(--space-4) var(--container-padding);
@@ -191,16 +202,6 @@
 
 .nav__mobile .btn {
   margin: var(--space-3) var(--container-padding);
-}
-
-/* Long flat drawer (17 links + CTAs) must scroll on short viewports instead of
-   running under the home indicator; cap height to viewport minus masthead and
-   pad the last item past the iOS home-indicator safe area. */
-.nav__mobile.is-open {
-  max-height: 80dvh;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  padding-bottom: env(safe-area-inset-bottom, 0);
 }
 
 /* ─── Breaking news bar ─── */
@@ -304,19 +305,6 @@
 .nav__dropdown-item.active {
   border-left: var(--rule-medium) solid var(--color-alarm);
   padding-left: calc(var(--space-4) - var(--rule-medium));
-}
-
-/* Desktop nav polish: Fox News-style dense horizontal category bar.
-   Grouped dropdowns for like pages (no hamburger on desktop).
-   Brutalist: mono upper, alarm on active/hover (bottom rule), zero radius, high contrast on ink bg.
-*/
-.nav__links {
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
-  flex-wrap: nowrap;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
 }
 
 /* Ensure dropdowns actually work on desktop: hover shows menu as reliable backup to JS */

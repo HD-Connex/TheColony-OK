@@ -35,8 +35,9 @@ export interface AuthState {
   isMember: boolean; // true for paying members OR signed-in admins (full access)
   isAdmin: boolean;
   loading: boolean;
-  signInWithEmail: (email: string) => Promise<{ error: string | null }>;
+  signInWithEmail: (email: string, options?: { redirectTo?: string }) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
+  refreshMembership: () => Promise<void>;
 }
 
 export function useAuth(): AuthState {
@@ -91,11 +92,12 @@ export function useAuth(): AuthState {
     return () => { active = false; };
   }, [user]);
 
-  const signInWithEmail = useCallback(async (email: string) => {
+  const signInWithEmail = useCallback(async (email: string, opts?: { redirectTo?: string }) => {
     const sb = supabaseBrowser();
+    const redirectPath = opts?.redirectTo || "/membership/account";
     const { error } = await sb.auth.signInWithOtp({
       email,
-      options: { emailRedirectTo: `${window.location.origin}/membership/account` },
+      options: { emailRedirectTo: `${window.location.origin}${redirectPath}` },
     });
     return { error: error?.message ?? null };
   }, []);
@@ -106,5 +108,15 @@ export function useAuth(): AuthState {
     setMemberFlag(false);
   }, []);
 
-  return { user, isMember: memberFlag || isAdmin, isAdmin, loading, signInWithEmail, signOut };
+  const refreshMembership = useCallback(async () => {
+    if (!user) return;
+    const { data } = await supabaseBrowser()
+      .from("members")
+      .select("is_member, status")
+      .eq("user_id", user.id)
+      .maybeSingle();
+    setMemberFlag(Boolean(data?.is_member) && data?.status === "active");
+  }, [user]);
+
+  return { user, isMember: memberFlag || isAdmin, isAdmin, loading, signInWithEmail, signOut, refreshMembership };
 }

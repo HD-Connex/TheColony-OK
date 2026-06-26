@@ -50,8 +50,10 @@ export async function POST(req: Request) {
     const form = await req.formData();
     const file = form.get('file') as File | null;
     const epId = form.get('ep_id') as string | null;
+    const title = (form.get('title') as string | null)?.trim() || null;
 
     if (!file) return jsonError('No file provided', 400);
+    if (!file.name) return jsonError('File name is required', 400);
     if (file.size > MAX_SIZE) {
       return jsonError('Clip too large (max ~30s)', 400);
     }
@@ -92,6 +94,8 @@ export async function POST(req: Request) {
         approved: false, // waits in moderation queue — no auto-approve
         ai_score: 0,
         tags: [],
+        source_phrase: title, // store upload title for display in /clips feed
+        transcript: title,
         dispatch_type: 'upload', // Phase 3: member UGC (not pre-cleared Citizen Dispatch); requires mod before appearing in /clips feed
       })
       .select('id, approved')

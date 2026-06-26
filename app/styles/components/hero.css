@@ -199,8 +199,16 @@
 
 @media (max-width: 768px) {
   .hero__primary { padding: var(--space-8) var(--container-padding) var(--space-10); }
-  .hero__title { font-size: clamp(2.5rem, 12vw, 4rem); }
+  .hero__title { font-size: clamp(2rem, 10vw, 4rem); }
   .hero__actions { flex-direction: column; align-items: stretch; }
+  .hero__dateline { flex-wrap: wrap; gap: var(--space-2); }
+  .hero__meta { flex-wrap: wrap; gap: var(--space-2); }
+  .hero__secondary-block { padding: var(--space-6) var(--space-6); }
+}
+
+@media (max-width: 480px) {
+  .hero__title { font-size: clamp(1.6rem, 9vw, 2.8rem); }
+  .hero__excerpt { font-size: var(--text-base); }
 }
 
 /* ─── Cinematic Hero System (Phase 4 design polish)

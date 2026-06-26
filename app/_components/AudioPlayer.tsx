@@ -21,8 +21,9 @@ interface Props {
    *  or cross-media time sync on mode switch. Parent must provide stable fn. */
   audioRefCallback?: (el: HTMLAudioElement | null) => void;
   /** For EpisodePlayer podcast dual-source: parent-driven seek on mode switch or chapters click
-   *  so position is preserved across audio<->video without reset. Reports feed parent state. */
-  seekTo?: number | null;
+   *  so position is preserved across audio<->video without reset. Reports feed parent state.
+   *  Object with time in seconds and a counter so same-time seeks (same chapter twice) still work. */
+  seekTo?: { time: number; counter: number } | null;
   onTimeChange?: (t: number) => void;
   onPlayingChange?: (p: boolean) => void;
 }
@@ -36,7 +37,6 @@ interface Props {
  *  + chapters seek without position loss). */
 export default function AudioPlayer({ src, title, episodeId, meta, previewSeconds = DEFAULT_PREVIEW_S, audioRefCallback, seekTo, onTimeChange, onPlayingChange }: Props) {
   const ref = useRef<HTMLAudioElement>(null);
-  const lastSeekRef = useRef<number | null>(null);
   const { isMember } = useAuth();
   const [playing, setPlaying] = useState(false);
   const [time, setTime] = useState(0);
@@ -58,17 +58,14 @@ export default function AudioPlayer({ src, title, episodeId, meta, previewSecond
   }, [audioRefCallback]);
 
   // Podcast sync (slice 2): external seekTo from mode switch / chapters (preserves pos across audio/video).
-  // Reports to parent for handoff.
+  // Reports to parent for handoff. Uses seekTo.counter for change detection so same-time seeks work.
   useEffect(() => {
     const el = ref.current;
     if (!el || seekTo == null) return;
-    if (seekTo !== lastSeekRef.current) {
-      const clamped = Math.max(0, Math.min(seekTo, (el.duration || seekTo) as number));
-      el.currentTime = clamped;
-      lastSeekRef.current = seekTo;
-      onTimeChange?.(clamped);
-    }
-  }, [seekTo, onTimeChange]);
+    const clamped = Math.max(0, Math.min(seekTo.time, (el.duration || seekTo.time) as number));
+    el.currentTime = clamped;
+    onTimeChange?.(clamped);
+  }, [seekTo?.counter]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     const el = ref.current;

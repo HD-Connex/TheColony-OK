@@ -8,7 +8,7 @@ import VideoPlayer from "./VideoPlayer";
 import VideoEmbed from "./VideoEmbed";
 import { getCurrentLiveChannel, type Live247Channel, COLONY_247 } from "@/lib/live-247";
 import { STOCK } from "@/lib/media-map";
-import { JAKE_MERRICK_YT_LIVE_URL, isSoftLaunchTonight } from "@/lib/live-events"; // for scheduling + Jake YT src free bypass (kept free even post soft launch date)
+
 import LiveChat from "./LiveChat";
 import LivePoll, { type Poll } from "./LivePoll";
 import ThreadedComments from "./ThreadedComments"; // P2-16 helped: realtime channels for comments on live targets (in stage interactivity)
@@ -167,17 +167,9 @@ export default function LiveStage({ items: initialItems = [], initialActiveId, c
     : active?.src ?? null;
   const playbackIsLive = is247 ? true : !!active?.isLive;
   // YT (including Jake Merrick @jakemerrick212/streams or watch?v=) is treated as embed (not HLS, not .mp4).
-  // Verified: is247 + YT playbackSrc -> VideoEmbed (bare) which calls toEmbedSrc -> proper YT nocookie iframe.
+  // Verified: is247 + YT playbackSrc -> VideoEmbed which calls toEmbedSrc -> proper YT nocookie iframe.
   // Direct Jake Merrick YouTube demo stream as permanent 24/7 fallback until real Mux ingest.
   const isEmbed = playbackSrc ? !/\.m3u8(\?|$)/.test(playbackSrc) && !playbackSrc.endsWith(".mp4") : false;
-
-  // Soft launch YT path guarantee for Jake Merrick /live src: free for anyone (keep even if date passed).
-  // Force active only on the soft launch window date logic (via isSoftLaunchTonight) for scheduling.
-  // The free bypass for Jake src path is kept unconditionally below (no paywall on this YT path).
-  if (isSoftLaunchTonight() && playbackSrc && playbackSrc.includes('jakemerrick212/live') && activeId !== 'yt-jake-merrick-7pm-est') {
-    // Force in next tick to avoid render loop
-    setTimeout(() => setActiveId('yt-jake-merrick-7pm-est'), 0);
-  }
 
   const isJakeYT = !!playbackSrc && /jakemerrick212/.test(playbackSrc);
   const isJakeFree = isJakeYT; // Jake Merrick YT src (live or streams) path always free - soft launch YT path kept free even if date passed
@@ -210,7 +202,7 @@ export default function LiveStage({ items: initialItems = [], initialActiveId, c
         {is247 && <span className="note">Always-on Jake Merrick YouTube demo stream • scheduled wheel active (permanent fallback until real Mux ingest)</span>}
       </div>
 
-      <div className="live-player">
+      <div className="live-player-wrapper">
         {demoReelActive ? (
           <YouTubeDemoReel
             items={items}
@@ -222,7 +214,7 @@ export default function LiveStage({ items: initialItems = [], initialActiveId, c
           />
         ) : offRecordBlocked ? (
           // Phase 2 brass Paywall for Off the Record (members live). Styled via prop; foil on h3.
-          <div className="live-player__gate live-player__gate--brass">
+          <div className="live-player live-player__gate live-player__gate--brass">
             <Paywall
               title="Off the Record"
               message="Off the Record is for members only."
@@ -232,7 +224,7 @@ export default function LiveStage({ items: initialItems = [], initialActiveId, c
             />
           </div>
         ) : tierBlocked ? (
-          <div className="live-player__gate">
+          <div className="live-player live-player__gate">
             <p>▼ {active?.tierLabel ?? "Members"} only</p>
             <a href="/membership" className="btn btn--outline">
               Join to watch
@@ -240,12 +232,12 @@ export default function LiveStage({ items: initialItems = [], initialActiveId, c
           </div>
         ) : playbackSrc ? (
           isEmbed ? (
-            <VideoEmbed url={playbackSrc} title={currentTitle} bare />
+            <VideoEmbed url={playbackSrc} title={currentTitle} />
           ) : (
             <VideoPlayer src={playbackSrc} title={currentTitle} isLive={playbackIsLive} />
           )
         ) : (
-          <div className="live-player__offline">
+          <div className="live-player live-player__offline">
             <Image
               src={effective247?.fallbackSlate || STOCK.offAirDefault}
               alt="The Colony OK — Off air. Next live broadcast soon."

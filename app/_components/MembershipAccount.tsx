@@ -1,13 +1,66 @@
 "use client";
 
+import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-client";
+import { supabaseBrowser } from "@/lib/auth-client";
 import { MEMBERSHIP_PLANS } from "@/lib/tiers";
 import BillingPortalButton from "./BillingPortalButton";
 import AppearanceControl from "./AppearanceControl";
 
 export default function MembershipAccount() {
   const { user, isMember, loading, signOut } = useAuth();
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  // Initialize checkout success from URL param during render (not in an effect)
+  const [checkoutSuccess, setCheckoutSuccess] = useState(
+    typeof window !== 'undefined' && searchParams?.get("checkout") === "success",
+  );
+  const [refreshing, setRefreshing] = useState(false);
+  const checkoutProcessed = useRef(false);
+
+  // After magic link sign-in completes, redirect to the original target page
+  useEffect(() => {
+    const redirectAfter = searchParams?.get("redirect");
+    if (!loading && user && redirectAfter) {
+      router.replace(redirectAfter);
+    }
+  }, [loading, user, searchParams, router]);
+
+  // Detect checkout redirect + poll membership until synced
+  useEffect(() => {
+    if (!checkoutSuccess || checkoutProcessed.current) return;
+    checkoutProcessed.current = true;
+
+    const url = new URL(window.location.href);
+    url.searchParams.delete("checkout");
+    window.history.replaceState({}, "", url.toString());
+
+    if (!isMember && user) {
+      const refreshTimer = setTimeout(() => setRefreshing(true), 0);
+      let attempts = 0;
+      const maxAttempts = 20;
+      const iv = setInterval(async () => {
+        attempts++;
+        const { data } = await supabaseBrowser()
+          .from("members")
+          .select("is_member, status")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        if (data?.is_member && data?.status === "active") {
+          clearInterval(iv);
+          setCheckoutSuccess(false);
+          setRefreshing(false);
+          window.location.reload();
+        } else if (attempts >= maxAttempts) {
+          clearInterval(iv);
+          setRefreshing(false);
+        }
+      }, 1500);
+      return () => { clearTimeout(refreshTimer); clearInterval(iv); };
+    }
+  }, [checkoutSuccess, isMember, user]);
 
   if (loading) {
     return (
@@ -36,6 +89,14 @@ export default function MembershipAccount() {
 
   return (
     <>
+      {checkoutSuccess && (
+        <div className="account-card" style={{ borderColor: "var(--color-success, #2a2)", borderStyle: "solid", borderWidth: "2px" }}>
+          <h2 style={{ color: "var(--color-success, #2a2)" }}>Payment successful!</h2>
+          <p>Your membership is being activated. This should only take a moment.</p>
+          {refreshing && <p style={{ fontSize: ".875rem" }}>Syncing with Stripe…</p>}
+        </div>
+      )}
+
       <div className="account-card">
         <h2>Profile</h2>
         <p>Signed in as <strong>{user.email}</strong></p>
@@ -54,7 +115,7 @@ export default function MembershipAccount() {
               {plan && plan.price > 0 ? `$${plan.price}/mo` : "Free tier"}
             </p>
           </div>
-          <span className={`badge${isMember ? "" : ""}`}>{isMember ? "Active" : "Free"}</span>
+          <span className="badge">{isMember ? "Active" : "Free"}</span>
         </div>
         {isMember ? (
           <BillingPortalButton className="btn btn--outline btn--full" />

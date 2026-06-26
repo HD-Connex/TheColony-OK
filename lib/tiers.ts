@@ -43,8 +43,22 @@ export interface MembershipPlan {
   stripePriceEnv?: StripePriceEnvKey;
 }
 
-/** Resolve Stripe price id for a marketing plan id. */
+/** Resolve Stripe price id for a marketing plan id (falls back through all known env keys). */
 export function priceIdForPlan(planId: string): string | null {
+  if (planId === "member") {
+    // Flexible fallback: any configured price env key grants member access.
+    const keys: StripePriceEnvKey[] = [
+      "STRIPE_PRICE_SETTLER",
+      "STRIPE_PRICE_MEMBER",
+      "STRIPE_PRICE_PATRIOT",
+      "STRIPE_PRICE_FOUNDER",
+    ];
+    for (const k of keys) {
+      const v = process.env[k];
+      if (v) return v;
+    }
+    return null;
+  }
   const plan = MEMBERSHIP_PLANS.find((p) => p.id === planId);
   if (!plan?.stripePriceEnv) return null;
   return process.env[plan.stripePriceEnv] ?? null;

@@ -17,7 +17,8 @@ const processedEvents = new Set<string>();
 export async function POST(req: Request) {
   const sig = req.headers.get("stripe-signature");
   const secret = process.env.STRIPE_WEBHOOK_SECRET;
-  if (!sig || !secret) return new NextResponse("Missing signature", { status: 400 });
+  // Defend against empty string (set by Vercel env placeholder) — treat same as missing.
+  if (!sig || !secret || !secret.trim()) return new NextResponse("Missing signature", { status: 400 });
 
   const payload = await req.text();
   let event: Stripe.Event;
@@ -62,11 +63,17 @@ async function linkCheckoutSession(session: Stripe.Checkout.Session, eventId: st
   const email = session.customer_email ?? session.customer_details?.email ?? null;
 
   const sb = supabaseAdmin();
+  // Set is_member:true + status:active immediately so the user doesn't
+  // wait for the subscription.created event to arrive. The syncSubscription
+  // handler (called for subscription.* events) will refine status/tier later.
   await sb.from("members").upsert(
     {
       user_id: userId,
       email,
       stripe_customer_id: customerId,
+      is_member: true,
+      status: "active",
+      tier: "member",
       updated_at: new Date().toISOString(),
     },
     { onConflict: "user_id" },

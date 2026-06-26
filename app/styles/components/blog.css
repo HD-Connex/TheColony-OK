@@ -26,7 +26,7 @@
   font-size: var(--text-xs);
   letter-spacing: var(--track-wider);
   text-transform: uppercase;
-  color: var(--color-ink-muted, #444);
+  color: var(--color-text-muted);
 }
 
 .hub-notice__title {
@@ -50,7 +50,7 @@
 .hub-notice__dek {
   font-size: var(--text-sm);
   line-height: var(--leading-relaxed);
-  color: var(--color-ink-muted, #333);
+  color: var(--color-text-muted);
   max-width: 52ch;
 }
 
@@ -96,7 +96,7 @@
 }
 
 .blog-card__dek {
-  color: var(--color-ink-muted, #333);
+  color: var(--color-text-muted);
   line-height: var(--leading-relaxed);
   margin-bottom: var(--space-5);
 }

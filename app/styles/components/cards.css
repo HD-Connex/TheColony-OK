@@ -147,6 +147,10 @@
 }
 
 .card--horizontal .card__title { font-size: var(--text-lg); }
+@media (max-width: 480px) {
+  .card--horizontal { grid-template-columns: 1fr; }
+  .card--horizontal .card__image { aspect-ratio: 16 / 9; border-right: none; border-bottom: var(--rule-medium) solid var(--color-text-primary); }
+}
 
 /* ─── Minimal text card ─── */
 .card--minimal {
@@ -217,6 +221,14 @@
   scroll-snap-align: start;
   min-width: 260px;
   max-width: 320px;
+}
+/* Accessibility wrapper inside scroller: fill the scroller width, allow
+   shrinking below content size so the scroller's overflow-x:auto handles
+   card overflow instead of blowing out the page on mobile. */
+.section-rail__scroller > [tabindex="0"][role="region"] {
+  min-width: 0;
+  max-width: none;
+  width: 100%;
 }
 .section-rail__scroller .card,
 .section-rail__scroller .card--article {

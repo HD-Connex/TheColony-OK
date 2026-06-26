@@ -136,9 +136,21 @@
   pointer-events: none;
   opacity: 0.9;
 }
-.backroom-thread-item:hover {
-  background-color: var(--color-ink) !important;
-  color: var(--color-paper) !important;
+.backroom-layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: var(--space-6);
+  align-items: start;
+}
+@media (max-width: 768px) {
+  .backroom-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.backroom-plate .backroom-thread-item:hover {
+  background-color: var(--color-ink);
+  color: var(--color-paper);
   padding-left: var(--space-5);
 }
 .backroom-thread-item:active {
@@ -198,7 +210,7 @@
 
 /* Phase 4: Oklahoma Report Card — letterpress/foil public record plates (county-tied civic transparency) */
 .report-card-plate {
-  border: 2px solid var(--color-brass);
+  border: var(--rule-medium) solid var(--color-brass);
   background: var(--color-paper);
   position: relative;
 }

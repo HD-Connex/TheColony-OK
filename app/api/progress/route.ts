@@ -36,7 +36,7 @@ function parseProgressBody(body: unknown): ProgressPayload | null {
 /** Save / upsert resume position for the signed-in viewer (player heartbeat). */
 export async function POST(req: Request) {
   const user = await getUserFromRequest(req);
-  if (!user) return new NextResponse("Unauthorized", { status: 401 });
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const rl = await rateLimit(`progress:${user.id}`, { limit: 60, windowSec: 60 });
   if (!rl.ok) return tooManyRequests(rl);
@@ -45,11 +45,11 @@ export async function POST(req: Request) {
   try {
     body = await req.json();
   } catch {
-    return new NextResponse("Bad JSON", { status: 400 });
+    return NextResponse.json({ error: "Bad JSON" }, { status: 400 });
   }
 
   const parsed = parseProgressBody(body);
-  if (!parsed) return new NextResponse("Invalid payload", { status: 422 });
+  if (!parsed) return NextResponse.json({ error: "Invalid payload" }, { status: 422 });
 
   const completed =
     parsed.durationSeconds != null && parsed.positionSeconds >= parsed.durationSeconds * 0.95;
@@ -66,7 +66,7 @@ export async function POST(req: Request) {
     { onConflict: "user_id,episode_id" },
   );
 
-  if (error) return new NextResponse(error.message, { status: 500 });
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
   return NextResponse.json({ ok: true });
 }

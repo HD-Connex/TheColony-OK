@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import type { Contributor } from "@/lib/contributors";
-import { tierBadgeClass, tierLabel } from "@/lib/contributor-tiers";
+import { tierBadgeClass, contributorTierLabel } from "@/lib/contributor-tiers";
 import { hostPhoto } from "@/lib/media-map";
 import FollowButton from "./FollowButton"; // Integrated for reuse across directory, journalists, profiles (Phase 1 contributors follow)
 
@@ -25,7 +25,7 @@ function Meta({ c }: { c: Contributor }) {
 }
 
 function Badge({ tier }: { tier: string }) {
-  return <span className={`badge ${tierBadgeClass(tier)}`}>{tierLabel(tier)}</span>;
+  return <span className={`badge ${tierBadgeClass(tier)}`}>{contributorTierLabel(tier)}</span>;
 }
 /** Renders a contributor at the layout appropriate to a tier:
  *  hero (headliner), featured, or compact (contributor).

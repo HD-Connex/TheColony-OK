@@ -18,9 +18,9 @@ type HlsInstance = {
 };
 
 /** Native HTML5 video for direct MP4/HLS. For .m3u8 on browsers without native
- *  HLS (i.e. not Safari), hls.js is loaded on demand from a CDN — so it's not a
- *  bundled dependency. When `episodeId` is set, playback progress is saved for
- *  the signed-in viewer (continue-watching).
+ *  HLS (i.e. not Safari), hls.js is dynamically imported (bundled dependency) —
+ *  code-split and served from our own origin. When `episodeId` is set, playback
+ *  progress is saved for the signed-in viewer (continue-watching).
  *
  *  Enhanced with custom editorial chrome for live/replay...
  *
@@ -44,14 +44,14 @@ export default function VideoPlayer({
   episodeId?: string;
   isLive?: boolean;
   /** Support for podcast EpisodePlayer dual-source mode sync (pause+seek on toggle) and chapters seek.
-   *  Only effective for native (non-embed) video sources. Optional to not affect series/live usage. */
-  seekTo?: number | null;
+   *  Only effective for native (non-embed) video sources. Optional to not affect series/live usage.
+   *  Object with time in seconds and a counter to detect seek commands even for the same time value. */
+  seekTo?: { time: number; counter: number } | null;
   onTimeChange?: (t: number) => void;
   onPlayingChange?: (p: boolean) => void;
 }) {
   const ref = useRef<HTMLVideoElement>(null);
   const hlsRef = useRef<HlsInstance | null>(null);
-  const lastSeekRef = useRef<number | null>(null);
   const [reloadToken, setReloadToken] = useState(0);
 
   // UI state for custom chrome
@@ -83,17 +83,15 @@ export default function VideoPlayer({
   // ─── Podcast dual-source sync support (slice 2) + reporting for parent (EpisodePlayer) ───
   // seekTo allows mode switch / chapters to hand off position without reset.
   // on*Change feed parent currentTime/playing so it can capture on toggle.
+  // Uses seekTo.counter for change detection so same-time seeks (e.g. chapter twice) still work.
   useEffect(() => {
     const v = ref.current;
     if (!v || seekTo == null) return;
-    if (seekTo !== lastSeekRef.current) {
-      const clamped = Math.max(0, Math.min(seekTo, (v.duration || seekTo) as number));
-      v.currentTime = clamped;
-      setCurrentTime(clamped);
-      lastSeekRef.current = seekTo;
-      onTimeChange?.(clamped);
-    }
-  }, [seekTo, onTimeChange]);
+    const clamped = Math.max(0, Math.min(seekTo.time, (v.duration || seekTo.time) as number));
+    v.currentTime = clamped;
+    setCurrentTime(clamped);
+    onTimeChange?.(clamped);
+  }, [seekTo?.counter]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Report time/playing state to parent (for sync handoff + chapters). Separate listeners so we don't
   // mutate the big attach effect.
@@ -348,6 +346,7 @@ export default function VideoPlayer({
         poster={poster || STOCK.slateDefault}
         title={title}
         playsInline
+        muted
         preload="metadata"
         onClick={togglePlay}
       />

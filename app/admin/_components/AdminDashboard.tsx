@@ -131,6 +131,22 @@ export default function AdminDashboard({ currentUserRole }: Props) {
     }
   }
 
+  async function moderateClip(clipId: string, action: 'approve' | 'reject') {
+    setMsg(null);
+    const res = await authedFetch("/api/clips/moderate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ clipId, action }),
+    });
+    if (res.ok) {
+      setMsg(action === 'approve' ? "Clip approved (visible to public)." : "Clip rejected.");
+      loadClips();
+    } else {
+      const err = await res.json().catch(() => ({}));
+      setMsg(`Moderate failed: ${err.error || res.status}`);
+    }
+  }
+
   useEffect(() => {
     let active = true;
     const load = async () => {
@@ -330,11 +346,15 @@ export default function AdminDashboard({ currentUserRole }: Props) {
                     {c.dispatch_type || 'upload'}
                   </span>
                   <div style={{ fontSize: '10px', opacity: 0.7, marginTop: 2 }}>{String(label).slice(0, 80)}</div>
+                  <div style={{ marginTop: 4 }}>
+                    <button onClick={() => moderateClip(c.id, 'approve')} className="btn btn--primary btn--sm">Approve</button>
+                    <button onClick={() => moderateClip(c.id, 'reject')} className="btn btn--outline btn--sm" style={{ marginLeft: 6 }}>Reject</button>
+                  </div>
                 </li>
               );
             })}
           </ul>
-          <a href="/api/clips/moderate" target="_blank" className="btn btn--outline">Open moderate endpoint</a>
+          <a href="/api/clips/moderate" target="_blank" className="btn btn--outline" style={{ marginLeft: 8 }}>Open moderate endpoint</a>
           <p className="fine-print" style={{ marginTop: 8 }}>Pre-cleared Citizen Dispatches (dispatch_type=citizen_dispatch) appear directly in /clips feed (approved=true). Uploads wait here.</p>
         </section>
       )}
@@ -599,40 +619,6 @@ function AdminArticlesEditor({
     }
   }
 
-  async function saveWithToken() {
-    setSaving(true);
-    setPreview("");
-    try {
-      const headers: Record<string, string> = { "Content-Type": "application/json" };
-      try {
-        const { supabaseBrowser } = await import("@/lib/auth-client");
-        const { data } = await supabaseBrowser().auth.getSession();
-        const token = data.session?.access_token;
-        if (token) headers["Authorization"] = `Bearer ${token}`;
-      } catch {}
-      const res = await fetch("/api/admin/articles", {
-        method: "POST",
-        headers,
-        body: JSON.stringify({
-          title: form.title || "Untitled",
-          slug: form.slug || `draft-${Date.now()}`,
-          body: form.body,
-          body_md: form.body,
-          status: form.status,
-          category: form.category || null,
-          county: form.county || null,
-        }),
-      });
-      if (res.ok) {
-        onSaved();
-        setForm({ title: "", slug: "", body: "", status: "draft", category: "", county: "" });
-        setPreview("");
-      }
-    } finally {
-      setSaving(false);
-    }
-  }
-
   return (
     <div style={{ border: "3px solid #111", padding: 12, background: "#fff" }}>
       <input placeholder="Title" value={form.title} onChange={(e) => update("title", e.target.value)} style={{ width: "100%", marginBottom: 6 }} />
@@ -657,7 +643,7 @@ function AdminArticlesEditor({
       {preview && (
         <div style={{ border: "1px solid #ccc", padding: 8, margin: "8px 0", background: "#faf8f0" }} dangerouslySetInnerHTML={{ __html: preview }} />
       )}
-      <button onClick={saveWithToken} disabled={saving} className="btn btn--primary">{saving ? "Saving..." : "Save / Publish"}</button>
+      <button onClick={save} disabled={saving} className="btn btn--primary">{saving ? "Saving..." : "Save / Publish"}</button>
       <span className="fine-print" style={{ marginLeft: 12 }}>Saves via gated /api/admin/articles (re-validates role)</span>
     </div>
   );

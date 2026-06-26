@@ -11,7 +11,7 @@ import React from 'react'
 import Link from 'next/link'
 
 export function Paywall({ perk = 'PER_EP_EXCLUSIVE', episodeTitle, returnUrl, title: customTitle, message, brass = false }: { perk?: string; episodeTitle?: string; returnUrl?: string; title?: string; message?: string; brass?: boolean }) {
-  const ctaUrl = `/checkout?perk=${perk}&return=${encodeURIComponent(returnUrl || '/podcasts')}`
+  const ctaUrl = `/pricing?perk=${perk}&return=${encodeURIComponent(returnUrl || '/podcasts')}`
   const title = customTitle || (episodeTitle ? `Member Exclusive: ${episodeTitle}` : 'Member Exclusive')
 
   const paywallClass = `paywall${brass ? ' paywall--brass' : ''}`

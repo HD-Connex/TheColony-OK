@@ -477,7 +477,7 @@ export default async function HomePage() {
         </SectionRail>
 
         <SectionRail title="Contributor Spotlight" dateline="OK VOICES" linkHref="/contributors">
-          <div style={{display:'flex', gap:8}}>
+          <div style={{display:'flex', gap:8, flexWrap:'wrap'}}>
             {contributorSpotlight?.slice(0,3).map((c: any, i: number) => <div key={i} className="card">{c.name}</div>)}
           </div>
         </SectionRail>

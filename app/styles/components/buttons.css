@@ -105,6 +105,7 @@ summary:focus-visible {
 
 /* Paywall — brutalist patriotic integration (ui-ux-pro-max: zero radius, semantic tokens, .btn, high contrast, no raw hex, mobile touch) */
 .paywall {
+  position: relative;
   border: var(--rule-medium) solid var(--color-ink);
   background-color: var(--color-paper);
   color: var(--color-ink);

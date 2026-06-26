@@ -15,7 +15,7 @@ import {
   getContributorStoryCount,
 } from "@/lib/contributors"; // Reuse + stats helper for profile
 import FollowButton from "../../_components/FollowButton"; // Basic follow + note migration 0028
-import { tierBadgeClass, tierLabel } from "@/lib/contributor-tiers";
+import { tierBadgeClass, contributorTierLabel } from "@/lib/contributor-tiers";
 import { formatDate, formatDurationLabel } from "@/lib/format";
 import { hostPhoto, safeStockImage } from "@/lib/media-map";
 
@@ -88,7 +88,7 @@ export default async function ContributorPage({ params }: PageProps) {
           { label: "Journalists", href: "/journalists" },
           { label: contributor.name },
         ]}
-        eyebrow={`▼ MASTHEAD · ${tierLabel(contributor.tier).toUpperCase()}`}
+        eyebrow={`▼ MASTHEAD · ${contributorTierLabel(contributor.tier).toUpperCase()}`}
         title={contributor.name}
         section={false}
       >
@@ -102,7 +102,7 @@ export default async function ContributorPage({ params }: PageProps) {
             priority
           />
           <div>
-            <span className={`badge ${tierBadgeClass(contributor.tier)}`}>{tierLabel(contributor.tier)}</span>
+            <span className={`badge ${tierBadgeClass(contributor.tier)}`}>{contributorTierLabel(contributor.tier)}</span>
             {contributor.role && <p className="contrib-profile__role">{contributor.role}</p>}
             {contributor.bio && <p className="contrib-profile__bio">{contributor.bio}</p>}
             <div className="contrib-profile__meta">

@@ -62,7 +62,8 @@ export default function EpisodePlayer({ episodes: episodesProp, episode: episode
   // ─── Dual source sync state (slice 2) ───
   // mediaTime / mediaPlaying lifted so mode switch can capture current pos from whichever
   // is mounted and hand it to the other via seekCmd without reset.
-  const [seekCmd, setSeekCmd] = useState<{ time: number; token: number } | null>(null);
+  // seekCmd uses a counter so same-time seeks (e.g. clicking same chapter twice) trigger re-seek.
+  const [seekCmd, setSeekCmd] = useState<{ time: number; counter: number } | null>(null);
   const [mediaTime, setMediaTime] = useState(0);
   const [mediaPlaying, setMediaPlaying] = useState(false);
 
@@ -73,14 +74,14 @@ export default function EpisodePlayer({ episodes: episodesProp, episode: episode
   const requestMode = useCallback((newMode: "video" | "audio") => {
     if (!hasVideo || newMode === effectiveMode) return;
     const t = mediaTime || 0;
-    setSeekCmd({ time: t, token: Date.now() });
+    setSeekCmd(prev => ({ time: t, counter: (prev?.counter ?? 0) + 1 }));
     setMode(newMode);
   }, [hasVideo, effectiveMode, mediaTime]);
 
   // Chapters from DB (episodes.chapters jsonb): set seekCmd so whichever source is currently active (audio or native video)
   // jumps without full reset. Works with the same sync plumbing. Position handoff best-effort for embeds (YT).
   const seekToChapter = useCallback((t: number) => {
-    setSeekCmd({ time: Math.max(0, t), token: Date.now() });
+    setSeekCmd(prev => ({ time: Math.max(0, t), counter: (prev?.counter ?? 0) + 1 }));
   }, []);
 
   // ─── Real Web Audio visualizer (slice 1 per implement-and-review + design skill) ───
@@ -317,7 +318,7 @@ export default function EpisodePlayer({ episodes: episodesProp, episode: episode
                       src={videoSrc}
                       title={active.title}
                       episodeId={active.id}
-                      seekTo={seekCmd?.time ?? null}
+                      seekTo={seekCmd}
                       onTimeChange={setMediaTime}
                       onPlayingChange={setMediaPlaying}
                     />
@@ -342,7 +343,7 @@ export default function EpisodePlayer({ episodes: episodesProp, episode: episode
                     episodeId={active.id}
                     meta={`EPISODE ${active.episode_no ?? "—"} · ${formatDurationLabel(active.duration_s)}`}
                     audioRefCallback={setAudioEl}
-                    seekTo={seekCmd?.time ?? null}
+                    seekTo={seekCmd}
                     onTimeChange={setMediaTime}
                     onPlayingChange={setMediaPlaying}
                   />
