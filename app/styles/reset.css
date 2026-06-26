@@ -17,6 +17,13 @@ html {
 body {
   background-color: var(--color-ink);
   color: var(--color-text-primary);
+  /* Clip any element that tries to extend beyond the viewport edge.
+     Paired with html overflow-x:clip (viewport guard above). This catches
+     the rare case where a child overrides html's clip via propagation — the
+     body-level horizontal clip ensures scrollWidth never exceeds clientWidth,
+     which is what the E2E mobile-layout test measures. */
+  overflow-x: clip;
+  max-width: 100vw;
   font-family: var(--font-body);
   font-size: var(--text-base);
   line-height: var(--leading-normal);
