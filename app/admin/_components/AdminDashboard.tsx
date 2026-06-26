@@ -212,7 +212,7 @@ export default function AdminDashboard({ currentUserRole }: Props) {
         <section>
           <h2 className="section-title">Articles (MD supported)</h2>
           <p className="fine-print">Draft → Review → Published. Contributor bylines linked via contributors table.</p>
-          <AdminArticlesEditor onSaved={loadArticles} />
+          <AdminArticlesEditor onSaved={loadArticles} authedFetch={authedFetch} />
           <div style={{ marginTop: 16 }}>
             <h3>Recent</h3>
             <ul>
@@ -476,7 +476,13 @@ export default function AdminDashboard({ currentUserRole }: Props) {
 }
 
 // Simple inline MD-capable editor for articles (no extra deps)
-function AdminArticlesEditor({ onSaved }: { onSaved: () => void }) {
+function AdminArticlesEditor({
+  onSaved,
+  authedFetch,
+}: {
+  onSaved: () => void;
+  authedFetch: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}) {
   const [form, setForm] = useState({ title: "", slug: "", body: "", status: "draft", category: "", county: "" });
   const [preview, setPreview] = useState("");
   const [saving, setSaving] = useState(false);
@@ -499,9 +505,7 @@ function AdminArticlesEditor({ onSaved }: { onSaved: () => void }) {
     setSaving(true);
     setPreview("");
     try {
-      // Note: for full auth, this nested editor should use authedFetch too. For now the parent loads are fixed;
-      // duplicate the token logic or lift helper if editor save 403s. (Minor; main admin flows + report-card covered.)
-      const res = await fetch("/api/admin/articles", {
+      const res = await authedFetch("/api/admin/articles", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
