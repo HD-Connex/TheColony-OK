@@ -1,8 +1,8 @@
 import { describe, it, expect, vi } from "vitest";
 
 describe("assertPublicHttpUrl", () => {
-  it("allows public https URLs and returns a URL", async () => {
-    vi.stubEnv("ALLOWED_TRANSCRIBE_MEDIA_HOSTS", "");
+  it("allows public https URLs when allow-list is set", async () => {
+    vi.stubEnv("ALLOWED_TRANSCRIBE_MEDIA_HOSTS", "mux.com,example.com");
     vi.stubEnv("NODE_ENV", "development");
     vi.resetModules();
     const { assertPublicHttpUrl } = await import("./safe-url");
@@ -12,7 +12,7 @@ describe("assertPublicHttpUrl", () => {
   });
 
   it("rejects non-http schemes", async () => {
-    vi.stubEnv("ALLOWED_TRANSCRIBE_MEDIA_HOSTS", "");
+    vi.stubEnv("ALLOWED_TRANSCRIBE_MEDIA_HOSTS", "mux.com");
     vi.stubEnv("NODE_ENV", "development");
     vi.resetModules();
     const { assertPublicHttpUrl } = await import("./safe-url");
@@ -22,7 +22,7 @@ describe("assertPublicHttpUrl", () => {
     vi.unstubAllEnvs();
   });
 
-  it("blocks public hosts in production when ALLOWED_TRANSCRIBE_MEDIA_HOSTS is unset", async () => {
+  it("blocks all hosts when ALLOWED_TRANSCRIBE_MEDIA_HOSTS is unset", async () => {
     vi.stubEnv("NODE_ENV", "production");
     vi.stubEnv("ALLOWED_TRANSCRIBE_MEDIA_HOSTS", "");
     vi.resetModules();
@@ -30,6 +30,15 @@ describe("assertPublicHttpUrl", () => {
     await expect(strictAssert("https://stream.mux.com/x.m3u8")).rejects.toThrow("allow-list");
     await expect(strictAssert("https://cdn.example.com/a.mp3")).rejects.toThrow("allow-list");
     await expect(strictAssert("http://localhost/")).rejects.toThrow();
+    vi.unstubAllEnvs();
+  });
+
+  it("also blocks when unset in dev", async () => {
+    vi.stubEnv("NODE_ENV", "development");
+    vi.stubEnv("ALLOWED_TRANSCRIBE_MEDIA_HOSTS", "");
+    vi.resetModules();
+    const { assertPublicHttpUrl: devAssert } = await import("./safe-url");
+    await expect(devAssert("https://stream.mux.com/x.m3u8")).rejects.toThrow("allow-list");
     vi.unstubAllEnvs();
   });
 

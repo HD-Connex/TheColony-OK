@@ -16,12 +16,8 @@ const ALLOWED_MEDIA_HOSTS = (process.env.ALLOWED_TRANSCRIBE_MEDIA_HOSTS || "")
 
 function isAllowedHost(hostname: string): boolean {
   const host = hostname.toLowerCase();
-  // If no explicit allow-list is provided, allow any public host (the other
-  // checks in assertPublicHttpUrl will still block localhost, private IPs, and
-  // link-local/metadata addresses). This keeps the dev/test experience smooth
-  // while preserving SSRF protections when an allow-list is configured.
   if (ALLOWED_MEDIA_HOSTS.length === 0) {
-    return process.env.NODE_ENV !== "production";
+    return false;
   }
   return ALLOWED_MEDIA_HOSTS.some((allowed) => host === allowed || host.endsWith(`.${allowed}`));
 }
@@ -90,7 +86,7 @@ export async function assertPublicHttpUrl(raw: string): Promise<URL> {
     throw new Error(`Unsupported URL scheme: ${u.protocol}`);
   }
   if (!isAllowedHost(u.hostname)) {
-    throw new Error("URL host is not in allow-list");
+    throw new Error("URL host is not in ALLOWED_TRANSCRIBE_MEDIA_HOSTS allow-list");
   }
   if (isBlockedHostname(u.hostname)) {
     throw new Error("URL host is not allowed");
