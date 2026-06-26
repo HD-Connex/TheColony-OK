@@ -410,7 +410,7 @@ SELECT
   'parents-curriculum-pushback',
   'Oklahoma Parents Draw the Line on Classroom Curriculum Mandates',
   'From Edmond to Lawton, families are taking back the classroom.',
-  'School board meetings from Edmond to Lawton have turned into standing-room-only forums as parents demand a say in reading lists, history standards, and vendor contracts. The Colony interviewed two dozen families who pulled public records on curriculum adoptions their districts never advertised. Their pushback is reshaping the 2026 legislative session — and both parties are scrambling to claim the parent vote.',
+  $$School board meetings from Edmond to Lawton have turned into standing-room-only forums as parents demand a say in reading lists, history standards, and vendor contracts. The Colony interviewed two dozen families who pulled public records on curriculum adoptions their districts never advertised. Their pushback is reshaping the 2026 legislative session — and both parties are scrambling to claim the parent vote.$$,
   'published',
   false,
   'https://images.pexels.com/photos/162395/hay-bales-field-agriculture-162395.jpeg?auto=compress&cs=tinysrgb&w=1260',
