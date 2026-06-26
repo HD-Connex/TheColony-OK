@@ -25,7 +25,7 @@ interface Application {
 }
 
 export default function AdminDashboard({ currentUserRole }: Props) {
-  const [tab, setTab] = useState<"articles" | "contributors" | "live" | "clips" | "members" | "report-card" | "comments">("articles");
+  const [tab, setTab] = useState<"create" | "articles" | "contributors" | "live" | "clips" | "members" | "report-card" | "comments">("create");
   const [articles, setArticles] = useState<Article[]>([]);
   const [apps, setApps] = useState<Application[]>([]);
   const [liveEvents, setLiveEvents] = useState<any[]>([]);
@@ -198,7 +198,7 @@ export default function AdminDashboard({ currentUserRole }: Props) {
   return (
     <div className="admin-cms">
       <nav className="admin-tabs" style={{ display: "flex", gap: "8px", margin: "16px 0", borderBottom: "3px solid var(--color-ink)", paddingBottom: 8 }}>
-        {["articles", "contributors", "live", "clips", "members", "report-card", "comments"].map((t) => (
+        {["create", "articles", "contributors", "live", "clips", "members", "report-card", "comments"].map((t) => (
           <button
             key={t}
             onClick={() => setTab(t as any)}
@@ -212,6 +212,13 @@ export default function AdminDashboard({ currentUserRole }: Props) {
       </nav>
 
       {msg && <div style={{ background: "var(--color-paper-soft)", border: "2px solid var(--color-ink)", padding: 8, marginBottom: 12 }}>{msg}</div>}
+
+      {tab === "create" && (
+        <section>
+          <h2 className="section-title">Create Content</h2>
+          <AdminContentUpload onSaved={() => { loadArticles(); }} />
+        </section>
+      )}
 
       {tab === "articles" && (
         <section>
@@ -529,6 +536,40 @@ function AdminArticlesEditor({ onSaved }: { onSaved: () => void }) {
     }
   }
 
+  async function saveWithToken() {
+    setSaving(true);
+    setPreview("");
+    try {
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      try {
+        const { supabaseBrowser } = await import("@/lib/auth-client");
+        const { data } = await supabaseBrowser().auth.getSession();
+        const token = data.session?.access_token;
+        if (token) headers["Authorization"] = `Bearer ${token}`;
+      } catch {}
+      const res = await fetch("/api/admin/articles", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          title: form.title || "Untitled",
+          slug: form.slug || `draft-${Date.now()}`,
+          body: form.body,
+          body_md: form.body,
+          status: form.status,
+          category: form.category || null,
+          county: form.county || null,
+        }),
+      });
+      if (res.ok) {
+        onSaved();
+        setForm({ title: "", slug: "", body: "", status: "draft", category: "", county: "" });
+        setPreview("");
+      }
+    } finally {
+      setSaving(false);
+    }
+  }
+
   return (
     <div style={{ border: "3px solid #111", padding: 12, background: "#fff" }}>
       <input placeholder="Title" value={form.title} onChange={(e) => update("title", e.target.value)} style={{ width: "100%", marginBottom: 6 }} />
@@ -553,7 +594,7 @@ function AdminArticlesEditor({ onSaved }: { onSaved: () => void }) {
       {preview && (
         <div style={{ border: "1px solid #ccc", padding: 8, margin: "8px 0", background: "#faf8f0" }} dangerouslySetInnerHTML={{ __html: preview }} />
       )}
-      <button onClick={save} disabled={saving} className="btn btn--primary">{saving ? "Saving..." : "Save / Publish"}</button>
+      <button onClick={saveWithToken} disabled={saving} className="btn btn--primary">{saving ? "Saving..." : "Save / Publish"}</button>
       <span className="fine-print" style={{ marginLeft: 12 }}>Saves via gated /api/admin/articles (re-validates role)</span>
     </div>
   );
