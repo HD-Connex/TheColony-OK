@@ -31,9 +31,6 @@ if (!DIRECT_URL) {
   process.exit(1);
 }
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const migrationsDir = join(__dirname, '..', 'supabase', 'migrations');
-
 const KEY_TABLES = [
   'live_events',
   'live_chat_messages',

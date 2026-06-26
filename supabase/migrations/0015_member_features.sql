@@ -12,12 +12,15 @@ CREATE INDEX IF NOT EXISTS idx_watchlist_user ON public.watchlist(user_id, creat
 
 ALTER TABLE public.watchlist ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "watchlist_select_own" ON public.watchlist;
 CREATE POLICY "watchlist_select_own" ON public.watchlist
   FOR SELECT USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "watchlist_insert_own" ON public.watchlist;
 CREATE POLICY "watchlist_insert_own" ON public.watchlist
   FOR INSERT WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "watchlist_delete_own" ON public.watchlist;
 CREATE POLICY "watchlist_delete_own" ON public.watchlist
   FOR DELETE USING (auth.uid() = user_id);
 
@@ -39,15 +42,19 @@ CREATE INDEX IF NOT EXISTS idx_downloads_expires ON public.downloads(expires_at)
 
 ALTER TABLE public.downloads ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "downloads_select_own" ON public.downloads;
 CREATE POLICY "downloads_select_own" ON public.downloads
   FOR SELECT USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "downloads_insert_own" ON public.downloads;
 CREATE POLICY "downloads_insert_own" ON public.downloads
   FOR INSERT WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "downloads_update_own" ON public.downloads;
 CREATE POLICY "downloads_update_own" ON public.downloads
   FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "downloads_delete_own" ON public.downloads;
 CREATE POLICY "downloads_delete_own" ON public.downloads
   FOR DELETE USING (auth.uid() = user_id);
 

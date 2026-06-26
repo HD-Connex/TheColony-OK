@@ -8,7 +8,7 @@
  * When used as 247 streamUrl, LiveStage detects isEmbed (YT) and renders via VideoEmbed bare.
  * /streams and @handle URLs resolve here to embed of the placeholder video ID for continuous demo playback.
  */
-export const JAKE_MERRICK_STREAMS_URL = "https://www.youtube.com/@jakemerrick212/streams";
+export const JAKE_MERRICK_CHANNEL_URL = "https://www.youtube.com/@jakemerrick212";
 export const JAKE_MERRICK_CHANNEL_ID =
   process.env.NEXT_PUBLIC_YT_COLONY_CHANNEL_ID ?? "UCExrnzUQGrVZmO4WW9XJ-bA";
 /** Latest VOD from the /streams tab (override via env when it changes). */
@@ -28,6 +28,9 @@ function youtubeLiveEmbed(channelId: string): string {
     mute: "1",
     rel: "0",
     modestbranding: "1",
+    // playsinline=1: keep playback inline on iOS Safari instead of forcing native
+    // fullscreen the moment the stream starts. Critical for the mobile live path.
+    playsinline: "1",
   });
   return `https://www.youtube-nocookie.com/embed/live_stream?${params}`;
 }
@@ -62,13 +65,13 @@ export function toEmbedSrc(url: string): string | null {
 
     const watchId = url.match(/[?&]v=([^&]+)/)?.[1] || url.match(/youtu\.be\/([^?]+)/)?.[1];
     if (watchId) {
-      const params = new URLSearchParams({ autoplay: "1", mute: "1", rel: "0", modestbranding: "1" });
+      const params = new URLSearchParams({ autoplay: "1", mute: "1", rel: "0", modestbranding: "1", playsinline: "1" });
       return `https://www.youtube-nocookie.com/embed/${watchId}?${params}`;
     }
 
     const embedId = url.match(/embed\/([^?]+)/)?.[1];
     if (embedId && embedId !== "live_stream") {
-      const params = new URLSearchParams({ autoplay: "1", mute: "1", rel: "0", modestbranding: "1" });
+      const params = new URLSearchParams({ autoplay: "1", mute: "1", rel: "0", modestbranding: "1", playsinline: "1" });
       return `https://www.youtube-nocookie.com/embed/${embedId}?${params}`;
     }
 
@@ -77,10 +80,15 @@ export function toEmbedSrc(url: string): string | null {
       return channelId ? youtubeLiveEmbed(channelId) : null;
     }
 
-    if (/\/streams(?:\?|$|\/)/.test(url) || /youtube\.com\/@[^/?#]+(?:\/|$)/.test(url)) {
+    if (/\/streams(?:\?|$|\/)/.test(url)) {
       const videoId = JAKE_MERRICK_PLACEHOLDER_VIDEO_ID;
-      const params = new URLSearchParams({ autoplay: "1", mute: "1", rel: "0", modestbranding: "1" });
+      const params = new URLSearchParams({ autoplay: "1", mute: "1", rel: "0", modestbranding: "1", playsinline: "1" });
       return `https://www.youtube-nocookie.com/embed/${videoId}?${params}`;
+    }
+
+    if (/youtube\.com\/@[^/?#]+(?:\/|$)/.test(url)) {
+      const channelId = resolveYoutubeChannelId(url);
+      return channelId ? youtubeLiveEmbed(channelId) : null;
     }
 
     if (/youtube\.com\/channel\/UC[\w-]+/.test(url)) {

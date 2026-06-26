@@ -30,12 +30,15 @@ DROP POLICY IF EXISTS "contributor_follows_select_own" ON public.contributor_fol
 DROP POLICY IF EXISTS "contributor_follows_insert_own" ON public.contributor_follows;
 DROP POLICY IF EXISTS "contributor_follows_delete_own" ON public.contributor_follows;
 
+DROP POLICY IF EXISTS "contributor_follows_select_own" ON public.contributor_follows;
 CREATE POLICY "contributor_follows_select_own" ON public.contributor_follows
   FOR SELECT USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "contributor_follows_insert_own" ON public.contributor_follows;
 CREATE POLICY "contributor_follows_insert_own" ON public.contributor_follows
   FOR INSERT WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "contributor_follows_delete_own" ON public.contributor_follows;
 CREATE POLICY "contributor_follows_delete_own" ON public.contributor_follows
   FOR DELETE USING (auth.uid() = user_id);
 

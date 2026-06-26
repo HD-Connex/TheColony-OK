@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import Link from "next/link";
 import FilterBar from "../_components/FilterBar";
 import InnerPageShell from "../_components/InnerPageShell";
 import StoryCard from "../_components/StoryCard";
@@ -75,7 +76,7 @@ export default async function StoriesPage({
           ))}
         </select>
         <button className="btn btn--sm btn--outline" type="submit">Filter</button>
-        {(county || activeKey !== "all") && <a href="/stories" className="btn btn--sm">Clear all</a>}
+        {(county || activeKey !== "all") && <Link href="/stories" className="btn btn--sm">Clear all</Link>}
       </form>
 
       {/* Newsletter signup / The Briefing block: after filters/headers in stories (inline variant for flow) */}
@@ -115,9 +116,9 @@ export default async function StoriesPage({
       {/* P1 pagination: simple offset/limit + count pager (non-breaking defaults; ?page= ) */}
       {totalPages > 1 && (
         <div style={{ marginTop: 16, display: 'flex', gap: 8, alignItems: 'center' }}>
-          {page > 1 && <a href={`/stories?${new URLSearchParams({ ...(cat && cat!=='all' ? {cat} : {}), ...(county ? {county} : {}), page: String(page-1) }).toString()}`} className="btn btn--sm btn--outline">← Prev</a>}
+          {page > 1 && <Link href={`/stories?${new URLSearchParams({ ...(cat && cat!=='all' ? {cat} : {}), ...(county ? {county} : {}), page: String(page-1) }).toString()}`} className="btn btn--sm btn--outline">← Prev</Link>}
           <span className="fine-print">Page {page} / {totalPages} (showing {filtered.length})</span>
-          {page < totalPages && <a href={`/stories?${new URLSearchParams({ ...(cat && cat!=='all' ? {cat} : {}), ...(county ? {county} : {}), page: String(page+1) }).toString()}`} className="btn btn--sm btn--outline">Next →</a>}
+          {page < totalPages && <Link href={`/stories?${new URLSearchParams({ ...(cat && cat!=='all' ? {cat} : {}), ...(county ? {county} : {}), page: String(page+1) }).toString()}`} className="btn btn--sm btn--outline">Next →</Link>}
         </div>
       )}
 

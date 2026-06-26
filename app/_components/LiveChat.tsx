@@ -60,7 +60,8 @@ export default function LiveChat({ liveEventId = null, isMember, currentUser }: 
     // Swallow: configured() will be false or load will catch; component stays mounted with friendly fallback.
   }
 
-  // Static sample messages shown only in fallback (graceful "coming soon" preview; never sent)
+  // Stable sample timestamps, computed once via lazy initializer
+  const [sampleNow] = useState(() => Date.now());
   const sampleMessages: ChatMessage[] = [
     {
       id: 'sample-1',
@@ -68,7 +69,7 @@ export default function LiveChat({ liveEventId = null, isMember, currentUser }: 
       user_id: null,
       display_name: 'OKWatcher',
       body: 'First! Excited for the report tonight.',
-      created_at: new Date(Date.now() - 1000 * 60 * 7).toISOString(),
+      created_at: new Date(sampleNow - 1000 * 60 * 7).toISOString(),
     },
     {
       id: 'sample-2',
@@ -76,7 +77,7 @@ export default function LiveChat({ liveEventId = null, isMember, currentUser }: 
       user_id: null,
       display_name: 'PatriotPrepper',
       body: 'The 24/7 feed has been solid this week.',
-      created_at: new Date(Date.now() - 1000 * 60 * 3).toISOString(),
+      created_at: new Date(sampleNow - 1000 * 60 * 3).toISOString(),
     },
   ];
 
@@ -143,10 +144,12 @@ export default function LiveChat({ liveEventId = null, isMember, currentUser }: 
   }, [liveEventId, sb]);
 
   useEffect(() => {
+    let active = true;
     mountedRef.current = true;
 
     // Initial fetch (guarded)
-    void loadMessages();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (active) void loadMessages();
 
     // Realtime subscription with status listener for robustness
     // P2: extra try/catch + sb guard + generic 'unavailable' signal (realtime fail -> friendly coming-soon + samples, no raw).
@@ -177,25 +180,24 @@ export default function LiveChat({ liveEventId = null, isMember, currentUser }: 
         )
         .subscribe((status, err) => {
           if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
-            // Do not overwrite a primary load error; surface only if chat was otherwise ok
-            if (!loadErrorRef.current && mountedRef.current) {
-              setLoadError('unavailable'); // internal signal; UI shows fixed friendly + samples (P2: no raw realtime msg)
+            if (!loadErrorRef.current && active) {
+              setLoadError('unavailable');
               loadErrorRef.current = 'unavailable';
             }
-            // eslint-disable-next-line no-console
             console.warn('[LiveChat] realtime status:', status, err);
           }
         });
 
       channelRef.current = channel;
     } catch (e) {
-      if (mountedRef.current && !loadErrorRef.current) {
+      if (active && !loadErrorRef.current) {
         setLoadError('unavailable');
         loadErrorRef.current = 'unavailable';
       }
     }
 
     return () => {
+      active = false;
       mountedRef.current = false;
       if (channelRef.current) {
         try { sb?.removeChannel(channelRef.current); } catch {}

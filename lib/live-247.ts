@@ -3,7 +3,7 @@
  * live_event is active. Stream source resolves from env config only.
  *
  * Jake Merrick YouTube demo stream as permanent 24/7 fallback until real Mux ingest.
- * Primary demo uses the project's JAKE_MERRICK_STREAMS_URL (@jakemerrick212/streams)
+ * Primary demo uses the project's JAKE_MERRICK_CHANNEL_URL (@jakemerrick212)
  * which VideoEmbed + toEmbedSrc turns into an embeddable continuous YouTube player
  * (falls back to JAKE_MERRICK_PLACEHOLDER_VIDEO_ID yEjlzfS4k1s VOD for demo continuity).
  *
@@ -20,7 +20,7 @@
 
 import { getLiveEvents } from "./live-events";
 import { STOCK } from "./media-map";
-import { JAKE_MERRICK_STREAMS_URL } from "./video";
+import { JAKE_MERRICK_CHANNEL_URL } from "./video";
 
 export interface Live247Channel {
   id: "colony-247";
@@ -54,7 +54,7 @@ function resolve247StreamUrl(): string | null {
   // Uses @jakemerrick212/streams (embed-friendly; resolves to continuous YT iframe via VideoEmbed).
   // Guarantees the live TV player (LiveStage -> VideoEmbed for YT) always runs the Jake Merrick stream.
   // Set NEXT_PUBLIC_247_YOUTUBE_URL to override with a specific watch?v= or /live URL.
-  return JAKE_MERRICK_STREAMS_URL;
+  return JAKE_MERRICK_CHANNEL_URL;
 }
 
 export const COLONY_247: Live247Channel = {

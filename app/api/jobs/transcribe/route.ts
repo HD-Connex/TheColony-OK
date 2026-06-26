@@ -50,7 +50,7 @@ function resolveProvider(): WhisperProvider | null {
 async function transcribeUrl(url: string, provider: WhisperProvider): Promise<string | any> {
   // SSRF guard: validate before fetching a DB/body-supplied URL. Fetch the parsed
   // URL object so the value passed to fetch() is the validated one.
-  const safeUrl = assertPublicHttpUrl(url);
+  const safeUrl = await assertPublicHttpUrl(url);
   const media = await fetch(safeUrl, { signal: AbortSignal.timeout(60_000) });
   if (!media.ok) throw new Error(`Failed to fetch media (${media.status})`);
   const blob = await media.blob();

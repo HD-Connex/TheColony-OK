@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth, supabaseBrowser } from '@/lib/auth-client';
 import { createClient } from '@/utils/supabase/client'; // P5: shared singleton (browser client cache); dual import with supabaseBrowser now consolidated to one instance
@@ -44,7 +44,7 @@ export default function ClipsFeedPage() {
   // New SSR client (browser instance here for consistency with my-feed/backroom; anon key for public RLS-approved reads)
   const ssrClient = createClient();
 
-  async function loadClips(p = page) {
+  const loadClips = useCallback(async (p: number = page) => {
     setLoading(true);
     setLoadError(null);
     try {
@@ -89,11 +89,14 @@ export default function ClipsFeedPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [filter, page]);
 
   useEffect(() => {
-    void loadClips(page);
-  }, [filter, page]);
+    let active = true;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (active) void loadClips(page);
+    return () => { active = false; };
+  }, [filter, page, loadClips]);
 
   // Upvote reuses existing /api/clips/upvote (public, rate-limited, denorm increment)
   async function handleUpvote(clipId: string, currentUpvotes: number) {

@@ -59,7 +59,7 @@ export default function LiveStage({ items: initialItems = [], initialActiveId, c
   const [viewerCount, setViewerCount] = useState(0);
   // Sync default guarantees 24/7 playbackSrc on first render (no flash of off-air when no live events or async env).
   // getCurrentLiveChannel enriches with currentProgram when available.
-  // Jake Merrick YouTube demo stream (JAKE_MERRICK_STREAMS_URL) is the permanent primary for is247 fallback.
+  // Jake Merrick YouTube demo stream (JAKE_MERRICK_CHANNEL_URL) is the permanent primary for is247 fallback.
   const [channel247, setChannel247] = useState<Live247Channel | null>(COLONY_247);
   const [activePoll, setActivePoll] = useState<Poll | null>(null);
   const [demoReelActive, setDemoReelActive] = useState(false);
@@ -94,6 +94,7 @@ export default function LiveStage({ items: initialItems = [], initialActiveId, c
 
   // Realtime: live_events changes + presence viewer count
   useEffect(() => {
+    let active = true;
     const sb = supabaseBrowser();
     let eventsChannel: RealtimeChannel | null = null;
     let presenceChannel: RealtimeChannel | null = null;
@@ -102,15 +103,17 @@ export default function LiveStage({ items: initialItems = [], initialActiveId, c
       eventsChannel = sb
         .channel("live-stage-events")
         .on("postgres_changes", { event: "*", schema: "public", table: "live_events" }, () => {
-          void refreshItems();
+          if (active) void refreshItems();
         })
         .subscribe();
 
       presenceChannel = sb
         .channel("live-stage-presence", { config: { presence: { key: user?.id ?? "anon" } } })
         .on("presence", { event: "sync" }, () => {
-          const state = presenceChannel?.presenceState() ?? {};
-          setViewerCount(Math.max(1, Object.keys(state).length));
+          if (active) {
+            const state = presenceChannel?.presenceState() ?? {};
+            setViewerCount(Math.max(1, Object.keys(state).length));
+          }
         })
         .subscribe(async (status) => {
           if (status === "SUBSCRIBED") {
@@ -118,12 +121,14 @@ export default function LiveStage({ items: initialItems = [], initialActiveId, c
           }
         });
     } catch {
-      setViewerCount((c) => Math.max(c, 12));
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      if (active) setViewerCount((c) => Math.max(c, 12));
     }
 
-    const pollIv = setInterval(() => void refreshItems(), 60_000);
+    const pollIv = setInterval(() => { if (active) void refreshItems(); }, 60_000);
 
     return () => {
+      active = false;
       clearInterval(pollIv);
       if (eventsChannel) sb.removeChannel(eventsChannel);
       if (presenceChannel) sb.removeChannel(presenceChannel);

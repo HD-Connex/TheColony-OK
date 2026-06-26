@@ -84,6 +84,7 @@ RETURNS TABLE (
 )
 LANGUAGE sql
 STABLE
+SET search_path = 'extensions'
 AS $$
   SELECT
     ce.id,
@@ -105,9 +106,11 @@ GRANT EXECUTE ON FUNCTION public.match_content_embeddings(vector(1536), int, flo
 ALTER TABLE public.transcripts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.content_embeddings ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "transcripts_public_read" ON public.transcripts;
 CREATE POLICY "transcripts_public_read" ON public.transcripts
   FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "content_embeddings_public_read" ON public.content_embeddings;
 CREATE POLICY "content_embeddings_public_read" ON public.content_embeddings
   FOR SELECT USING (true);
 

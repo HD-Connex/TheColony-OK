@@ -31,6 +31,7 @@ CREATE INDEX IF NOT EXISTS threaded_comments_approved_idx ON public.threaded_com
 
 -- Update public read policy to only approved (tighten previous loose policy).
 DROP POLICY IF EXISTS "comments_public_read" ON public.threaded_comments;
+DROP POLICY IF EXISTS "comments_public_read_approved" ON public.threaded_comments;
 CREATE POLICY "comments_public_read_approved" ON public.threaded_comments
   FOR SELECT USING (approved = true);
 
@@ -56,6 +57,7 @@ ALTER TABLE public.tips
 UPDATE public.tips SET kind = 'tip' WHERE kind IS NULL;
 ALTER TABLE public.tips ALTER COLUMN kind SET NOT NULL;
 -- Add check constraint after column is populated
+ALTER TABLE public.tips DROP CONSTRAINT IF EXISTS tips_kind_check;
 ALTER TABLE public.tips ADD CONSTRAINT tips_kind_check CHECK (kind IN ('tip', 'newsletter'));
 
 -- Create indexes (idempotent)

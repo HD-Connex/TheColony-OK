@@ -25,7 +25,9 @@ export default function VideoEmbed({
     <iframe
       src={src!}
       title={title ?? "Video"}
-      loading="lazy"
+      // bare = the primary above-the-fold stage (e.g. /live 24/7): load eagerly so
+      // the main content isn't deferred. Non-bare embeds stay lazy.
+      loading={bare ? "eager" : "lazy"}
       allow="accelerometer; autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
       allowFullScreen
     />

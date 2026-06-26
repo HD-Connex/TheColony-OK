@@ -6,8 +6,6 @@ import { STOCK } from "@/lib/media-map";
 // Note: for fully authenticated progress, prefer the /api/progress route (which has user context).
 // viewer.saveProgress now supports an optional userId 4th arg to write to watch_progress table.
 
-const HLS_CDN = "https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js";
-
 type HlsInstance = {
   loadSource: (s: string) => void;
   attachMedia: (v: HTMLVideoElement) => void;
@@ -18,8 +16,6 @@ type HlsInstance = {
   on: (evt: string, fn: (...a: any[]) => void) => void;
   off?: (evt: string, fn: (...a: any[]) => void) => void;
 };
-
-type HlsGlobal = { Hls?: new (config?: any) => HlsInstance };
 
 /** Native HTML5 video for direct MP4/HLS. For .m3u8 on browsers without native
  *  HLS (i.e. not Safari), hls.js is loaded on demand from a CDN — so it's not a
@@ -151,7 +147,7 @@ export default function VideoPlayer({
 
     const onTime = () => {
       setCurrentTime(video.currentTime || 0);
-      if (!duration && video.duration && isFinite(video.duration)) setDuration(video.duration);
+      setDuration((prev) => (!prev && video.duration && isFinite(video.duration) ? video.duration : prev));
       updateLatency();
     };
     const onPlay = () => setIsPlaying(true);
@@ -188,13 +184,27 @@ export default function VideoPlayer({
       };
     }
 
-    // HLS path via CDN
+    // HLS path — hls.js is a bundled dependency, dynamically imported so it stays
+    // code-split and is served from our own origin (cacheable by the service worker
+    // for offline replay; no runtime CDN dependency). Native-HLS browsers (Safari/iOS)
+    // never reach here — they took the canPlayType branch above.
     let cancelled = false;
-    const w = window as unknown as HlsGlobal;
 
-    const attachHls = () => {
-      if (cancelled || !w.Hls) return;
-      const inst = new w.Hls({ enableWorker: true, lowLatencyMode: true });
+    const attachHls = (Hls: new (config?: any) => HlsInstance) => {
+      if (cancelled) return;
+      // Mobile-tuned hls.js config:
+      // - lowLatencyMode only for live (it's pointless and stall-prone on VOD/cellular).
+      // - capLevelToPlayerSize avoids fetching renditions larger than the rendered
+      //   player — a big data/battery win on phones.
+      // - bounded forward/back buffers keep memory in check on low-end devices.
+      const inst = new Hls({
+        enableWorker: true,
+        lowLatencyMode: isLive,
+        capLevelToPlayerSize: true,
+        backBufferLength: 30,
+        maxBufferLength: 30,
+        maxMaxBufferLength: 60,
+      });
       inst.loadSource(src);
       inst.attachMedia(video);
       hlsRef.current = inst;
@@ -216,20 +226,20 @@ export default function VideoPlayer({
       setTimeout(updateLatency, 800);
     };
 
-    if (w.Hls) {
-      attachHls();
-    } else {
-      const existing = document.querySelector<HTMLScriptElement>(`script[src="${HLS_CDN}"]`);
-      if (existing) existing.addEventListener("load", attachHls);
-      else {
-        const s = document.createElement("script");
-        s.src = HLS_CDN;
-        s.async = true;
-        s.onload = attachHls;
-        s.onerror = () => setError("HLS loader failed — using native or reconnect");
-        document.head.appendChild(s);
-      }
-    }
+    import("hls.js")
+      .then((mod) => {
+        if (cancelled) return;
+        const Hls = mod.default as unknown as {
+          isSupported: () => boolean;
+          new (config?: any): HlsInstance;
+        };
+        if (Hls.isSupported()) {
+          attachHls(Hls as unknown as new (config?: any) => HlsInstance);
+        } else {
+          setError("HLS not supported on this device");
+        }
+      })
+      .catch(() => setError("HLS loader failed — tap reconnect"));
 
     return () => {
       cancelled = true;
@@ -245,7 +255,30 @@ export default function VideoPlayer({
       video.removeEventListener("error", onErr);
       video.removeEventListener("progress", onProgress);
     };
-  }, [src, reloadToken, isLive, duration]);
+  }, [src, reloadToken, isLive]);
+
+  // Pause live playback when the tab/app is backgrounded (saves battery + cellular
+  // data on mobile); rejoin the live edge and resume on return. Replay/VOD is left
+  // untouched (the user may intend to keep listening). To keep live AUDIO playing in
+  // the background instead, remove the pause branch below.
+  useEffect(() => {
+    if (!isLive) return;
+    const v = ref.current;
+    if (!v) return;
+    const onVisibility = () => {
+      if (document.visibilityState === "hidden") {
+        if (!v.paused) v.pause();
+      } else {
+        const h = hlsRef.current;
+        if (h && typeof h.liveSyncPosition === "number" && h.liveSyncPosition > 0) {
+          v.currentTime = h.liveSyncPosition;
+        }
+        void v.play().catch(() => {});
+      }
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => document.removeEventListener("visibilitychange", onVisibility);
+  }, [isLive]);
 
   // --- Custom control actions ---
   const togglePlay = () => {

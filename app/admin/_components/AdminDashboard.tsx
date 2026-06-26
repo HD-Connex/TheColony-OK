@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, useRef } from "react";
 
 type Role = "admin" | "editor" | "contributor" | "member";
 
@@ -25,7 +25,7 @@ interface Application {
 }
 
 export default function AdminDashboard({ currentUserRole }: Props) {
-  const [tab, setTab] = useState<"articles" | "contributors" | "live" | "clips" | "members" | "report-card" | "comments">("articles");
+  const [tab, setTab] = useState<"create" | "articles" | "contributors" | "live" | "clips" | "members" | "report-card" | "comments">("create");
   const [articles, setArticles] = useState<Article[]>([]);
   const [apps, setApps] = useState<Application[]>([]);
   const [liveEvents, setLiveEvents] = useState<any[]>([]);
@@ -66,7 +66,7 @@ export default function AdminDashboard({ currentUserRole }: Props) {
     return fetch(input, { ...init, headers });
   }
 
-  async function loadArticles() {
+  const loadArticles = useCallback(async () => {
     setLoading(true);
     try {
       const res = await authedFetch("/api/admin/articles");
@@ -74,47 +74,47 @@ export default function AdminDashboard({ currentUserRole }: Props) {
       setArticles(json.articles || []);
     } catch {}
     setLoading(false);
-  }
+  }, []);
 
-  async function loadApps() {
+  const loadApps = useCallback(async () => {
     if (!isAdminOrEditor) return;
     const res = await authedFetch("/api/admin/contributors/applications");
     const json = await res.json().catch(() => ({}));
     setApps(json.applications || []);
-  }
+  }, [isAdminOrEditor]);
 
-  async function loadLive() {
+  const loadLive = useCallback(async () => {
     const res = await authedFetch("/api/admin/live");
     const json = await res.json().catch(() => ({}));
     setLiveEvents(json.events || []);
-  }
+  }, []);
 
-  async function loadClips() {
+  const loadClips = useCallback(async () => {
     const res = await authedFetch("/api/admin/clips?approved=false");
     const json = await res.json().catch(() => ({}));
     setClips(json.clips || []);
-  }
+  }, []);
 
-  async function loadMembers() {
+  const loadMembers = useCallback(async () => {
     if (currentUserRole !== "admin") return;
     const res = await authedFetch("/api/admin/members");
     const json = await res.json().catch(() => ({}));
     setMembers(json.members || []);
-  }
+  }, [currentUserRole]);
 
-  async function loadReportCard() {
+  const loadReportCard = useCallback(async () => {
     const res = await authedFetch("/api/admin/report-card");
     const json = await res.json().catch(() => ({}));
     setReportOfficials(json.officials || []);
     setReportIssues(json.issues || []);
     setReportGrades(json.grades || []);
-  }
+  }, []);
 
-  async function loadComments() {
+  const loadComments = useCallback(async () => {
     const res = await authedFetch("/api/admin/comments");
     const json = await res.json().catch(() => ({}));
     setComments(json.comments || []);
-  }
+  }, []);
 
   async function moderateComment(commentId: string, action: 'approve' | 'reject') {
     setMsg(null);
@@ -132,14 +132,19 @@ export default function AdminDashboard({ currentUserRole }: Props) {
   }
 
   useEffect(() => {
-    if (tab === "articles") loadArticles();
-    if (tab === "contributors") loadApps();
-    if (tab === "live") loadLive();
-    if (tab === "clips") loadClips();
-    if (tab === "members") loadMembers();
-    if (tab === "report-card") loadReportCard();
-    if (tab === "comments") loadComments();
-  }, [tab]);
+    let active = true;
+    const load = async () => {
+      if (tab === "articles") await loadArticles();
+      else if (tab === "contributors") await loadApps();
+      else if (tab === "live") await loadLive();
+      else if (tab === "clips") await loadClips();
+      else if (tab === "members") await loadMembers();
+      else if (tab === "report-card") await loadReportCard();
+      else if (tab === "comments") await loadComments();
+    };
+    if (active) void load();
+    return () => { active = false; };
+  }, [tab, loadArticles, loadApps, loadLive, loadClips, loadMembers, loadReportCard, loadComments]);
 
   async function approveApp(id: string) {
     setMsg(null);
@@ -193,7 +198,7 @@ export default function AdminDashboard({ currentUserRole }: Props) {
   return (
     <div className="admin-cms">
       <nav className="admin-tabs" style={{ display: "flex", gap: "8px", margin: "16px 0", borderBottom: "3px solid var(--color-ink)", paddingBottom: 8 }}>
-        {["articles", "contributors", "live", "clips", "members", "report-card", "comments"].map((t) => (
+        {["create", "articles", "contributors", "live", "clips", "members", "report-card", "comments"].map((t) => (
           <button
             key={t}
             onClick={() => setTab(t as any)}
@@ -207,6 +212,13 @@ export default function AdminDashboard({ currentUserRole }: Props) {
       </nav>
 
       {msg && <div style={{ background: "var(--color-paper-soft)", border: "2px solid var(--color-ink)", padding: 8, marginBottom: 12 }}>{msg}</div>}
+
+      {tab === "create" && (
+        <section>
+          <h2 className="section-title">Create Content</h2>
+          <AdminContentUpload onSaved={() => { loadArticles(); }} />
+        </section>
+      )}
 
       {tab === "articles" && (
         <section>
@@ -475,6 +487,65 @@ export default function AdminDashboard({ currentUserRole }: Props) {
   );
 }
 
+function AdminContentUpload({ onSaved }: { onSaved: () => void }) {
+  const [file, setFile] = useState<File | null>(null);
+  const [folder, setFolder] = useState("images");
+  const [uploading, setUploading] = useState(false);
+  const [result, setResult] = useState<string | null>(null);
+
+  async function handleUpload() {
+    if (!file) return;
+    setUploading(true);
+    setResult(null);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      fd.append("folder", folder);
+      const headers: Record<string, string> = {};
+      try {
+        const { supabaseBrowser } = await import("@/lib/auth-client");
+        const { data } = await supabaseBrowser().auth.getSession();
+        const token = data.session?.access_token;
+        if (token) headers["Authorization"] = `Bearer ${token}`;
+      } catch {}
+      const res = await fetch("/api/admin/upload", { method: "POST", headers, body: fd });
+      const json = await res.json();
+      if (res.ok) {
+        setResult(json.url);
+        onSaved();
+      } else {
+        setResult(`Error: ${json.error}`);
+      }
+    } catch (e) {
+      setResult(`Error: ${e}`);
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  return (
+    <div style={{ border: "3px solid #111", padding: 12, background: "#fff", marginBottom: 16 }}>
+      <input type="file" onChange={(e) => setFile(e.target.files?.[0] || null)} style={{ marginBottom: 6 }} />
+      <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 6 }}>
+        <select value={folder} onChange={(e) => setFolder(e.target.value)}>
+          <option value="images">images</option>
+          <option value="audio">audio</option>
+          <option value="video">video</option>
+          <option value="pdf">pdf</option>
+          <option value="uploads">uploads</option>
+        </select>
+        <button onClick={handleUpload} disabled={!file || uploading} className="btn btn--primary">{uploading ? "Uploading..." : "Upload"}</button>
+      </div>
+      {result && (
+        <div>
+          <p className="fine-print">Result:</p>
+          <input readOnly value={result} style={{ width: "100%" }} onClick={(e) => e.currentTarget.select()} />
+        </div>
+      )}
+    </div>
+  );
+}
+
 // Simple inline MD-capable editor for articles (no extra deps)
 function AdminArticlesEditor({
   onSaved,
@@ -528,6 +599,40 @@ function AdminArticlesEditor({
     }
   }
 
+  async function saveWithToken() {
+    setSaving(true);
+    setPreview("");
+    try {
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      try {
+        const { supabaseBrowser } = await import("@/lib/auth-client");
+        const { data } = await supabaseBrowser().auth.getSession();
+        const token = data.session?.access_token;
+        if (token) headers["Authorization"] = `Bearer ${token}`;
+      } catch {}
+      const res = await fetch("/api/admin/articles", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          title: form.title || "Untitled",
+          slug: form.slug || `draft-${Date.now()}`,
+          body: form.body,
+          body_md: form.body,
+          status: form.status,
+          category: form.category || null,
+          county: form.county || null,
+        }),
+      });
+      if (res.ok) {
+        onSaved();
+        setForm({ title: "", slug: "", body: "", status: "draft", category: "", county: "" });
+        setPreview("");
+      }
+    } finally {
+      setSaving(false);
+    }
+  }
+
   return (
     <div style={{ border: "3px solid #111", padding: 12, background: "#fff" }}>
       <input placeholder="Title" value={form.title} onChange={(e) => update("title", e.target.value)} style={{ width: "100%", marginBottom: 6 }} />
@@ -552,7 +657,7 @@ function AdminArticlesEditor({
       {preview && (
         <div style={{ border: "1px solid #ccc", padding: 8, margin: "8px 0", background: "#faf8f0" }} dangerouslySetInnerHTML={{ __html: preview }} />
       )}
-      <button onClick={save} disabled={saving} className="btn btn--primary">{saving ? "Saving..." : "Save / Publish"}</button>
+      <button onClick={saveWithToken} disabled={saving} className="btn btn--primary">{saving ? "Saving..." : "Save / Publish"}</button>
       <span className="fine-print" style={{ marginLeft: 12 }}>Saves via gated /api/admin/articles (re-validates role)</span>
     </div>
   );

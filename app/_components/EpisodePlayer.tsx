@@ -47,7 +47,7 @@ export interface PlayableEpisode {
  *  Real video podcast episodes (e.g. colony-report video demo) surface toggle, VIDEO badge, visualizer, chapters from DB. */
 export default function EpisodePlayer({ episodes: episodesProp, episode: episodeProp, transcript }: { episodes?: PlayableEpisode[]; episode?: PlayableEpisode; transcript?: Transcript | null }) {
   // Support singular for per-ep dedicated page + array for library
-  const episodes = episodesProp || (episodeProp ? [episodeProp] : []);
+  const episodes = useMemo(() => episodesProp || (episodeProp ? [episodeProp] : []), [episodesProp, episodeProp]);
   const firstPlayable = useMemo(() => episodes.find((e) => e.audio_url) ?? null, [episodes]);
   const [activeId, setActiveId] = useState<string | null>(firstPlayable?.id ?? null);
   const [mode, setMode] = useState<"video" | "audio">("video"); // default video when available
@@ -105,6 +105,8 @@ export default function EpisodePlayer({ episodes: episodesProp, episode: episode
     }
   }, []);
 
+  const drawVisualizerRef = useRef<(() => void) | null>(null);
+
   const drawVisualizer = useCallback(() => {
     const canvas = canvasRef.current;
     const analyser = analyserRef.current;
@@ -118,7 +120,6 @@ export default function EpisodePlayer({ episodes: episodesProp, episode: episode
     analyser.getByteFrequencyData(freq);
 
     c.clearRect(0, 0, w, h);
-    // Editorial restrained: ~20-24 visible thin bars, centered, alarm color, minimal height.
     const barCount = Math.min(24, binCount);
     const barW = Math.max(1.5, (w / barCount) * 0.55);
     const gap = 1.5;
@@ -129,8 +130,6 @@ export default function EpisodePlayer({ episodes: episodesProp, episode: episode
       const idx = Math.floor((i / barCount) * binCount);
       const v = freq[idx] / 255;
       const bh = Math.max(1.5, v * maxBarH);
-      // Respect design token --color-alarm (brutalist alarm red) instead of raw hex.
-      // Falls back to the documented value if var not resolvable (e.g. SSR edge or reduced env).
       try {
         const varAlarm = (typeof document !== 'undefined')
           ? getComputedStyle(document.documentElement).getPropertyValue('--color-alarm').trim()
@@ -142,8 +141,10 @@ export default function EpisodePlayer({ episodes: episodesProp, episode: episode
       c.fillRect(x, h - bh, barW, bh);
       x += barW + gap;
     }
-    rafRef.current = requestAnimationFrame(drawVisualizer);
+    rafRef.current = requestAnimationFrame(drawVisualizerRef.current!);
   }, []);
+
+  useEffect(() => { drawVisualizerRef.current = drawVisualizer; }, [drawVisualizer]);
 
   const initVisualizer = useCallback((audio: HTMLAudioElement) => {
     stopVisualizer();
@@ -155,7 +156,6 @@ export default function EpisodePlayer({ episodes: episodesProp, episode: episode
       const ctx = audioCtxRef.current;
       if (ctx.state === "suspended") void ctx.resume();
 
-      // Only one MediaElementSource per audio element lifetime.
       if (!sourceRef.current || (sourceRef.current as any).mediaElement !== audio) {
         try { sourceRef.current?.disconnect(); } catch {}
         sourceRef.current = ctx.createMediaElementSource(audio);
@@ -235,14 +235,18 @@ export default function EpisodePlayer({ episodes: episodesProp, episode: episode
     episode: PlayableEpisode | null;
     globalId: string | null;
   }>({ playing: false, time: 0, episode: null, globalId: null });
-  handoffRef.current = {
-    playing: mediaPlaying,
-    time: mediaTime,
-    episode: active ?? null,
-    globalId: globalTrack?.episodeId ?? null,
-  };
+
+  useEffect(() => {
+    handoffRef.current = {
+      playing: mediaPlaying,
+      time: mediaTime,
+      episode: active ?? null,
+      globalId: globalTrack?.episodeId ?? null,
+    };
+  }, [mediaPlaying, mediaTime, active, globalTrack?.episodeId]);
+
   const miniPlayRef = useRef(miniPlay);
-  miniPlayRef.current = miniPlay;
+  useEffect(() => { miniPlayRef.current = miniPlay; }, [miniPlay]);
 
   useEffect(() => {
     return () => {

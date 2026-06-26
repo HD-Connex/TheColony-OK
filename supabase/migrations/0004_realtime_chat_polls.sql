@@ -56,17 +56,22 @@ ALTER TABLE live_polls ENABLE ROW LEVEL SECURITY;
 ALTER TABLE live_poll_votes ENABLE ROW LEVEL SECURITY;
 
 -- Read: public for chat (transparency) or member-only? Start public read for engagement, write member.
+DROP POLICY IF EXISTS "live_chat_read" ON live_chat_messages;
 CREATE POLICY "live_chat_read" ON live_chat_messages FOR SELECT USING (true); -- or (auth.role() = 'authenticated' AND is_member())
+DROP POLICY IF EXISTS "live_chat_insert" ON live_chat_messages;
 CREATE POLICY "live_chat_insert" ON live_chat_messages FOR INSERT WITH CHECK (
   auth.uid() IS NOT NULL AND
   COALESCE((SELECT is_member FROM public.members WHERE user_id = auth.uid()), false)
 );
 
 -- Similar for polls (read active, vote if member)
+DROP POLICY IF EXISTS "live_polls_read" ON live_polls;
 CREATE POLICY "live_polls_read" ON live_polls FOR SELECT USING (is_active OR auth.uid() = created_by);
+DROP POLICY IF EXISTS "live_polls_vote" ON live_poll_votes;
 CREATE POLICY "live_polls_vote" ON live_poll_votes FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
 
 -- Update/delete own or admin (simple)
+DROP POLICY IF EXISTS "live_chat_own_update" ON live_chat_messages;
 CREATE POLICY "live_chat_own_update" ON live_chat_messages FOR UPDATE USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
 -- Admin full via service or separate policy.
 

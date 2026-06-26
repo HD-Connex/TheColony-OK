@@ -18,6 +18,7 @@
     "@supabase/supabase-js": "^2.108.1",
     "@vercel/analytics": "^2.0.1",
     "@vercel/blob": "^2.4.0",
+<<<<<<< HEAD
     "docx": "^9.7.1",
     "fast-xml-parser": "^5.9.3",
     "framer-motion": "^12.40.0",
@@ -25,11 +26,18 @@
     "motion": "^12.40.0",
     "next": "^15.3.0",
     "pptxgenjs": "^4.0.1",
+=======
+    "fast-xml-parser": "^4.4.1",
+    "framer-motion": "^12.40.0",
+    "hls.js": "^1.6.16",
+    "next": "16.2.6",
+>>>>>>> f9102e8b6d4d5bce411db78ac71d57818d48e2d4
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "resend": "^4.0.0",
+    "sanitize-html": "^2.17.5",
     "stripe": "^22.2.0",
-    "web-vitals": "^4.2.4"
+    "ws": "^8.21.0"
   },
   "devDependencies": {
     "@playwright/test": "^1.51.1",
@@ -37,7 +45,17 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/sanitize-html": "^2.16.1",
+    "@types/ws": "^8.18.1",
+    "docx": "^9.7.1",
+    "eslint": "^9.39.4",
+    "eslint-config-next": "^16.2.9",
+    "pptxgenjs": "^4.0.1",
     "typescript": "^5",
+<<<<<<< HEAD
     "vitest": "^4.1.9"
+=======
+    "vitest": "^1.6.0"
+>>>>>>> f9102e8b6d4d5bce411db78ac71d57818d48e2d4
   }
 }
