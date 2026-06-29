@@ -34,7 +34,7 @@ interface LiveClientProps {
 
 export default function LiveClient({ isMember, user }: LiveClientProps) {
   const [stageItems, setStageItems] = useState<StageItem[]>([]);
-  const [activeTab, setActiveTab] = useState("live");
+  const [, setActiveTab] = useState("live");
   const [isLoading, setIsLoading] = useState(true);
   const [live, setLive] = useState<LiveEvent[]>([]);
   const [schedule, setSchedule] = useState<LiveEvent[]>([]);
