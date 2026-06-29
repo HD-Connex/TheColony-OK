@@ -1,0 +1,51 @@
+{
+  "name": "thecolony-mobile",
+  "version": "1.0.0",
+  "private": true,
+  "main": "expo-router/entry",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web",
+    "lint": "expo lint",
+    "typecheck": "tsc --noEmit",
+    "build:ios": "eas build --platform ios",
+    "build:android": "eas build --platform android",
+    "submit:ios": "eas submit --platform ios",
+    "submit:android": "eas submit --platform android"
+  },
+  "dependencies": {
+    "@react-native-community/slider": "^4.5.6",
+    "@shopify/flash-list": "^2.3.2",
+    "@supabase/supabase-js": "^2.108.2",
+    "@tanstack/react-query": "^5.101.1",
+    "expo": "~56.0.12",
+    "expo-constants": "~56.0.18",
+    "expo-haptics": "~56.0.3",
+    "expo-linking": "~56.0.14",
+    "expo-notifications": "~56.0.18",
+    "expo-router": "~56.2.11",
+    "expo-screen-orientation": "~56.0.5",
+    "expo-secure-store": "~56.0.4",
+    "expo-splash-screen": "~56.0.10",
+    "expo-status-bar": "~56.0.4",
+    "expo-video": "~56.1.4",
+    "nativewind": "^4.2.6",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "react-native": "^0.86.0",
+    "react-native-gesture-handler": "~3.0.2",
+    "react-native-reanimated": "~4.5.0",
+    "react-native-safe-area-context": "~5.8.0",
+    "react-native-screens": "~4.25.2",
+    "react-native-web": "~0.21.2",
+    "tailwindcss": "^3.4.17",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.26.9",
+    "@types/react": "~19.1.1",
+    "typescript": "~5.7.3"
+  }
+}
