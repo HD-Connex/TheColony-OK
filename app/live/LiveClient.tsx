@@ -98,10 +98,6 @@ export default function LiveClient({ isMember, user }: LiveClientProps) {
     fetchLiveData();
   }, []);
 
-  const handleTabChange = (tab: string) => {
-    setActiveTab(tab);
-  };
-
   return (
     <>
       {live[0] && (
