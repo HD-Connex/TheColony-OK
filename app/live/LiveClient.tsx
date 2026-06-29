@@ -6,12 +6,14 @@ import Link from "next/link";
 import Image from "next/image";
 import { whenLabel, formatLiveWhen } from "@/lib/format";
 import { STOCK } from "@/lib/media-map";
+import { safeStockImage, STOCK } from "@/lib/media-map";
 import { getLiveEvents, type LiveEvent } from "@/lib/live-events";
 import LiveStageMount from "../_components/LiveStageMount";
 import { type StageItem } from "../_components/LiveStage";
 import LivePlatformTabs from "../_components/LivePlatformTabs";
 import ClipsTeaser from "../_components/ClipsTeaser";
 import LiveChat from "../_components/LiveChat";
+import LiveNowBar from "../_components/LiveNowBar";
 import ThreadedComments from "../_components/ThreadedComments";
 import Countdown from "../_components/Countdown";
 import NewsletterSignup from "../_components/NewsletterSignup";
@@ -34,12 +36,14 @@ interface LiveClientProps {
 export default function LiveClient({ isMember, user }: LiveClientProps) {
   const [stageItems, setStageItems] = useState<StageItem[]>([]);
   const [, setActiveTab] = useState("live");
+  const [activeTab, setActiveTab] = useState("live");
   const [isLoading, setIsLoading] = useState(true);
   const [live, setLive] = useState<LiveEvent[]>([]);
   const [schedule, setSchedule] = useState<LiveEvent[]>([]);
   const [upcoming, setUpcoming] = useState<LiveEvent[]>([]);
   const [replays, setReplays] = useState<LiveEvent[]>([]);
   const [prefer247] = useState(false);
+  const [prefer247, setPrefer247] = useState(false);
   const [isOnAir, setIsOnAir] = useState(false);
   const [nextLive, setNextLive] = useState<LiveEvent | null>(null);
   const [countdownTarget, setCountdownTarget] = useState<string | null>(null);
@@ -96,6 +100,10 @@ export default function LiveClient({ isMember, user }: LiveClientProps) {
     
     fetchLiveData();
   }, []);
+
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+  };
 
   return (
     <>

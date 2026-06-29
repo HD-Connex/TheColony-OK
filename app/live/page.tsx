@@ -21,5 +21,8 @@ export default async function LivePage() {
   const isMember = user?.user ? await isActiveMember(user.user.id) : false;
 
   // Pass data to the client component
+  const { data: user } = await supabase.auth.getUser();
+  const isMember = user?.user ? await isActiveMember(user.user.id) : false;
+
   return <LiveClient isMember={isMember} user={user?.user} />;
 }
