@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import Image from "next/image";
 import { whenLabel, formatLiveWhen } from "@/lib/format";
-import { safeStockImage, STOCK } from "@/lib/media-map";
+import { STOCK } from "@/lib/media-map";
 import { getLiveEvents, type LiveEvent } from "@/lib/live-events";
 import LiveStageMount from "../_components/LiveStageMount";
 import { type StageItem } from "../_components/LiveStage";
