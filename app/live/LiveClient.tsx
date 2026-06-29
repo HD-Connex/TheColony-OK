@@ -40,7 +40,7 @@ export default function LiveClient({ isMember, user }: LiveClientProps) {
   const [schedule, setSchedule] = useState<LiveEvent[]>([]);
   const [upcoming, setUpcoming] = useState<LiveEvent[]>([]);
   const [replays, setReplays] = useState<LiveEvent[]>([]);
-  const [prefer247, setPrefer247] = useState(false);
+  const [prefer247] = useState(false);
   const [isOnAir, setIsOnAir] = useState(false);
   const [nextLive, setNextLive] = useState<LiveEvent | null>(null);
   const [countdownTarget, setCountdownTarget] = useState<string | null>(null);
