@@ -16,6 +16,11 @@ export default async function LivePage() {
   const cookieStore = cookies();
   const supabase = createClient(cookieStore);
 
+  // Fetch user and membership status on the server
+  const { data: user } = await supabase.auth.getUser();
+  const isMember = user?.user ? await isActiveMember(user.user.id) : false;
+
+  // Pass data to the client component
   const { data: user } = await supabase.auth.getUser();
   const isMember = user?.user ? await isActiveMember(user.user.id) : false;
 
