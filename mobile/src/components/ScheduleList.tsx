@@ -33,8 +33,8 @@ export function ScheduleList({
     );
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (
-    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
     <FlashList
       data={items}
       estimatedItemSize={88 as any}
@@ -50,7 +50,7 @@ export function ScheduleList({
       contentContainerStyle={styles.listContent}
     />
   );
-}
+}  // <-- ✅ Added this closing brace!
 
 interface ScheduleRowProps {
   item: QueueItem;
