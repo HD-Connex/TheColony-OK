@@ -36,9 +36,9 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
-    "dev": "next dev",
+    "dev": "next dev --webpack",
     "build": "next build",
-    "next-start": "next start"
-  },
-  "private": true
+    "next-start": "next start",
+    "test": "echo \"No tests specified\" && exit 0"
+  }
 }
