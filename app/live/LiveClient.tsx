@@ -12,7 +12,6 @@ import { type StageItem } from "../_components/LiveStage";
 import LivePlatformTabs from "../_components/LivePlatformTabs";
 import ClipsTeaser from "../_components/ClipsTeaser";
 import LiveChat from "../_components/LiveChat";
-import LiveNowBar from "../_components/LiveNowBar";
 import ThreadedComments from "../_components/ThreadedComments";
 import Countdown from "../_components/Countdown";
 import NewsletterSignup from "../_components/NewsletterSignup";
