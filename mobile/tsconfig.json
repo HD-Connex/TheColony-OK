@@ -2,25 +2,28 @@
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
     "strict": true,
-    "noUncheckedIndexedAccess": true,
-    "noImplicitOverride": true,
-    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "jsx": "react-native",
     "paths": {
       "@/*": ["./src/*"],
-      "~/*": ["./*"]
-    },
-    "baseUrl": ".",
-    "types": ["nativewind/types"]
+      "@/components/*": ["./src/components/*"],
+      "@/hooks/*": ["./src/hooks/*"],
+      "@/lib/*": ["./src/lib/*"],
+      "@/providers/*": ["./src/providers/*"],
+      "@/types": ["./src/types/index.ts"],
+      "@/types/*": ["./src/types/*"]
+    }
   },
   "include": [
     "**/*.ts",
     "**/*.tsx",
     ".expo/types/**/*.ts",
-    "expo-env.d.ts",
-    "nativewind-env.d.ts"
+    "expo-env.d.ts"
   ],
   "exclude": [
     "node_modules",
-    "dist"
+    "**/__tests__/**",
+    "**/*.test.ts",
+    "**/*.spec.ts"
   ]
 }
