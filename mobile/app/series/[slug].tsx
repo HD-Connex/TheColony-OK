@@ -105,9 +105,10 @@ export default function SeriesDetailScreen() {
       <Stack.Screen options={{ title: series.title }} />
       <ErrorBoundary>
         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+        // @ts-ignore
         <FlashList
           data={episodes}
-          estimatedItemSize={200 as any}
+          estimatedItemSize={200}
           keyExtractor={(item) => item.id}
           ListHeaderComponent={
             <View className="mb-4">

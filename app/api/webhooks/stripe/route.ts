@@ -103,11 +103,14 @@ async function syncSubscription(sub: Stripe.Subscription, eventId: string) {
 
   if (!member) {
     const customer = await stripe().customers.retrieve(customerId);
-    if (!customer.deleted && customer.metadata?.supabase_user_id) {
+    // Handle both wrapped and unwrapped customer responses
+    const customerData = (customer as any).data || customer;
+    
+    if (!customerData.deleted && customerData.metadata?.supabase_user_id) {
       await sb.from("members").upsert(
         {
-          user_id: customer.metadata.supabase_user_id,
-          email: customer.email,
+          user_id: customerData.metadata.supabase_user_id,
+          email: customerData.email,
           stripe_customer_id: customerId,
           updated_at: new Date().toISOString(),
         },

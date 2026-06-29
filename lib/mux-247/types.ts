@@ -38,7 +38,7 @@ export const ProgramSchema = z.object({
   created_at: z.string(),
   updated_at: z.string(),
   tags: z.array(z.string()),
-  custom_metadata: z.record(z.unknown()),
+  custom_metadata: z.record(z.string(), z.unknown()),
 });
 export type Program = z.infer<typeof ProgramSchema>;
 
@@ -124,7 +124,7 @@ export const PlaybackSessionSchema = z.object({
   browser: z.string().nullable(),
   country: z.string().nullable(),
   is_live: z.boolean(),
-  metadata: z.record(z.unknown()),
+  metadata: z.record(z.string(), z.unknown()),
 });
 export type PlaybackSession = z.infer<typeof PlaybackSessionSchema>;
 

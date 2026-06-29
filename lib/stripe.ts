@@ -9,7 +9,7 @@ export function stripe(): Stripe {
   if (!key) throw new Error("STRIPE_SECRET_KEY missing. See .env.example.");
   _stripe = new Stripe(key, {
     typescript: true,
-    apiVersion: "2026-05-27.dahlia",
+    apiVersion: "2026-06-24.dahlia",
     appInfo: { name: "The Colony OK", version: "0.1.0" },
   });
   return _stripe;
