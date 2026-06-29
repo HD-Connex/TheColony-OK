@@ -167,7 +167,7 @@ export async function ingestPodcastFeeds(): Promise<IngestResult> {
       const xml = await withRetry(async () => {
         const res = await fetch(show.rss_url, {
           headers: { "user-agent": "TheColonyOK/1.0 RSS" },
-          next: { revalidate: 0 },
+          // next: { revalidate: 0 },
           signal: AbortSignal.timeout(20_000),
         });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);

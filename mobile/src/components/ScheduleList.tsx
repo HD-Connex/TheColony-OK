@@ -34,10 +34,11 @@ export function ScheduleList({
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // @ts-ignore
   return (
     <FlashList
       data={items}
-      estimatedItemSize={88 as any}
+      estimatedItemSize={88}
       keyExtractor={(item, index) => `${item.programId}-${index}`}
       renderItem={({ item, index }: any) => (
         <ScheduleRow
