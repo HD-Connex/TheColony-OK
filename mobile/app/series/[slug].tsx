@@ -108,7 +108,6 @@ export default function SeriesDetailScreen() {
         // @ts-ignore
         <FlashList
           data={episodes}
-          estimatedItemSize={200}
           keyExtractor={(item) => item.id}
           ListHeaderComponent={
             <View className="mb-4">

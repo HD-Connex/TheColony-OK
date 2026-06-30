@@ -194,7 +194,6 @@ export default function BrowseScreen() {
         // @ts-ignore
         <FlashList
           data={filteredPrograms}
-          estimatedItemHeight={200}
           numColumns={2}
           keyExtractor={(item) => item.id}
           renderItem={({ item }: any) => (
