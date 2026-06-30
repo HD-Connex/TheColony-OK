@@ -1,16 +1,12 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
-  "crons": [
-    {
-      "path": "/api/cron/ingest-rss",
-      "schedule": "*/20 * * * *"
-    },
-    {
-      "path": "/api/cron/poll-feeds",
-      "schedule": "*/20 * * * *"
-    }
-  ],
+  // "crons": [
+  // Hobby plan = 1 cron/day. Two */20 jobs need Pro or alternative (Upstash/Netlify/etc).
+  //   { "path": "/api/cron/ingest-rss",     "schedule": "*/20 * * * *" },
+  //   { "path": "/api/cron/poll-feeds",     "schedule": "*/20 * * * *" }
+  // ],
+  
   "headers": [
     {
       "source": "/.well-known/assetlinks.json",
