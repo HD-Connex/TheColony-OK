@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/admin-auth";
 import { supabaseAdmin } from "@/lib/supabase";
+import { log } from "@/lib/log";
 
 export async function POST(req: Request) {
   const auth = await requireAdmin(req, "editor");
@@ -30,7 +31,10 @@ export async function POST(req: Request) {
     pub_date: pub_date || new Date().toISOString(),
   }).select().single();
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+  if (error) {
+    log.error("[admin/episodes] insert failed", error);
+    return NextResponse.json({ error: "Could not save episode" }, { status: 400 });
+  }
   return NextResponse.json({ ok: true, episode: data });
 }
 

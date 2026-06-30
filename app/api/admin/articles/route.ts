@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/admin-auth";
 import { adminListArticles, adminUpsertArticle } from "@/lib/articles";
+import { log } from "@/lib/log";
 
 /** List articles (any status) for admin. */
 export async function GET(req: Request) {
@@ -23,6 +24,7 @@ export async function POST(req: Request) {
     const saved = await adminUpsertArticle(body);
     return NextResponse.json({ ok: true, article: saved });
   } catch (e: any) {
-    return NextResponse.json({ error: e.message || "Save failed" }, { status: 400 });
+    log.error("[admin/articles] upsert failed", e);
+    return NextResponse.json({ error: "Save failed" }, { status: 400 });
   }
 }

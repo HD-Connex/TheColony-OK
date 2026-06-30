@@ -103,9 +103,9 @@ Add a second job to `ci.yml` (minimum: typecheck + lint; ideal: EAS build on tag
 > routes: tips, contributors/apply, articles, admin/report-card, newsletter), D-3 ✅
 > (empty catches in webhooks/stripe, cron/weekly-digest, jobs/transcribe), D-4 ✅
 > (public routes: progress, watchlist, contributors/follow now log + return generic
-> bodies). **Still open:** D-4 for *admin-gated* routes (admin/episodes, admin/live/start,
-> admin/contributors/applications, admin/articles — leak only to authenticated admins,
-> low risk), plus D-5..D-9 below.
+> bodies). D-4 admin routes ✅ (admin/episodes, admin/live/start,
+> admin/contributors/applications, admin/articles now log + generic). D-5 ✅. D-8 was
+> **already satisfied** in code (false positive — see below). **Still open:** D-6, D-7, D-9.
 
 - **D-1. No `Sentry.captureException` anywhere.** Enhance `lib/log.ts` `error()` to
   also call `Sentry.captureException` when a DSN is set, then every existing
@@ -142,9 +142,10 @@ Add a second job to `ci.yml` (minimum: typecheck + lint; ideal: EAS build on tag
   un-exclude route tests in `vitest.config.ts` only **after** adding `vi.mock()`
   for Supabase/Blob/Mux. (Until mocks exist, leave them excluded — running them
   against real services is worse than not running them.)
-- **D-8. Rate limiter falls back to in-memory Map** (ineffective on serverless) →
-  require Upstash in production: throw from `lib/rate-limit.ts` if
-  `UPSTASH_REDIS_REST_URL` is unset and `NODE_ENV === 'production'`.
+- **D-8. ✅ Already satisfied (audit false positive).** `lib/rate-limit.ts` already
+  fails **closed** in production: when Upstash is unconfigured and `NODE_ENV ===
+  'production'`, `rateLimit()` returns `{ ok: false, ... }` (callers emit 429) rather
+  than silently using the in-memory Map. The Map is dev-only. No change needed.
 - **D-9. Mobile a11y label** `ScheduleList.tsx` image → add
   `accessibilityLabel={item.title}` (verify the row isn't already wrapped in a
   labeled Pressable, like ProgramCard was).

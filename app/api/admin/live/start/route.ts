@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/admin-auth";
 import { createLiveStream, addSimulcastTargets } from "@/lib/mux";
 import { supabaseAdmin } from "@/lib/supabase";
+import { log } from "@/lib/log";
 
 /**
  * Admin "Go Live": creates real Mux live stream, stores id + stream_key on a new or latest idle live_event.
@@ -68,6 +69,7 @@ export async function POST(req: Request) {
       // stream_key intentionally omitted from normal JSON response for safety; it's in DB for ingest
     });
   } catch (e: any) {
-    return NextResponse.json({ error: e.message || "Mux live create failed" }, { status: 500 });
+    log.error("[admin/live/start] failed", e);
+    return NextResponse.json({ error: "Mux live create failed" }, { status: 500 });
   }
 }
