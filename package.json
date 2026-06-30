@@ -23,6 +23,7 @@
     "stripe": "^22.3.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.61.1",
     "@types/jest": "^30.0.0",
     "@types/node": "^26.0.1",
     "@types/react": "~19.2.2",
