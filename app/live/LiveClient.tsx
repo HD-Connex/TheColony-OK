@@ -6,8 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { whenLabel, formatLiveWhen } from "@/lib/format";
 import { STOCK } from "@/lib/media-map";
-import { safeStockImage, STOCK } from "@/lib/media-map";
-import { getLiveEvents, type LiveEvent } from "@/lib/live-events";
+import { getLiveEvents, eventsToStageItems, type LiveEvent } from "@/lib/live-events";
 import LiveStageMount from "../_components/LiveStageMount";
 import { type StageItem } from "../_components/LiveStage";
 import LivePlatformTabs from "../_components/LivePlatformTabs";
@@ -17,7 +16,7 @@ import LiveNowBar from "../_components/LiveNowBar";
 import ThreadedComments from "../_components/ThreadedComments";
 import Countdown from "../_components/Countdown";
 import NewsletterSignup from "../_components/NewsletterSignup";
-import Paywall from "../_components/Paywall";
+import { Paywall } from "../_components/Paywall";
 import Breadcrumbs from "../_components/Breadcrumbs";
 import PageHeader from "../_components/PageHeader";
 import JsonLd from "../_components/JsonLd";
@@ -36,14 +35,12 @@ interface LiveClientProps {
 export default function LiveClient({ isMember, user }: LiveClientProps) {
   const [stageItems, setStageItems] = useState<StageItem[]>([]);
   const [, setActiveTab] = useState("live");
-  const [activeTab, setActiveTab] = useState("live");
   const [isLoading, setIsLoading] = useState(true);
   const [live, setLive] = useState<LiveEvent[]>([]);
   const [schedule, setSchedule] = useState<LiveEvent[]>([]);
   const [upcoming, setUpcoming] = useState<LiveEvent[]>([]);
   const [replays, setReplays] = useState<LiveEvent[]>([]);
   const [prefer247] = useState(false);
-  const [prefer247, setPrefer247] = useState(false);
   const [isOnAir, setIsOnAir] = useState(false);
   const [nextLive, setNextLive] = useState<LiveEvent | null>(null);
   const [countdownTarget, setCountdownTarget] = useState<string | null>(null);
@@ -53,19 +50,22 @@ export default function LiveClient({ isMember, user }: LiveClientProps) {
   useEffect(() => {
     async function fetchLiveData() {
       try {
-        const events = await getLiveEvents();
+        // getLiveEvents() returns a LiveBundle ({ live, upcoming, replays });
+        // flatten to a LiveEvent[] so the date-based logic below keeps working.
+        const bundle = await getLiveEvents();
+        const events: LiveEvent[] = [...bundle.live, ...bundle.upcoming, ...bundle.replays];
         setLive(events);
         
         const now = new Date();
         const current = events.find(e => 
           e.actual_start && new Date(e.actual_start) <= now && 
-          (!e.actual_end || new Date(e.actual_end) >= now)
+          (!e.ended_at || new Date(e.ended_at) >= now)
         );
         const upcomingEvents = events.filter(e => 
           e.scheduled_start && new Date(e.scheduled_start) > now
         );
         const replaysList = events.filter(e => 
-          e.actual_end && new Date(e.actual_end) < now
+          e.ended_at && new Date(e.ended_at) < now
         );
         
         setSchedule(events);
@@ -75,21 +75,17 @@ export default function LiveClient({ isMember, user }: LiveClientProps) {
         setNextLive(current || upcomingEvents[0] || null);
         
         if (current || upcomingEvents[0]) {
-          const target = current?.actual_end || upcomingEvents[0]?.scheduled_start || null;
+          const target = current?.ended_at || upcomingEvents[0]?.scheduled_start || null;
           setCountdownTarget(target);
         }
 
         setPrimaryLive(current || upcomingEvents[0] || null);
         setPrimaryIsOffRecord(current?.title?.includes('Off the Record') || false);
 
-        const items: StageItem[] = [];
-        if (current) {
-          items.push({
-            type: "event",
-            data: current,
-          });
-        }
-        
+        // Map the current LiveEvent to a StageItem via the shared helper
+        // (StageItem is { id, title, kind, src, isLive, when, locked, tierLabel, visibility }).
+        const items: StageItem[] = current ? eventsToStageItems([current], whenLabel) : [];
+
         setStageItems(items);
       } catch (error) {
         console.error("Failed to fetch live data:", error);

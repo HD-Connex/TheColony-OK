@@ -13,14 +13,11 @@ export const metadata = {
 };
 
 export default async function LivePage() {
-  const cookieStore = cookies();
+  // Next.js 16: cookies() is async and must be awaited.
+  const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
 
   // Fetch user and membership status on the server
-  const { data: user } = await supabase.auth.getUser();
-  const isMember = user?.user ? await isActiveMember(user.user.id) : false;
-
-  // Pass data to the client component
   const { data: user } = await supabase.auth.getUser();
   const isMember = user?.user ? await isActiveMember(user.user.id) : false;
 
