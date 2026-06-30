@@ -105,7 +105,9 @@ export async function GET(req: Request) {
         intro,
       });
       sent++;
-    } catch {}
+    } catch (err) {
+      log.warn("[weekly-digest] send failed", err);
+    }
   }
 
   return NextResponse.json({ ok: true, sent, recipients: (subs || []).length });

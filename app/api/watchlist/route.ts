@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getUserFromRequest, isUuid } from "@/lib/auth-server";
 import { supabaseAdmin } from "@/lib/supabase";
 import { rateLimit, tooManyRequests } from "@/lib/rate-limit";
+import { log } from "@/lib/log";
 
 export const runtime = "nodejs";
 
@@ -22,7 +23,10 @@ export async function GET(req: Request) {
     .eq("series_id", seriesId)
     .maybeSingle();
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) {
+    log.error("[watchlist] lookup failed", error);
+    return NextResponse.json({ error: "Database error" }, { status: 500 });
+  }
 
   return NextResponse.json({ inWatchlist: Boolean(data) });
 }
@@ -60,7 +64,10 @@ export async function POST(req: Request) {
     .eq("series_id", seriesId)
     .maybeSingle();
 
-  if (lookupError) return NextResponse.json({ error: lookupError.message }, { status: 500 });
+  if (lookupError) {
+    log.error("[watchlist] toggle lookup failed", lookupError);
+    return NextResponse.json({ error: "Database error" }, { status: 500 });
+  }
 
   if (existing) {
     const { error } = await sb
@@ -69,7 +76,10 @@ export async function POST(req: Request) {
       .eq("user_id", user.id)
       .eq("series_id", seriesId);
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) {
+      log.error("[watchlist] remove failed", error);
+      return NextResponse.json({ error: "Database error" }, { status: 500 });
+    }
     return NextResponse.json({ inWatchlist: false });
   }
 
@@ -78,7 +88,10 @@ export async function POST(req: Request) {
     series_id: seriesId,
   });
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) {
+    log.error("[watchlist] add failed", error);
+    return NextResponse.json({ error: "Database error" }, { status: 500 });
+  }
 
   return NextResponse.json({ inWatchlist: true });
 }

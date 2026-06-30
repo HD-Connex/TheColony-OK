@@ -4,6 +4,7 @@ import { sanitizeHtml, stripHtml } from "@/lib/sanitize";
 import { supabaseAdmin } from "@/lib/supabase";
 import { sendTipAckEmail } from "@/lib/email";
 import { isEmail } from "@/lib/validate";
+import { log } from "@/lib/log";
 
 export const runtime = "nodejs";
 
@@ -48,7 +49,7 @@ export async function POST(req: Request) {
   });
 
   if (error) {
-    console.error("[tips] insert error", error.message);
+    log.error("[tips] insert error", error);
     return NextResponse.json({ error: "Could not store submission." }, { status: 503 });
   }
 

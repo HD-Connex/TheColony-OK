@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getUserFromRequest, isUuid } from "@/lib/auth-server";
 import { supabaseAdmin } from "@/lib/supabase";
 import { rateLimit, tooManyRequests } from "@/lib/rate-limit";
+import { log } from "@/lib/log";
 
 export const runtime = "nodejs";
 
@@ -66,7 +67,10 @@ export async function POST(req: Request) {
     { onConflict: "user_id,episode_id" },
   );
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) {
+    log.error("[progress] upsert failed", error);
+    return NextResponse.json({ error: "Could not save progress" }, { status: 500 });
+  }
 
   return NextResponse.json({ ok: true });
 }

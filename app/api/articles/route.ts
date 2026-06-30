@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getArticles } from "@/lib/articles";
+import { log } from "@/lib/log";
 
 export const runtime = "nodejs";
 export const revalidate = 60;
@@ -19,7 +20,7 @@ export async function GET(req: Request) {
     const articles = await getArticles({ county, limit });
     return NextResponse.json({ articles });
   } catch (e) {
-    console.error("[api/articles] failed", e);
+    log.error("[api/articles] failed", e);
     return NextResponse.json({ articles: [] });
   }
 }

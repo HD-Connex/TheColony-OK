@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/admin-auth";
 import { supabaseAdmin } from "@/lib/supabase";
+import { log } from "@/lib/log";
 
 /**
  * Phase 4 admin API for Oklahoma Report Card.
@@ -27,7 +28,7 @@ export async function GET(req: Request) {
     issues = i ?? [];
     grades = g ?? [];
   } catch (e: any) {
-    console.error("[admin/report-card] load error (tables may be missing - apply 0024 migration)", e?.message);
+    log.error("[admin/report-card] load error (tables may be missing - apply 0024 migration)", e);
   }
   return NextResponse.json({ officials, issues, grades });
 }
@@ -91,6 +92,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ error: "Unknown action" }, { status: 400 });
   } catch (e: any) {
-    return NextResponse.json({ error: e?.message || "Failed" }, { status: 500 });
+    log.error("[admin/report-card] write failed", e);
+    return NextResponse.json({ error: "Operation failed" }, { status: 500 });
   }
 }

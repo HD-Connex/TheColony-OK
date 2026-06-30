@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getUserFromRequest, isUuid } from "@/lib/auth-server";
 import { supabaseAdmin } from "@/lib/supabase";
 import { rateLimit, tooManyRequests } from "@/lib/rate-limit";
+import { log } from "@/lib/log";
 
 export const runtime = "nodejs";
 
@@ -23,7 +24,10 @@ export async function GET(req: Request) {
     .eq("contributor_id", contributorId)
     .maybeSingle();
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) {
+    log.error("[contributor-follow] lookup failed", error);
+    return NextResponse.json({ error: "Database error" }, { status: 500 });
+  }
 
   return NextResponse.json({ following: Boolean(data) });
 }
@@ -61,7 +65,10 @@ export async function POST(req: Request) {
     .eq("contributor_id", contributorId)
     .maybeSingle();
 
-  if (lookupError) return NextResponse.json({ error: lookupError.message }, { status: 500 });
+  if (lookupError) {
+    log.error("[contributor-follow] toggle lookup failed", lookupError);
+    return NextResponse.json({ error: "Database error" }, { status: 500 });
+  }
 
   if (existing) {
     const { error } = await sb
@@ -70,7 +77,10 @@ export async function POST(req: Request) {
       .eq("user_id", user.id)
       .eq("contributor_id", contributorId);
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) {
+      log.error("[contributor-follow] unfollow failed", error);
+      return NextResponse.json({ error: "Database error" }, { status: 500 });
+    }
     return NextResponse.json({ following: false });
   }
 
@@ -79,7 +89,10 @@ export async function POST(req: Request) {
     contributor_id: contributorId,
   });
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) {
+    log.error("[contributor-follow] follow failed", error);
+    return NextResponse.json({ error: "Database error" }, { status: 500 });
+  }
 
   return NextResponse.json({ following: true });
 }

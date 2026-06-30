@@ -46,7 +46,7 @@ export default function MiniPlayer() {
 
       {track.coverUrl ? (
         <div className="miniplayer__art">
-          <Image src={track.coverUrl} alt="" fill sizes="40px" className="img-cover" />
+          <Image src={track.coverUrl} alt={track.title ? `Cover art for ${track.title}` : "Cover art"} fill sizes="40px" className="img-cover" />
         </div>
       ) : null}
 

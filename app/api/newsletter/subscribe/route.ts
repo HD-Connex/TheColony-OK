@@ -6,6 +6,7 @@ import { getUserFromRequest } from "@/lib/auth-server";
 // Use the new Supabase SSR client (utils/supabase/server) where possible for session/user resolution alongside bearer token auth.
 import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
+import { log } from "@/lib/log";
 
 const SITE = process.env.NEXT_PUBLIC_SITE_URL || "https://thecolonyok.com";
 
@@ -102,7 +103,7 @@ export async function POST(req: Request) {
   const { error } = await sb.from("newsletter_subscribers").upsert(upsertPayload, { onConflict: "email" });
 
   if (error) {
-    console.error("[newsletter] upsert", error);
+    log.error("[newsletter] upsert", error);
     return NextResponse.json({ error: "Could not subscribe" }, { status: 503 });
   }
 

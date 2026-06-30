@@ -167,10 +167,14 @@ export async function POST(req: Request) {
               embedding: vec,
               chunk_index: Math.floor(seg.start || 0),
             });
-          } catch {}
+          } catch (err) {
+            log.warn("[transcribe] embedding insert failed", err);
+          }
         }
       }
-    } catch {}
+    } catch (err) {
+      log.warn("[transcribe] embedding step failed", err);
+    }
 
     // Phase 3 polish: LLM summaries + chapters from transcript (uses same Groq/OpenAI key as Whisper)
     // Stores chapters in a simple way (for episodes this would upsert to episodes.chapters jsonb + summary).

@@ -1,29 +1,60 @@
-# thecolony-app
+# The Colony OK
 
-Production app for **The Colony OK** — Oklahoma's reader-funded conservative press (stories, podcasts, live, $4.99 membership). Deployed at [thecolonyok.com](https://thecolonyok.com) / [thecolony-app.vercel.app](https://thecolony-app.vercel.app) (Vercel project thecolony-app only).
+Production web + mobile app for **The Colony OK** — Oklahoma's reader-funded conservative press (stories, podcasts, 24/7 live, membership). Deployed at [thecolonyok.com](https://thecolonyok.com).
 
-**Design source / Legacy:** `_archived_TheColony/legacy/` (patriotic brutalist HTML/CSS + full prior Next.js impl; kept as historical reference only).
+- **Web:** Next.js 15 (App Router, React 19), deployed on Vercel.
+- **Mobile:** Expo / React Native (SDK 56) in [`mobile/`](./mobile).
+- **Backend:** Supabase (Postgres + Auth + Realtime), Stripe (membership), Mux (video/live), Resend (email), Sentry (errors).
 
-**Production project only:** thecolony-app (GitHub hizzy-made-it/thecolony-app + Vercel thecolony-app project). No other "thecolony" or "thecolony-ok" roots active (thecolony-ok archived as planning-only; Vercel "thecolony" project removed after consolidation verification).
+## Repository layout
 
-Phase 7 multi-agent build artifacts (with D+15+ extensions ported from prior tracks):
-- ARCHITECTURE_LAYERS.md (Layers 10-15+)
-- COMPETITIVE_MATRIX.md (vs Blaze/DW/Newsmax + local OK moat)
-- docs/ (LOCAL_OK_CONTENT_STRATEGY.md, MOBILE_TWA_PWA_STRATEGY.md, RICH_COMMENTS_MEMBER_CLIPS.md, AGENT_SWARM_TEMPLATES.md, MONITORING.md — ported for completeness)
+| Path | Purpose |
+|------|---------|
+| `app/` | Next.js App Router routes, API routes, and components |
+| `lib/` | Shared server/client utilities (auth, supabase, env, logging) |
+| `mobile/` | Expo / React Native app |
+| `supabase/` | Database migrations and edge functions |
+| `tests/` | Playwright E2E tests |
 
-See docs in root for TRACK D+15 AUDITOR/VERIFIER COMPLETE report.
+## Getting started (web)
 
-**Key Extensions:** full CI + Sentry (proposed), formal swarm templates + best-of-n (agentic), rich comments + member clips, local OK/rural content strategy + partnerships, TWA/PWA/mobile, "The Colony vs Blaze" page, PWA sw + paywall + enhanced stripe/monetization.
+```bash
+pnpm install
+cp .env.example .env.local   # then fill in your own values
+pnpm dev                     # http://localhost:3000
+```
 
-Created via Phase 7 Auditor/Verifier process (2026-06-08). Consolidated to thecolony-app only.
+### Useful scripts
 
+| Script | Description |
+|--------|-------------|
+| `pnpm dev` | Run the Next.js dev server |
+| `pnpm build` | Production build |
+| `pnpm lint` | ESLint |
+| `pnpm test` | Unit tests |
 
-## D: DRIVE MALFUNCTION — PROGRESS SAVED (added commit)
+## Getting started (mobile)
 
-D:\\1Projects\\thecolony-app drive malfunctioned/disappeared. Per user explicit request, combined/cleaned session (only the update *routes* from proposed-changes/), and saved **all** edits exclusively to GitHub under hizzy-made-it/thecolony-app (this repo only; TARGET_RULE enforced, no thecolony-ok).
+See [`mobile/README.md`](./mobile/README.md). In short:
 
-Pushed in this commit: the full Phase 7 media perfection (EpisodePlayer with Spotify-style video+audio+real viz+PiP+chapters, LiveStage with persistent 24/7 + framer queue + realtime LiveChat/Poll, per-ep dedicated pages with JsonLd, lib transcripts/live-247, 0003/0004 supabase migrations for video/realtime, supporting TRACK perfection docs + seed + rail FKs + images mapping note).
+```bash
+cd mobile
+pnpm install
+cp .env.example .env.local   # fill in EXPO_PUBLIC_* values
+pnpm start
+```
 
-**Recover:** git clone this repo to your restored/new local. Place images, migrate, seed, npm run dev. All progress preserved. See DRIVE_MALFUNCTION_NOTE.md .
+## Environment variables
 
-Continue the work from here (local launch first, then verification, Stripe, etc.).
+Copy `.env.example` to `.env.local` and fill in your own values. Never commit
+real secrets. For production/preview, configure variables in **Vercel → Project
+→ Environment Variables**. Boot-time validation lives in `lib/env.ts`.
+
+## Deployment
+
+The web app deploys to Vercel from `main`. CI (`.github/workflows/ci.yml`) runs
+type-check, tests, build, and E2E on every push and pull request.
+
+## License
+
+MIT — see [LICENSE](./LICENSE).

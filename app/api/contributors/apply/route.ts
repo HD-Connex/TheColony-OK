@@ -4,6 +4,7 @@ import { isContributorPlanId } from "@/lib/contributor-plans";
 import { supabaseAdmin } from "@/lib/supabase";
 import { rateLimit, keyFromRequest, tooManyRequests } from "@/lib/rate-limit";
 import { isEmail } from "@/lib/validate";
+import { log } from "@/lib/log";
 
 export const runtime = "nodejs";
 
@@ -71,7 +72,7 @@ export async function POST(req: Request) {
   });
 
   if (error) {
-    console.error("contributor_applications insert:", error.message);
+    log.error("contributor_applications insert:", error);
     return NextResponse.json(
       { error: "Could not save application. Confirm migrations are applied." },
       { status: 503 },

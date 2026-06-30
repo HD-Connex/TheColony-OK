@@ -20,6 +20,7 @@ export default function ContinueRail({ title = "Continue Watching", compact = fa
   const [items, setItems] = useState<Array<{ id: string; position: number; label: string }>>([]);
 
   useEffect(() => {
+    let cancelled = false;
     const load = async () => {
       const collected: Array<{ id: string; position: number; label: string; ts: number }> = [];
 
@@ -81,12 +82,15 @@ export default function ContinueRail({ title = "Continue Watching", compact = fa
         .slice(0, 4)
         .map(({ id, position, label }) => ({ id, position, label }) as { id: string; position: number; label: string });
 
-      setItems(sorted);
+      if (!cancelled) setItems(sorted);
     };
 
     if (!authLoading) {
       load();
     }
+    return () => {
+      cancelled = true;
+    };
   }, [user, authLoading]);
 
   if (items.length === 0) return null;

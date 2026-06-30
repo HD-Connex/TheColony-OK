@@ -3,6 +3,7 @@ import type Stripe from "stripe";
 import { supabaseAdmin } from "@/lib/supabase";
 import { computeMemberFromSubscription, stripe, tierForPriceId } from "@/lib/stripe";
 import { sendReceiptEmail, sendCancelEmail, sendWelcomeEmail } from "@/lib/email";
+import { log } from "@/lib/log";
 
 export const runtime = "nodejs";
 
@@ -146,7 +147,9 @@ async function syncSubscription(sub: Stripe.Subscription, eventId: string) {
     try {
       const cust = await stripe().customers.retrieve(customerId);
       if (!cust.deleted) notifyEmail = (cust as any).email ?? null;
-    } catch {}
+    } catch (err) {
+      log.warn("[stripe] customer email lookup failed", err);
+    }
   }
 
   await sb
