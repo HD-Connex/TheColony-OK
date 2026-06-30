@@ -12,7 +12,7 @@ import { supabaseAdmin } from "@/lib/supabase";
 import { requireAdmin, requireServiceToken } from "@/lib/admin-auth";
 import { withRetry } from "@/lib/jobs";
 import { log } from "@/lib/log";
-import { assertPublicHttpUrl } from "@/lib/safe-url";
+import { assertPublicHttpsUrlString } from "@/lib/safe-url";
 
 export const runtime = 'nodejs';
 export const maxDuration = 300;
@@ -48,10 +48,10 @@ function resolveProvider(): WhisperProvider | null {
 }
 
 async function transcribeUrl(url: string, provider: WhisperProvider): Promise<string | any> {
-  // SSRF guard: validate before fetching a DB/body-supplied URL. Fetch the parsed
-  // URL object so the value passed to fetch() is the validated one.
-  const safeUrl = await assertPublicHttpUrl(url);
-  const media = await fetch(safeUrl, { signal: AbortSignal.timeout(60_000) });
+  // SSRF guard: validate before fetching a DB/body-supplied URL and use the
+  // normalized sanitized URL string for the fetch sink.
+  const safeUrl = await assertPublicHttpsUrlString(url);
+  const media = await fetch(safeUrl, { signal: AbortSignal.timeout(60_000), redirect: 'error' });
   if (!media.ok) throw new Error(`Failed to fetch media (${media.status})`);
   const blob = await media.blob();
   if (blob.size > MAX_AUDIO_BYTES) {

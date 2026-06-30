@@ -68,8 +68,8 @@ function isBlockedHostname(hostname: string): boolean {
 }
 
 /**
- * Validate that `raw` is a public http(s) URL safe to fetch server-side.
- * Throws on invalid/blocked URLs. Returns the parsed URL — pass it to fetch().
+ * Validate that `raw` is a public HTTPS URL safe to fetch server-side.
+ * Throws on invalid/blocked URLs. Returns the parsed URL.
  *
  * IP-literal hostnames are checked directly against the block list.
  * DNS hostnames are resolved to all A/AAAA records — if any resolved address
@@ -82,8 +82,14 @@ export async function assertPublicHttpUrl(raw: string): Promise<URL> {
   } catch {
     throw new Error("Invalid URL");
   }
-  if (u.protocol !== "https:" && u.protocol !== "http:") {
+  if (u.protocol !== "https:") {
     throw new Error(`Unsupported URL scheme: ${u.protocol}`);
+  }
+  if (u.username || u.password) {
+    throw new Error("URL must not include credentials");
+  }
+  if (u.port && u.port !== "443") {
+    throw new Error("URL port is not allowed");
   }
   if (!isAllowedHost(u.hostname)) {
     throw new Error("URL host is not in ALLOWED_TRANSCRIBE_MEDIA_HOSTS allow-list");
@@ -116,4 +122,9 @@ export async function assertPublicHttpUrl(raw: string): Promise<URL> {
   }
 
   return u;
+}
+
+export async function assertPublicHttpsUrlString(raw: string): Promise<string> {
+  const u = await assertPublicHttpUrl(raw);
+  return u.toString();
 }
