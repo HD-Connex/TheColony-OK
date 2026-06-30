@@ -174,7 +174,7 @@ $$;
 -- ── 3. Views ──
 
 -- Current program: the active program based on schedule position + wall clock
-CREATE OR REPLACE VIEW public.current_program AS
+CREATE OR REPLACE VIEW public.current_program WITH (security_invoker = true) AS
 WITH ordered AS (
   SELECT
     s.id AS schedule_id,
@@ -201,7 +201,7 @@ SELECT * FROM ordered
 WHERE rn = 1;
 
 -- Upcoming queue: the next N programs after the current one
-CREATE OR REPLACE VIEW public.upcoming_queue AS
+CREATE OR REPLACE VIEW public.upcoming_queue WITH (security_invoker = true) AS
 WITH ordered AS (
   SELECT
     s.id AS schedule_id,

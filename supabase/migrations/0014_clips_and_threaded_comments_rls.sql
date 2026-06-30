@@ -42,9 +42,13 @@ alter table clips enable row level security;
 alter table threaded_comments enable row level security;
 
 -- Policies (owner full, public approved clips, member comments)
+drop policy if exists "clips_owner_all" on clips;
 create policy "clips_owner_all" on clips for all using (auth.uid() = user_id);
+drop policy if exists "clips_public_approved_read" on clips;
 create policy "clips_public_approved_read" on clips for select using (approved = true);
+drop policy if exists "comments_owner_all" on threaded_comments;
 create policy "comments_owner_all" on threaded_comments for all using (auth.uid() = user_id);
+drop policy if exists "comments_public_read" on threaded_comments;
 create policy "comments_public_read" on threaded_comments for select using (true); -- tighten with member check via entitlements later
 
 -- Note: For premium member comments, integrate with existing members table or gift/perks (per vercel:auth + audit stubs).

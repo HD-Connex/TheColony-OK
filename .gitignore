@@ -22,6 +22,10 @@ terminals/
 .serena/
 .config/
 bun.lock
+
+# local agent skills / MCP config (tooling-specific, not project source)
+.agents/
+.mcp.json
 test-results/
 
 # nested repo

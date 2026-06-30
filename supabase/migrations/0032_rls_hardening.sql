@@ -14,21 +14,26 @@
 drop policy if exists "clips_owner_all" on public.clips;
 drop policy if exists "clips_public_approved_read" on public.clips;
 
+drop policy if exists "clips_owner_select" on public.clips;
 create policy "clips_owner_select" on public.clips
   for select using (auth.uid() = user_id);
 
+drop policy if exists "clips_owner_insert" on public.clips;
 create policy "clips_owner_insert" on public.clips
   for insert with check (auth.uid() = user_id and approved = false);
 
 -- Owners may edit their own clips but can never set/keep approved = true.
+drop policy if exists "clips_owner_update" on public.clips;
 create policy "clips_owner_update" on public.clips
   for update using (auth.uid() = user_id)
   with check (auth.uid() = user_id and approved = false);
 
+drop policy if exists "clips_owner_delete" on public.clips;
 create policy "clips_owner_delete" on public.clips
   for delete using (auth.uid() = user_id);
 
 -- Admins/editors moderate any clip (approve, edit, remove).
+drop policy if exists "clips_admin_all" on public.clips;
 create policy "clips_admin_all" on public.clips
   for all
   using (exists (select 1 from public.members m where m.user_id = auth.uid() and m.role in ('admin', 'editor')))

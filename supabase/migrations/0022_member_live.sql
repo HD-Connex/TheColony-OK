@@ -37,6 +37,7 @@ alter table public.backroom_posts enable row level security;
 -- 4. Policies: select + insert ONLY for active members (is_member=true in members table)
 -- Matches plan spec + reuse of existing members.is_member pattern from 0006/0015/0018/ entitlements.
 
+drop policy if exists "backroom_threads_member_select" on public.backroom_threads;
 create policy "backroom_threads_member_select" on public.backroom_threads
   for select
   using (
@@ -47,6 +48,7 @@ create policy "backroom_threads_member_select" on public.backroom_threads
     )
   );
 
+drop policy if exists "backroom_threads_member_insert" on public.backroom_threads;
 create policy "backroom_threads_member_insert" on public.backroom_threads
   for insert
   with check (
@@ -58,6 +60,7 @@ create policy "backroom_threads_member_insert" on public.backroom_threads
     )
   );
 
+drop policy if exists "backroom_posts_member_select" on public.backroom_posts;
 create policy "backroom_posts_member_select" on public.backroom_posts
   for select
   using (
@@ -68,6 +71,7 @@ create policy "backroom_posts_member_select" on public.backroom_posts
     )
   );
 
+drop policy if exists "backroom_posts_member_insert" on public.backroom_posts;
 create policy "backroom_posts_member_insert" on public.backroom_posts
   for insert
   with check (
