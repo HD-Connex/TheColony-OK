@@ -38,7 +38,6 @@ export function ScheduleList({
   return (
     <FlashList
       data={items}
-      estimatedItemSize={88}
       keyExtractor={(item, index) => `${item.programId}-${index}`}
       renderItem={({ item, index }: any) => (
         <ScheduleRow
