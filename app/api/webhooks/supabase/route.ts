@@ -14,8 +14,8 @@ export const runtime = "nodejs";
  * only mirrors identity fields (user_id, email) and never touches billing columns
  * (is_member, status, tier, stripe_*) — those stay owned by the Stripe webhook.
  *
- * Configure in Supabase → Database Webhooks (or Auth Hooks) to POST here with an
- * HMAC-SHA256 signature of the body in the `supabase-signature` header.
+ * Configure in Supabase → Database Webhooks on `auth` table (INSERT/UPDATE/DELETE).
+ * Sends HMAC-SHA256 signature of the body in the `supabase-signature` header.
  * Env: SUPABASE_WEBHOOK_SECRET.
  *
  * Note: members.user_id is ON DELETE CASCADE from auth.users, so user.deleted is
@@ -57,7 +57,12 @@ export async function POST(req: Request) {
   const now = new Date().toISOString();
 
   try {
-    if (type === "user.created" || type === "user.updated") {
+    // Database Webhook event types from auth table: INSERT, UPDATE, DELETE
+    // Also accept legacy Auth Hook types: user.created, user.updated, user.deleted
+    const isInsertOrUpdate = type === "INSERT" || type === "UPDATE" || type === "user.created" || type === "user.updated";
+    const isDelete = type === "DELETE" || type === "user.deleted";
+
+    if (isInsertOrUpdate) {
       // Identity only — onConflict update leaves billing columns untouched.
       const { error } = await sb
         .from("members")
@@ -69,7 +74,7 @@ export async function POST(req: Request) {
         log.error("[supabase webhook] members upsert failed", error);
         return NextResponse.json({ error: "Sync failed" }, { status: 500 });
       }
-    } else if (type === "user.deleted") {
+    } else if (isDelete) {
       const { error } = await sb.from("members").delete().eq("user_id", record.id);
       if (error) {
         log.error("[supabase webhook] members delete failed", error);
