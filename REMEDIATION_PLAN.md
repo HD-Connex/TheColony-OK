@@ -130,8 +130,11 @@ Add a second job to `ci.yml` (minimum: typecheck + lint; ideal: EAS build on tag
     return NextResponse.json({ error: "Database error" }, { status: 500 }); }
   ```
   Grep: `rg "error\.message|err\.message" app/api`.
-- **D-5. `analytics/end-session` uses raw `createClient()` + non-null assertions**
-  → switch to `supabaseAdmin()` from `@/lib/supabase` (already guards env).
+- **D-5. ✅ `analytics/end-session`** — switched raw `createClient()` + non-null
+  assertions to env-guarded `supabaseAdmin()`, added `log.error` on failure, and
+  **whitelisted the 6 updatable columns** (was spreading raw body into a
+  service-role update keyed only by `sessionId` — a mass-assignment hole any
+  caller could exploit).
 - **D-6. Stripe webhook idempotency** — add a `processed_stripe_events(event_id pk)`
   table; `insert ... on conflict do nothing`; skip if already processed. Prevents
   double membership grants on Stripe retries.
