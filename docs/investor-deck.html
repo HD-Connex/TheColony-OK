@@ -1,0 +1,1490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Colony OK — Investor Deck</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter+Tight:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink:     #0a1f3d;
+    --paper:   #f4f0e6;
+    --alarm:   #ec1024;
+    --ink-soft:#1a3560;
+    --rule:    #c8c0b0;
+    --muted:   #6b6355;
+    --font-display: 'Archivo Black', sans-serif;
+    --font-body:    'Inter Tight', sans-serif;
+    --font-mono:    'JetBrains Mono', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--ink);
+    color: var(--paper);
+    line-height: 1.5;
+    overflow-x: hidden;
+  }
+
+  /* ── Nav ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 2.5rem;
+    background: var(--ink);
+    border-bottom: 4px solid var(--alarm);
+  }
+  .nav-logo {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    letter-spacing: 0.04em;
+    color: var(--paper);
+    text-decoration: none;
+  }
+  .nav-logo span { color: var(--alarm); }
+  .nav-slides {
+    display: flex;
+    gap: 0.25rem;
+  }
+  .nav-dot {
+    width: 8px; height: 8px;
+    background: var(--muted);
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .nav-dot.active, .nav-dot:hover { background: var(--alarm); }
+  .slide-counter {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+  }
+
+  /* ── Slide system ── */
+  .deck { padding-top: 56px; }
+
+  .slide {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 5rem 10vw;
+    position: relative;
+    border-bottom: 8px solid var(--alarm);
+  }
+
+  .slide--ink    { background: var(--ink); color: var(--paper); }
+  .slide--paper  { background: var(--paper); color: var(--ink); }
+  .slide--alarm  { background: var(--alarm); color: var(--paper); }
+  .slide--dark   { background: #040e1f; color: var(--paper); }
+
+  .slide-n {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    opacity: 0.5;
+    margin-bottom: 1.5rem;
+    display: block;
+  }
+  .slide--paper .slide-n { color: var(--ink); }
+  .slide--alarm .slide-n { color: rgba(255,255,255,0.7); }
+
+  /* ── Typography ── */
+  h1 {
+    font-family: var(--font-display);
+    font-size: clamp(2.8rem, 7vw, 6rem);
+    line-height: 1.0;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+  }
+  h2 {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 5vw, 3.8rem);
+    line-height: 1.05;
+    text-transform: uppercase;
+    margin-bottom: 1.25rem;
+  }
+  h3 {
+    font-family: var(--font-display);
+    font-size: clamp(1.2rem, 2.5vw, 1.8rem);
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+  }
+  .lead {
+    font-size: clamp(1.05rem, 2vw, 1.35rem);
+    font-weight: 500;
+    line-height: 1.55;
+    max-width: 62ch;
+  }
+  .mono { font-family: var(--font-mono); }
+  .alarm-text { color: var(--alarm); }
+  .muted-text { opacity: 0.6; }
+  .slide--paper .muted-text { color: var(--muted); opacity: 1; }
+
+  /* ── Rules ── */
+  .rule-h {
+    display: block;
+    height: 4px;
+    background: var(--alarm);
+    margin: 2rem 0;
+    max-width: 80px;
+  }
+  .rule-h--full { max-width: 100%; }
+  .rule-h--thin { height: 1px; background: var(--rule); max-width: 100%; }
+  .slide--ink .rule-h--thin { background: rgba(255,255,255,0.15); }
+
+  /* ── Grid layouts ── */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: start;
+  }
+  .three-col {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+  }
+  .four-col {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+  }
+  .two-thirds {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 4rem;
+    align-items: start;
+  }
+
+  /* ── Cards ── */
+  .card {
+    padding: 1.75rem;
+    border: 1px solid rgba(255,255,255,0.12);
+    position: relative;
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 4px;
+    background: var(--alarm);
+  }
+  .slide--paper .card {
+    border: 1px solid var(--rule);
+    background: rgba(255,255,255,0.5);
+  }
+  .card-title {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-bottom: 0.6rem;
+    opacity: 0.55;
+  }
+  .card-value {
+    font-family: var(--font-display);
+    font-size: clamp(1.6rem, 3vw, 2.4rem);
+    line-height: 1.1;
+    color: var(--alarm);
+  }
+  .slide--paper .card-value { color: var(--ink); }
+  .card-desc {
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+    opacity: 0.7;
+    line-height: 1.5;
+  }
+
+  /* ── Stat blocks ── */
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 0;
+    border: 1px solid rgba(255,255,255,0.12);
+  }
+  .slide--paper .stat-grid { border-color: var(--rule); }
+  .stat {
+    padding: 2rem 1.5rem;
+    border-right: 1px solid rgba(255,255,255,0.12);
+    text-align: center;
+  }
+  .slide--paper .stat { border-right-color: var(--rule); }
+  .stat:last-child { border-right: none; }
+  .stat-num {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    color: var(--alarm);
+    line-height: 1;
+    margin-bottom: 0.4rem;
+  }
+  .stat-label {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    opacity: 0.55;
+  }
+
+  /* ── Lists ── */
+  .bullet-list { list-style: none; }
+  .bullet-list li {
+    padding: 0.65rem 0;
+    padding-left: 1.5rem;
+    position: relative;
+    font-size: 1rem;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    line-height: 1.4;
+  }
+  .slide--paper .bullet-list li { border-bottom-color: var(--rule); }
+  .bullet-list li:last-child { border-bottom: none; }
+  .bullet-list li::before {
+    content: '—';
+    position: absolute;
+    left: 0;
+    color: var(--alarm);
+    font-family: var(--font-mono);
+  }
+
+  /* ── Pull quote ── */
+  .pull-quote {
+    font-family: var(--font-display);
+    font-size: clamp(1.4rem, 3vw, 2.2rem);
+    line-height: 1.25;
+    text-transform: uppercase;
+    border-left: 8px solid var(--alarm);
+    padding-left: 1.5rem;
+    max-width: 52ch;
+  }
+
+  /* ── Table ── */
+  .compare-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+  }
+  .compare-table th {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-align: left;
+    padding: 0.75rem 1rem;
+    background: rgba(255,255,255,0.06);
+    border-bottom: 2px solid var(--alarm);
+  }
+  .compare-table td {
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    vertical-align: top;
+    line-height: 1.4;
+  }
+  .compare-table tr:last-child td { border-bottom: none; }
+  .compare-table td:first-child { font-weight: 600; }
+  .check { color: #4ade80; font-weight: 700; }
+  .cross { color: var(--alarm); opacity: 0.5; }
+  .colony-col { color: #fbbf24; font-weight: 600; }
+
+  /* ── Timeline ── */
+  .timeline { position: relative; }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--alarm), rgba(236,16,36,0.2));
+  }
+  .timeline-item {
+    padding-left: 2rem;
+    padding-bottom: 2rem;
+    position: relative;
+  }
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -5px;
+    top: 6px;
+    width: 12px; height: 12px;
+    background: var(--alarm);
+  }
+  .timeline-phase {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--alarm);
+    margin-bottom: 0.25rem;
+  }
+  .timeline-title {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    margin-bottom: 0.3rem;
+  }
+  .timeline-desc { font-size: 0.875rem; opacity: 0.7; line-height: 1.45; }
+
+  /* ── Tag pills ── */
+  .tags { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem; }
+  .tag {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.3rem 0.7rem;
+    border: 1px solid rgba(255,255,255,0.25);
+  }
+  .slide--paper .tag { border-color: var(--rule); color: var(--ink); }
+  .tag--alarm { border-color: var(--alarm); color: var(--alarm); }
+
+  /* ── Use-of-funds bar ── */
+  .funds-bar {
+    display: flex;
+    height: 48px;
+    overflow: hidden;
+    margin: 1.5rem 0;
+    gap: 2px;
+  }
+  .funds-seg {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+  .seg-content    { background: var(--alarm); flex: 35; color: var(--paper); }
+  .seg-tech       { background: var(--ink-soft); flex: 25; color: var(--paper); }
+  .seg-team       { background: #1a3560; flex: 25; color: var(--paper); }
+  .seg-marketing  { background: #2d5a9e; flex: 15; color: var(--paper); }
+
+  .funds-legend { display: flex; flex-wrap: wrap; gap: 1.25rem; }
+  .legend-item  { display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; }
+  .legend-dot   { width: 12px; height: 12px; flex-shrink: 0; }
+
+  /* ── Hero slide specific ── */
+  .hero-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--alarm);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .hero-eyebrow::before {
+    content: '';
+    display: block;
+    height: 1px;
+    width: 40px;
+    background: var(--alarm);
+  }
+  .hero-tagline {
+    font-size: clamp(1rem, 1.8vw, 1.25rem);
+    opacity: 0.7;
+    max-width: 55ch;
+    line-height: 1.6;
+    margin-top: 1rem;
+  }
+  .hero-meta {
+    margin-top: 3rem;
+    display: flex;
+    gap: 3rem;
+    align-items: center;
+  }
+  .hero-meta-item { font-size: 0.875rem; opacity: 0.55; font-family: var(--font-mono); }
+  .hero-meta-item strong { display: block; font-family: var(--font-display); font-size: 1.3rem; color: var(--paper); opacity: 1; margin-bottom: 0.2rem; }
+
+  /* ── Big number emphasis ── */
+  .big-number {
+    font-family: var(--font-display);
+    font-size: clamp(5rem, 15vw, 12rem);
+    line-height: 1;
+    color: var(--alarm);
+    letter-spacing: -0.02em;
+    opacity: 0.15;
+    position: absolute;
+    right: 8vw;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    user-select: none;
+  }
+
+  /* ── Brand mark ── */
+  .brand-mark {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+  }
+  .brand-name {
+    font-family: var(--font-display);
+    font-size: clamp(1.2rem, 2.5vw, 1.8rem);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--paper);
+  }
+  .brand-tagline-sm {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--alarm);
+    margin-top: 0.15rem;
+  }
+
+  /* ── Roadmap phases ── */
+  .phase-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+  .phase-item {
+    padding: 1.5rem;
+    border-right: 1px solid rgba(255,255,255,0.1);
+    position: relative;
+  }
+  .phase-item:last-child { border-right: none; }
+  .phase-item.done::after {
+    content: '✓ COMPLETE';
+    position: absolute;
+    top: 0.75rem; right: 0.75rem;
+    font-family: var(--font-mono);
+    font-size: 0.55rem;
+    letter-spacing: 0.1em;
+    color: #4ade80;
+    opacity: 0.8;
+  }
+  .phase-num {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    color: var(--alarm);
+    margin-bottom: 0.5rem;
+  }
+  .phase-title {
+    font-family: var(--font-display);
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+  .phase-items { font-size: 0.8rem; opacity: 0.65; line-height: 1.5; }
+
+  /* ── Team card ── */
+  .team-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+  }
+  .team-card {
+    padding: 1.5rem;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-top: 4px solid var(--alarm);
+  }
+  .team-name {
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    text-transform: uppercase;
+    margin-bottom: 0.25rem;
+  }
+  .team-role {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--alarm);
+    margin-bottom: 0.75rem;
+  }
+  .team-bio { font-size: 0.8rem; opacity: 0.65; line-height: 1.5; }
+
+  /* ── CTA / final slide ── */
+  .ask-number {
+    font-family: var(--font-display);
+    font-size: clamp(3rem, 8vw, 7rem);
+    line-height: 1;
+    color: var(--paper);
+    margin: 1rem 0;
+  }
+  .ask-label {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    opacity: 0.6;
+  }
+  .contact-block {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(255,255,255,0.2);
+  }
+  .contact-item {
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    opacity: 0.7;
+    margin-bottom: 0.35rem;
+  }
+
+  /* ── Folio bar ── */
+  .folio {
+    position: absolute;
+    bottom: 1.5rem;
+    left: 10vw; right: 10vw;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    opacity: 0.35;
+  }
+  .folio span {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  /* ── Watermark pattern ── */
+  .pattern-bg {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.03;
+    background-image: repeating-linear-gradient(
+      90deg,
+      var(--paper) 0,
+      var(--paper) 1px,
+      transparent 1px,
+      transparent 60px
+    );
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 900px) {
+    .slide { padding: 4rem 6vw; }
+    .two-col, .three-col, .four-col, .two-thirds, .phase-grid { grid-template-columns: 1fr; }
+    .phase-item { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .big-number { display: none; }
+    .hero-meta { flex-wrap: wrap; gap: 1.5rem; }
+    .compare-table { font-size: 0.8rem; }
+  }
+
+  @media (max-width: 600px) {
+    h1 { font-size: 2.2rem; }
+    h2 { font-size: 1.7rem; }
+    .slide { padding: 3rem 5vw; }
+    nav { padding: 0.75rem 1.25rem; }
+    .nav-slides { display: none; }
+    .stat-grid { grid-template-columns: repeat(2, 1fr); }
+    .stat { border-right-color: rgba(255,255,255,0.1) !important; }
+  }
+
+  /* ── Print ── */
+  @media print {
+    nav { display: none; }
+    .slide { page-break-after: always; min-height: 100vh; }
+  }
+
+  /* ── Scroll animations ── */
+  @media (prefers-reduced-motion: no-preference) {
+    .animate-in {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .animate-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .animate-in:nth-child(2) { transition-delay: 0.1s; }
+    .animate-in:nth-child(3) { transition-delay: 0.2s; }
+    .animate-in:nth-child(4) { transition-delay: 0.3s; }
+    .animate-in:nth-child(5) { transition-delay: 0.4s; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── Navigation ── -->
+<nav>
+  <a href="#slide-1" class="nav-logo">THE COLONY<span> OK</span></a>
+  <div class="nav-slides" id="navDots"></div>
+  <span class="slide-counter mono" id="slideCounter">01 / 13</span>
+</nav>
+
+<main class="deck" id="deck">
+
+<!-- ══════════════════════════════════════════
+     SLIDE 1 — TITLE
+══════════════════════════════════════════ -->
+<section class="slide slide--ink" id="slide-1" data-slide="1">
+  <div class="pattern-bg"></div>
+  <span class="big-number">OK</span>
+
+  <div class="animate-in">
+    <div class="hero-eyebrow">INVESTOR PRESENTATION · 2026</div>
+    <h1>The<br>Colony<br><span class="alarm-text">OK</span></h1>
+  </div>
+
+  <div class="animate-in">
+    <p class="hero-tagline">Oklahoma's reader-funded conservative press — independent investigative journalism, podcasts, live streaming, and community for rural America.</p>
+  </div>
+
+  <div class="hero-meta animate-in">
+    <div class="hero-meta-item">
+      <strong>$4.99/mo</strong>
+      membership
+    </div>
+    <div class="hero-meta-item">
+      <strong>thecolonyok.com</strong>
+      production platform
+    </div>
+    <div class="hero-meta-item">
+      <strong>500+</strong>
+      concurrent users verified
+    </div>
+  </div>
+
+  <div class="folio">
+    <span>The Colony OK — Confidential Investor Deck</span>
+    <span>SLIDE 01</span>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SLIDE 2 — THE PROBLEM
+══════════════════════════════════════════ -->
+<section class="slide slide--paper" id="slide-2" data-slide="2">
+  <span class="slide-n">N°01 — THE PROBLEM</span>
+
+  <div class="two-col">
+    <div>
+      <h2>Rural Oklahoma Has No Voice</h2>
+      <span class="rule-h"></span>
+      <p class="lead" style="color:#1a1a1a;">National conservative media covers Washington, New York, and Texas. It does not cover the Panhandle, Garfield County, or the fifth-generation ranchers making decisions that feed America.</p>
+      <p style="margin-top:1.5rem;font-size:1rem;color:#444;line-height:1.6;">Oklahoma's 3.9 million residents — 65%+ conservative — are underserved by media that doesn't know their names, their counties, or their concerns about oil prices, fertilizer costs, or Farm Bureau policy.</p>
+    </div>
+
+    <div>
+      <ul class="bullet-list" style="color:#1a1a1a;">
+        <li><strong>BlazeTV</strong> — national focus, zero rural Oklahoma depth</li>
+        <li><strong>Daily Wire</strong> — Dallas-based, entertainment-first</li>
+        <li><strong>Newsmax</strong> — some state coverage, no county-level beats</li>
+        <li><strong>Local TV/Radio</strong> — generalist, no conservative editorial identity</li>
+        <li><strong>Legacy Newspapers</strong> — shrinking, paywall-hostile, editorial drift</li>
+      </ul>
+
+      <div style="margin-top:2rem;padding:1.5rem;background:var(--ink);color:var(--paper);">
+        <p class="pull-quote" style="font-size:1.3rem;border-left-color:#ec1024;">
+          "When Garfield County farmers face DC mandates, they have nowhere to turn for real conservative coverage."
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="folio">
+    <span>The Colony OK — Confidential Investor Deck</span>
+    <span>SLIDE 02</span>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SLIDE 3 — THE SOLUTION
+══════════════════════════════════════════ -->
+<section class="slide slide--ink" id="slide-3" data-slide="3">
+  <span class="slide-n">N°02 — THE SOLUTION</span>
+
+  <div class="animate-in">
+    <h2>Reader-Funded.<br>Hyper-Local.<br><span class="alarm-text">Unapologetically Conservative.</span></h2>
+  </div>
+
+  <span class="rule-h"></span>
+
+  <div class="two-col animate-in">
+    <div>
+      <p class="lead">The Colony OK is a full-stack journalism platform built for Oklahoma conservatives — combining investigative reporting, podcast network, live TV, member clips, and civic transparency tools in one reader-funded subscription.</p>
+      <div class="tags">
+        <span class="tag tag--alarm">No Ads</span>
+        <span class="tag tag--alarm">Reader-Funded</span>
+        <span class="tag tag--alarm">Oklahoma-First</span>
+        <span class="tag tag--alarm">$4.99/Month</span>
+      </div>
+    </div>
+
+    <div class="three-col" style="grid-template-columns:1fr 1fr; gap:1rem;">
+      <div class="card">
+        <div class="card-title">Stories</div>
+        <div class="card-value">Investigative</div>
+        <div class="card-desc">Long-form reporting on OK politics, energy, and rural affairs</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Podcasts</div>
+        <div class="card-value">5 Shows</div>
+        <div class="card-desc">Colony Report, Faith & Freedom, Energy OK, Patriot Hour, more</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Live TV</div>
+        <div class="card-value">24/7</div>
+        <div class="card-desc">Live events, town halls, county fairs, legislative sessions</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Report Card</div>
+        <div class="card-value">6 Counties</div>
+        <div class="card-desc">Civic transparency tool grading elected officials by conservative values</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="folio">
+    <span>The Colony OK — Confidential Investor Deck</span>
+    <span>SLIDE 03</span>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SLIDE 4 — PLATFORM / PRODUCT
+══════════════════════════════════════════ -->
+<section class="slide slide--paper" id="slide-4" data-slide="4">
+  <span class="slide-n">N°03 — THE PLATFORM</span>
+
+  <h2>A Full Media OS<br>Built for Oklahoma</h2>
+  <span class="rule-h"></span>
+
+  <div class="stat-grid animate-in" style="margin-bottom:2.5rem;">
+    <div class="stat">
+      <div class="stat-num" style="color:var(--ink);">85+</div>
+      <div class="stat-label" style="color:var(--ink);">Live Routes &amp; Pages</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num" style="color:var(--ink);">500</div>
+      <div class="stat-label" style="color:var(--ink);">Concurrent Users Verified</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num" style="color:var(--ink);">14/14</div>
+      <div class="stat-label" style="color:var(--ink);">Test Suite Passing</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num" style="color:var(--ink);">8+</div>
+      <div class="stat-label" style="color:var(--ink);">Build Phases Complete</div>
+    </div>
+  </div>
+
+  <div class="three-col animate-in">
+    <div>
+      <h3 style="color:var(--ink);font-size:1rem;">Content</h3>
+      <ul class="bullet-list" style="color:#333;">
+        <li>Investigative stories &amp; news</li>
+        <li>5 podcast shows, 12+ episodes</li>
+        <li>Live events &amp; 24/7 stream</li>
+        <li>Member clips &amp; community</li>
+        <li>County Report Card (6 counties)</li>
+      </ul>
+    </div>
+    <div>
+      <h3 style="color:var(--ink);font-size:1rem;">Commerce</h3>
+      <ul class="bullet-list" style="color:#333;">
+        <li>$4.99/mo reader membership</li>
+        <li>Stripe checkout &amp; billing portal</li>
+        <li>Server-side paywall enforcement</li>
+        <li>Contributor tier system</li>
+        <li>Gift &amp; perk system (roadmap)</li>
+      </ul>
+    </div>
+    <div>
+      <h3 style="color:var(--ink);font-size:1rem;">Technology</h3>
+      <ul class="bullet-list" style="color:#333;">
+        <li>Next.js 16 + React 19 (SSG/ISR)</li>
+        <li>Supabase (Postgres + RLS + Realtime)</li>
+        <li>Mux video + live streaming</li>
+        <li>PWA + TWA mobile-ready</li>
+        <li>AI transcripts &amp; recommendations</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="folio">
+    <span>The Colony OK — Confidential Investor Deck</span>
+    <span>SLIDE 04</span>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SLIDE 5 — MARKET OPPORTUNITY
+══════════════════════════════════════════ -->
+<section class="slide slide--ink" id="slide-5" data-slide="5">
+  <span class="slide-n">N°04 — MARKET OPPORTUNITY</span>
+  <span class="big-number">3.9M</span>
+
+  <div class="animate-in" style="max-width:60%;">
+    <h2>Oklahoma's Conservative Majority Is an Untapped Media Market</h2>
+    <span class="rule-h"></span>
+  </div>
+
+  <div class="two-thirds animate-in">
+    <div>
+      <div class="stat-grid" style="border-color:rgba(255,255,255,0.1);margin-bottom:2rem;">
+        <div class="stat">
+          <div class="stat-num">3.9M</div>
+          <div class="stat-label">Oklahoma Population</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">~65%</div>
+          <div class="stat-label">Conservative Voters</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">~2.5M</div>
+          <div class="stat-label">Target Addressable Readers</div>
+        </div>
+      </div>
+
+      <ul class="bullet-list">
+        <li>Rural OK counties have <strong>zero dedicated conservative digital media</strong></li>
+        <li>BlazeTV has <strong>1M+ subscribers</strong> at $9.99/mo with national-only content</li>
+        <li>The Free Press (national) raised <strong>$25M+</strong> on reader-funded model</li>
+        <li>Oklahoma farmers/ranchers represent <strong>$9B+</strong> agricultural economy</li>
+        <li>Conservative news media is a <strong>$2B+ annual market</strong> nationally</li>
+      </ul>
+    </div>
+
+    <div>
+      <div class="card" style="margin-bottom:1rem;">
+        <div class="card-title">TAM — National Conservative Media</div>
+        <div class="card-value">$2B+</div>
+        <div class="card-desc">Annual market for conservative digital media subscriptions</div>
+      </div>
+      <div class="card" style="margin-bottom:1rem;">
+        <div class="card-title">SAM — Oklahoma Conservative Readers</div>
+        <div class="card-value">~2.5M</div>
+        <div class="card-desc">Conservative Oklahomans with no adequate local coverage</div>
+      </div>
+      <div class="card">
+        <div class="card-title">SOM — Year 1 Target Subscribers</div>
+        <div class="card-value">10K–50K</div>
+        <div class="card-desc">$600K–$3M ARR at $4.99/mo with 0.4%–2% penetration</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="folio">
+    <span>The Colony OK — Confidential Investor Deck</span>
+    <span>SLIDE 05</span>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SLIDE 6 — BUSINESS MODEL
+══════════════════════════════════════════ -->
+<section class="slide slide--alarm" id="slide-6" data-slide="6">
+  <span class="slide-n" style="color:rgba(255,255,255,0.7);">N°05 — BUSINESS MODEL</span>
+
+  <div class="animate-in">
+    <h2>Simple. Scalable.<br>Reader-Funded.</h2>
+  </div>
+
+  <span class="rule-h" style="background:var(--paper);"></span>
+
+  <div class="two-col animate-in">
+    <div>
+      <div style="margin-bottom:2rem;">
+        <div class="ask-label" style="color:rgba(255,255,255,0.7);">Core Membership</div>
+        <div class="ask-number" style="color:var(--paper);">$4.99<span style="font-size:2rem;">/mo</span></div>
+        <p style="opacity:0.8;font-size:1rem;line-height:1.6;">Full access to all stories, podcasts, live streams, member clips, and civic Report Card. No ads, no data selling — readers are the revenue.</p>
+      </div>
+      <ul class="bullet-list" style="border-color:rgba(255,255,255,0.2);">
+        <li style="border-color:rgba(255,255,255,0.2);">Stripe-powered checkout + instant access</li>
+        <li style="border-color:rgba(255,255,255,0.2);">Server-side paywall (zero bypass risk)</li>
+        <li style="border-color:rgba(255,255,255,0.2);">Billing portal for self-serve management</li>
+        <li style="border-color:rgba(255,255,255,0.2);">Member-only live events &amp; content</li>
+        <li style="border-color:rgba(255,255,255,0.2);">Contributor tier ($0 for community writers)</li>
+      </ul>
+    </div>
+
+    <div>
+      <h3 style="font-size:1rem;margin-bottom:1rem;">Revenue Milestones</h3>
+      <div style="display:flex;flex-direction:column;gap:0.75rem;">
+        <div style="display:flex;justify-content:space-between;padding:0.75rem 1rem;background:rgba(0,0,0,0.25);">
+          <span class="mono" style="font-size:0.75rem;letter-spacing:0.08em;">1,000 members</span>
+          <span style="font-weight:700;">$59,880 ARR</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:0.75rem 1rem;background:rgba(0,0,0,0.25);">
+          <span class="mono" style="font-size:0.75rem;letter-spacing:0.08em;">5,000 members</span>
+          <span style="font-weight:700;">$299,400 ARR</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:0.75rem 1rem;background:rgba(0,0,0,0.3);border-left:4px solid var(--paper);">
+          <span class="mono" style="font-size:0.75rem;letter-spacing:0.08em;">10,000 members</span>
+          <span style="font-weight:700;">$598,800 ARR</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:0.75rem 1rem;background:rgba(0,0,0,0.25);">
+          <span class="mono" style="font-size:0.75rem;letter-spacing:0.08em;">50,000 members</span>
+          <span style="font-weight:700;">$2.99M ARR</span>
+        </div>
+      </div>
+
+      <div style="margin-top:1.5rem;padding:1rem;background:rgba(0,0,0,0.3);">
+        <div class="card-title" style="opacity:0.7;">Expansion Levers</div>
+        <div style="font-size:0.875rem;line-height:1.6;opacity:0.85;">Sponsorships from OK Farm Bureau + co-ops; annual plans ($49.99/yr); county forum paid tiers; TWA/mobile app premium; rural events &amp; live town halls</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="folio">
+    <span>The Colony OK — Confidential Investor Deck</span>
+    <span>SLIDE 06</span>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SLIDE 7 — COMPETITIVE ADVANTAGE
+══════════════════════════════════════════ -->
+<section class="slide slide--dark" id="slide-7" data-slide="7">
+  <span class="slide-n">N°06 — COMPETITIVE ADVANTAGE</span>
+
+  <h2>We Win Where<br>Big Media <span class="alarm-text">Won't Go</span></h2>
+  <span class="rule-h"></span>
+
+  <div class="animate-in" style="overflow-x:auto;">
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th>Feature</th>
+          <th class="colony-col">The Colony OK</th>
+          <th>BlazeTV</th>
+          <th>Daily Wire</th>
+          <th>Local TV/Radio</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Oklahoma-specific content</td>
+          <td class="check colony-col">✓ DEEP</td>
+          <td class="cross">✗ None</td>
+          <td class="cross">✗ None</td>
+          <td>◑ General</td>
+        </tr>
+        <tr>
+          <td>Rural county beats (Ag/Energy)</td>
+          <td class="check colony-col">✓ 4 Dedicated Beats</td>
+          <td class="cross">✗ None</td>
+          <td class="cross">✗ None</td>
+          <td class="cross">✗ Rare</td>
+        </tr>
+        <tr>
+          <td>Reader-funded (no ad bias)</td>
+          <td class="check colony-col">✓ 100%</td>
+          <td class="cross">✗ Ad + Sub hybrid</td>
+          <td class="cross">✗ Ad + Sub hybrid</td>
+          <td class="cross">✗ Ad-driven</td>
+        </tr>
+        <tr>
+          <td>Live streaming platform</td>
+          <td class="check colony-col">✓ 24/7 + events</td>
+          <td class="check">✓ National</td>
+          <td class="check">✓ National</td>
+          <td class="cross">✗ Limited</td>
+        </tr>
+        <tr>
+          <td>Civic Report Card tool</td>
+          <td class="check colony-col">✓ 6 Counties</td>
+          <td class="cross">✗ None</td>
+          <td class="cross">✗ None</td>
+          <td class="cross">✗ None</td>
+        </tr>
+        <tr>
+          <td>Member community clips</td>
+          <td class="check colony-col">✓ Full platform</td>
+          <td class="cross">✗ None</td>
+          <td class="cross">✗ None</td>
+          <td class="cross">✗ None</td>
+        </tr>
+        <tr>
+          <td>PWA / TWA mobile app</td>
+          <td class="check colony-col">✓ Rural-optimized</td>
+          <td>◑ App only</td>
+          <td>◑ App only</td>
+          <td class="cross">✗ Website only</td>
+        </tr>
+        <tr>
+          <td>AI-powered journalism tools</td>
+          <td class="check colony-col">✓ Transcripts + Recs</td>
+          <td class="cross">✗ None</td>
+          <td class="cross">✗ None</td>
+          <td class="cross">✗ None</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p style="margin-top:1.5rem;font-size:0.875rem;opacity:0.5;font-style:italic;">No national player has attempted a hyper-local conservative platform with full-stack technology for an underserved state market.</p>
+
+  <div class="folio">
+    <span>The Colony OK — Confidential Investor Deck</span>
+    <span>SLIDE 07</span>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SLIDE 8 — CONTENT STRATEGY
+══════════════════════════════════════════ -->
+<section class="slide slide--ink" id="slide-8" data-slide="8">
+  <span class="slide-n">N°07 — CONTENT STRATEGY</span>
+
+  <div class="animate-in">
+    <h2>4 Rural Beats.<br>100% <span class="alarm-text">Oklahoma.</span></h2>
+    <span class="rule-h"></span>
+  </div>
+
+  <div class="four-col animate-in" style="margin-bottom:2.5rem;">
+    <div class="card">
+      <div class="card-title">Beat 01</div>
+      <div class="card-value" style="font-size:1.4rem;">OK Ag Report</div>
+      <div class="card-desc">Weekly live + podcast. Farm reports, soil/weather, policy impact. OSU Master Agronomist, 5th-gen ranchers, OK Dept of Agriculture, Farm Bureau.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Beat 02</div>
+      <div class="card-value" style="font-size:1.4rem;">Energy OK</div>
+      <div class="card-desc">Oil, gas, wind, solar rural impact and jobs. Rural co-op partners. Hybrid live from county fairs and energy conferences.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Beat 03</div>
+      <div class="card-value" style="font-size:1.4rem;">Small Town Faith</div>
+      <div class="card-desc">County-level: churches, 4H/FFA, family values, heritage. Town-hall lives with local leaders. "Oklahoma's Heritage: Faith and Freedom" pod series.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Beat 04</div>
+      <div class="card-value" style="font-size:1.4rem;">Rural Health &amp; Econ</div>
+      <div class="card-desc">Biblical perspectives, Farm Bureau "Farm State of Mind," fertilizer/fuel economics, mental health, rural stewardship and resilience.</div>
+    </div>
+  </div>
+
+  <div class="two-col animate-in">
+    <div>
+      <h3 style="font-size:1rem;margin-bottom:1rem;">Partnership Targets</h3>
+      <ul class="bullet-list" style="font-size:0.875rem;">
+        <li>Oklahoma Farm Bureau (OKFB) + Young Farmers</li>
+        <li>OSU Agricultural College + Master Agronomist program</li>
+        <li>Rural electric co-ops + OK Oil &amp; Gas Association</li>
+        <li>OK Peanut Board, Soybean/Cotton Assoc, FFA/4H chapters</li>
+        <li>Conservative OK chambers for co-branded exclusives</li>
+      </ul>
+    </div>
+    <div>
+      <h3 style="font-size:1rem;margin-bottom:1rem;">AI-Powered Content Engine</h3>
+      <ul class="bullet-list" style="font-size:0.875rem;">
+        <li>Local aggregator agent pulls OK ag/energy public feeds</li>
+        <li>Synthesizes briefs into pod inserts + live queue</li>
+        <li>Member clips + best-of-n curation (AI moderation)</li>
+        <li>Auto-transcripts with search/seek for SEO &amp; accessibility</li>
+        <li>Weekly: Tue Ag live · Thu Energy · Fri member clips highlight</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="folio">
+    <span>The Colony OK — Confidential Investor Deck</span>
+    <span>SLIDE 08</span>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SLIDE 9 — TECHNOLOGY
+══════════════════════════════════════════ -->
+<section class="slide slide--paper" id="slide-9" data-slide="9">
+  <span class="slide-n">N°08 — TECHNOLOGY</span>
+
+  <h2>Production-Grade.<br>Elite Performance.<br><span style="color:var(--alarm);">Fully Owned.</span></h2>
+  <span class="rule-h"></span>
+
+  <div class="two-col animate-in">
+    <div>
+      <p class="lead" style="color:#1a1a1a;">The Colony OK runs on a modern full-stack platform built for scale, security, and rural mobile performance — with no legacy debt and a clean CI/CD pipeline.</p>
+
+      <div style="margin-top:2rem;">
+        <h3 style="color:var(--ink);font-size:1rem;margin-bottom:1rem;">Stack Highlights</h3>
+        <ul class="bullet-list" style="color:#333;">
+          <li><strong>Next.js 16 + React 19</strong> — SSG/ISR hybrid, 85+ routes, sub-second pages</li>
+          <li><strong>Supabase</strong> — Postgres with RLS, Realtime, Vector embeddings, Auth</li>
+          <li><strong>Mux</strong> — Professional video hosting, signed tokens, 24/7 live stream</li>
+          <li><strong>Vercel Fluid Compute</strong> — Edge-optimized, rolling releases, CI gates</li>
+          <li><strong>Stripe</strong> — Subscriptions, webhooks, billing portal, perk grants</li>
+          <li><strong>Anthropic/OpenAI/Groq</strong> — AI transcripts, recommendations, editorial tools</li>
+          <li><strong>PWA/TWA</strong> — Install-to-homescreen, offline packs, rural bandwidth optimized</li>
+          <li><strong>Sentry + RUM</strong> — Real-time error tracking + performance observability</li>
+        </ul>
+      </div>
+    </div>
+
+    <div>
+      <h3 style="color:var(--ink);font-size:1rem;margin-bottom:1rem;">Security &amp; Quality</h3>
+      <div style="display:flex;flex-direction:column;gap:0.75rem;">
+        <div style="padding:0.75rem 1rem;border:1px solid var(--rule);display:flex;justify-content:space-between;align-items:center;">
+          <span style="color:#333;font-size:0.875rem;">TypeScript strict mode</span>
+          <span style="color:#16a34a;font-weight:700;font-size:0.875rem;">✓ Clean</span>
+        </div>
+        <div style="padding:0.75rem 1rem;border:1px solid var(--rule);display:flex;justify-content:space-between;align-items:center;">
+          <span style="color:#333;font-size:0.875rem;">Test suite (Vitest)</span>
+          <span style="color:#16a34a;font-weight:700;font-size:0.875rem;">✓ 14/14 Pass</span>
+        </div>
+        <div style="padding:0.75rem 1rem;border:1px solid var(--rule);display:flex;justify-content:space-between;align-items:center;">
+          <span style="color:#333;font-size:0.875rem;">CI/CD (GitHub Actions)</span>
+          <span style="color:#16a34a;font-weight:700;font-size:0.875rem;">✓ Enforced</span>
+        </div>
+        <div style="padding:0.75rem 1rem;border:1px solid var(--rule);display:flex;justify-content:space-between;align-items:center;">
+          <span style="color:#333;font-size:0.875rem;">Row-Level Security (RLS)</span>
+          <span style="color:#16a34a;font-weight:700;font-size:0.875rem;">✓ All tables</span>
+        </div>
+        <div style="padding:0.75rem 1rem;border:1px solid var(--rule);display:flex;justify-content:space-between;align-items:center;">
+          <span style="color:#333;font-size:0.875rem;">Security headers (HSTS, CSP)</span>
+          <span style="color:#16a34a;font-weight:700;font-size:0.875rem;">✓ Enforced</span>
+        </div>
+        <div style="padding:0.75rem 1rem;border:1px solid var(--rule);display:flex;justify-content:space-between;align-items:center;">
+          <span style="color:#333;font-size:0.875rem;">Paywall (server-side)</span>
+          <span style="color:#16a34a;font-weight:700;font-size:0.875rem;">✓ Real gate</span>
+        </div>
+        <div style="padding:0.75rem 1rem;border:1px solid var(--rule);display:flex;justify-content:space-between;align-items:center;">
+          <span style="color:#333;font-size:0.875rem;">Load test (500 concurrent)</span>
+          <span style="color:#16a34a;font-weight:700;font-size:0.875rem;">✓ 0 Errors</span>
+        </div>
+        <div style="padding:0.75rem 1rem;border:1px solid var(--rule);display:flex;justify-content:space-between;align-items:center;">
+          <span style="color:#333;font-size:0.875rem;">A11y audit (96% score)</span>
+          <span style="color:#16a34a;font-weight:700;font-size:0.875rem;">✓ WCAG AA</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="folio">
+    <span>The Colony OK — Confidential Investor Deck</span>
+    <span>SLIDE 09</span>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SLIDE 10 — TRACTION & MILESTONES
+══════════════════════════════════════════ -->
+<section class="slide slide--ink" id="slide-10" data-slide="10">
+  <span class="slide-n">N°09 — TRACTION &amp; MILESTONES</span>
+
+  <div class="animate-in">
+    <h2>8 Build Phases.<br><span class="alarm-text">Launch-Ready.</span></h2>
+  </div>
+  <span class="rule-h"></span>
+
+  <div class="two-col animate-in">
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="timeline-phase">Phase 0–2</div>
+        <div class="timeline-title">Foundation + Content Breadth + AI</div>
+        <div class="timeline-desc">Full infrastructure: Supabase schema (31 migrations), auth, Stripe payments, Mux video, RSS ingest pipeline, AI transcripts + recommendations + semantic search</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-phase">Phase 3</div>
+        <div class="timeline-title">Security + RLS + Paywall</div>
+        <div class="timeline-desc">Server-side paywall across all content types, Row-Level Security on all tables, security headers (HSTS/CSP/referrer), rate limiting, admin gate</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-phase">Phase 4</div>
+        <div class="timeline-title">UX + Design System + PWA</div>
+        <div class="timeline-desc">Brutalist patriotic design system (96% a11y, zero-radius, token-driven), PWA v6 with push notifications, motion animations, responsive mobile</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-phase">Phase 5–6</div>
+        <div class="timeline-title">Launch Verification + Activation</div>
+        <div class="timeline-desc">500 concurrent load test (0 errors), 14/14 tests passing, Lighthouse audit (96% a11y), LCP optimizations, seed content, soft-launch live stream</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-phase">Phase 7–8</div>
+        <div class="timeline-title">Content Scale + Elite Polish</div>
+        <div class="timeline-desc">Report Card (6 counties), member clips platform, /personalities hub, TWA mobile stub, AI rural-beat endpoint, llms.txt GEO, monitoring/RUM, CI/CD</div>
+      </div>
+    </div>
+
+    <div>
+      <h3 style="font-size:1rem;margin-bottom:1.25rem;">Live Today</h3>
+      <div class="stat-grid" style="margin-bottom:1.5rem;border-color:rgba(255,255,255,0.1);">
+        <div class="stat">
+          <div class="stat-num">5</div>
+          <div class="stat-label">Podcast Shows</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">12+</div>
+          <div class="stat-label">Episodes</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">15+</div>
+          <div class="stat-label">Articles</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">6</div>
+          <div class="stat-label">Report Card Counties</div>
+        </div>
+      </div>
+
+      <h3 style="font-size:1rem;margin-bottom:1rem;">Near-Term Milestones</h3>
+      <ul class="bullet-list">
+        <li>Stripe keys + payment flow activation</li>
+        <li>Farm Bureau &amp; OSU Ag partnership MOU</li>
+        <li>First 1,000 paid members campaign</li>
+        <li>TWA app submission to Google Play</li>
+        <li>Full member clips upload/community launch</li>
+        <li>4 rural show premiere (Ag, Energy, Faith, Health)</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="folio">
+    <span>The Colony OK — Confidential Investor Deck</span>
+    <span>SLIDE 10</span>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SLIDE 11 — TEAM
+══════════════════════════════════════════ -->
+<section class="slide slide--paper" id="slide-11" data-slide="11">
+  <span class="slide-n">N°10 — THE TEAM</span>
+
+  <h2>5 Oklahoma Journalists.<br>One Mission.</h2>
+  <span class="rule-h"></span>
+
+  <p class="lead" style="color:#1a1a1a;margin-bottom:2rem;">The Colony OK's masthead is made up of verified Oklahoma journalists and contributors committed to covering the stories that national conservative media ignores.</p>
+
+  <div class="team-grid animate-in">
+    <div class="team-card">
+      <div class="team-name">Jake Merrick</div>
+      <div class="team-role">Founder &amp; Editor-in-Chief</div>
+      <div class="team-bio">Lead host, platform architect, and executive producer for The Colony OK. Drives strategy, live programming, and editorial vision.</div>
+    </div>
+    <div class="team-card">
+      <div class="team-name">Sarah Mitchell</div>
+      <div class="team-role">Senior Reporter</div>
+      <div class="team-bio">Investigative lead covering Oklahoma state politics, legislative sessions, and conservative policy analysis.</div>
+    </div>
+    <div class="team-card">
+      <div class="team-name">Marcus Webb</div>
+      <div class="team-role">Rural Affairs Editor</div>
+      <div class="team-bio">Rural Oklahoma beat reporter specializing in agriculture, energy, and county-level economic stories.</div>
+    </div>
+    <div class="team-card">
+      <div class="team-name">Rachel Torres</div>
+      <div class="team-role">Podcast Host</div>
+      <div class="team-bio">Host of Faith &amp; Freedom and Small Town Community series. Covers cultural, religious, and community-values stories.</div>
+    </div>
+    <div class="team-card">
+      <div class="team-name">Dan Hollis</div>
+      <div class="team-role">Energy Correspondent</div>
+      <div class="team-bio">Energy OK beat. Oil, gas, wind, and rural infrastructure — the intersection of Oklahoma's economic backbone and conservative policy.</div>
+    </div>
+    <div class="team-card">
+      <div class="team-name">Wes Carter</div>
+      <div class="team-role">Ag &amp; Rural Reporter</div>
+      <div class="team-bio">OK Ag Report lead. Farm Bureau relationships, OSU ag data, and first-hand reporting from county fairs and co-ops across the state.</div>
+    </div>
+  </div>
+
+  <div style="margin-top:2rem;padding:1.25rem 1.5rem;background:var(--ink);display:inline-block;">
+    <span class="mono" style="color:var(--paper);font-size:0.75rem;letter-spacing:0.1em;">OPEN ROLES: Technology Lead · Marketing Director · Rural Community Manager</span>
+  </div>
+
+  <div class="folio">
+    <span>The Colony OK — Confidential Investor Deck</span>
+    <span>SLIDE 11</span>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SLIDE 12 — USE OF FUNDS
+══════════════════════════════════════════ -->
+<section class="slide slide--ink" id="slide-12" data-slide="12">
+  <span class="slide-n">N°11 — USE OF FUNDS</span>
+
+  <div class="animate-in">
+    <h2>Investment<br>Allocation</h2>
+    <span class="rule-h"></span>
+  </div>
+
+  <div class="two-col animate-in">
+    <div>
+      <div class="funds-bar">
+        <div class="funds-seg seg-content" title="Content 35%">35%</div>
+        <div class="funds-seg seg-tech" title="Tech 25%">25%</div>
+        <div class="funds-seg seg-team" title="Team 25%">25%</div>
+        <div class="funds-seg seg-marketing" title="Marketing 15%">15%</div>
+      </div>
+      <div class="funds-legend">
+        <div class="legend-item">
+          <div class="legend-dot" style="background:var(--alarm);"></div>
+          <span><strong>35% — Content</strong><br><span class="muted-text" style="font-size:0.8rem;">Rural shows, journalism, partnerships</span></span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:var(--ink-soft);"></div>
+          <span><strong>25% — Technology</strong><br><span class="muted-text" style="font-size:0.8rem;">Clips platform, TWA app, AI pipeline</span></span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:#1a3560;"></div>
+          <span><strong>25% — Team</strong><br><span class="muted-text" style="font-size:0.8rem;">Tech lead, marketing director, rural editor</span></span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:#2d5a9e;"></div>
+          <span><strong>15% — Marketing</strong><br><span class="muted-text" style="font-size:0.8rem;">Member acquisition, Farm Bureau outreach</span></span>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <h3 style="font-size:1rem;margin-bottom:1rem;">18-Month Priorities</h3>
+      <ul class="bullet-list">
+        <li>Launch 4 rural shows (Ag, Energy, Faith, Health) with Farm Bureau partnerships</li>
+        <li>Full member clips platform: upload, AI moderation, community forum</li>
+        <li>TWA Google Play app submission + rural offline optimization</li>
+        <li>Hire: Technology Lead + Rural Community Manager</li>
+        <li>1,000 → 10,000 member growth campaign (email + OK radio + social)</li>
+        <li>Expand Report Card to all 77 Oklahoma counties</li>
+        <li>Real AI transcripts pipeline (Whisper/Mux) + searchable archives</li>
+        <li>Civic partnerships: OK Farm Bureau MOU, OSU Ag, county conservation</li>
+      </ul>
+
+      <div style="margin-top:1.5rem;padding:1.25rem;border:1px solid rgba(255,255,255,0.15);border-left:4px solid var(--alarm);">
+        <div class="card-title">Key Performance Targets</div>
+        <div style="font-size:0.875rem;line-height:1.7;opacity:0.8;">
+          10,000 members by Month 12 · 2 Farm Bureau partnerships · 4 shows live ·
+          77-county Report Card · TWA on Play Store · $600K ARR run rate
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="folio">
+    <span>The Colony OK — Confidential Investor Deck</span>
+    <span>SLIDE 12</span>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SLIDE 13 — THE ASK / CLOSE
+══════════════════════════════════════════ -->
+<section class="slide slide--alarm" id="slide-13" data-slide="13">
+  <span class="slide-n" style="color:rgba(255,255,255,0.7);">N°12 — THE ASK</span>
+
+  <div class="animate-in">
+    <h2>Join the<br>Colony.</h2>
+  </div>
+
+  <span class="rule-h" style="background:var(--paper);max-width:120px;"></span>
+
+  <div class="two-col animate-in" style="align-items:start;">
+    <div>
+      <div class="ask-label" style="color:rgba(255,255,255,0.7);">Seeking</div>
+      <div class="ask-number">Seed<br>Round</div>
+      <p style="opacity:0.85;font-size:1.05rem;line-height:1.6;max-width:45ch;margin-top:0.5rem;">We are raising a seed round to activate the full platform, grow to 10,000 members, and establish The Colony OK as the defining voice of rural conservative Oklahoma.</p>
+
+      <div class="contact-block">
+        <div class="contact-item">Jake Merrick — Founder &amp; Editor-in-Chief</div>
+        <div class="contact-item">thecolonyok.com</div>
+        <div class="contact-item">Platform live at: thecolony-app.vercel.app</div>
+      </div>
+    </div>
+
+    <div>
+      <h3 style="font-size:1rem;margin-bottom:1.25rem;">Why Now</h3>
+      <ul class="bullet-list" style="border-color:rgba(255,255,255,0.2);">
+        <li style="border-color:rgba(255,255,255,0.2);">Platform is <strong>production-ready</strong> — 8 phases complete, 0 blockers</li>
+        <li style="border-color:rgba(255,255,255,0.2);">Conservative media is the <strong>fastest-growing</strong> news category in America</li>
+        <li style="border-color:rgba(255,255,255,0.2);">Reader-funded model proven by The Free Press, Substack, The Athletic</li>
+        <li style="border-color:rgba(255,255,255,0.2);">Oklahoma is <strong>65% conservative</strong> with zero dedicated digital native coverage</li>
+        <li style="border-color:rgba(255,255,255,0.2);">AI + agentic tools dramatically reduce content production cost</li>
+        <li style="border-color:rgba(255,255,255,0.2);">TWA/PWA enables <strong>true app parity</strong> without $50K/year App Store overhead</li>
+        <li style="border-color:rgba(255,255,255,0.2);">Rural Oklahoma is <strong>underserved by every major platform</strong> — the moat is geography</li>
+      </ul>
+
+      <div style="margin-top:1.5rem;padding:1.5rem;background:rgba(0,0,0,0.25);">
+        <div class="pull-quote" style="font-size:1.1rem;border-left-color:var(--paper);color:var(--paper);">
+          "The Colony OK is not a media company — it is Oklahoma's conservative infrastructure."
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="folio" style="opacity:0.5;">
+    <span>The Colony OK — Confidential Investor Deck · 2026</span>
+    <span>SLIDE 13</span>
+  </div>
+</section>
+
+</main>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const counter = document.getElementById('slideCounter');
+  const dotsContainer = document.getElementById('navDots');
+  const total = slides.length;
+
+  // Build dots
+  slides.forEach((s, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'nav-dot' + (i === 0 ? ' active' : '');
+    btn.setAttribute('aria-label', 'Slide ' + (i + 1));
+    btn.addEventListener('click', () => {
+      s.scrollIntoView({ behavior: 'smooth' });
+    });
+    dotsContainer.appendChild(btn);
+  });
+
+  const dots = dotsContainer.querySelectorAll('.nav-dot');
+
+  // Intersection observer for active dot + counter
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const idx = Array.from(slides).indexOf(entry.target);
+        dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+        counter.textContent = String(idx + 1).padStart(2, '0') + ' / ' + String(total).padStart(2, '0');
+      }
+    });
+  }, { threshold: 0.5 });
+
+  slides.forEach(s => observer.observe(s));
+
+  // Scroll-triggered animations
+  const animItems = document.querySelectorAll('.animate-in');
+  const animObs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        animObs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.15 });
+
+  animItems.forEach(el => animObs.observe(el));
+
+  // Keyboard navigation
+  document.addEventListener('keydown', e => {
+    const current = Array.from(slides).findIndex(s => {
+      const rect = s.getBoundingClientRect();
+      return rect.top >= -50 && rect.top <= window.innerHeight / 2;
+    });
+    if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+      if (current < total - 1) slides[current + 1].scrollIntoView({ behavior: 'smooth' });
+    }
+    if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+      if (current > 0) slides[current - 1].scrollIntoView({ behavior: 'smooth' });
+    }
+  });
+</script>
+</body>
+</html>
