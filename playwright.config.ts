@@ -40,7 +40,9 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'npm run start',
+    // `npm run start` is Expo (React Native); the Next.js production server
+    // (serving the CI `next build` output on :3000) is the `next-start` script.
+    command: 'npm run next-start',
     url: 'http://127.0.0.1:3000',
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,
