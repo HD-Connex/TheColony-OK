@@ -47,7 +47,10 @@ export default function ScheduleManager() {
     }
   }, []);
 
-  useEffect(() => { fetchData(); }, [fetchData]);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchData();
+  }, [fetchData]);
 
   const addToSchedule = useCallback(async (programId: string) => {
     const maxPos = schedule.length > 0 ? Math.max(...schedule.map((s) => s.position)) : 0;

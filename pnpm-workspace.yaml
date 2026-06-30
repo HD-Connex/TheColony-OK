@@ -1,5 +1,5 @@
 packages:
-  - '**'
+  - 'mobile'
 
 allowBuilds:
   '@sentry/cli': false
