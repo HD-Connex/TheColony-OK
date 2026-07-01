@@ -84,7 +84,15 @@ export const metadata: Metadata = {
     site: "@thecolonyok",
     images: ["/assets/images/og-home.jpg"],
   },
-  icons: { icon: "/assets/images/logo-icon.jpg" },
+  icons: {
+    icon: "/assets/images/logo-icon.jpg",
+    apple: "/apple-icon.png",
+  },
+  appleWebApp: {
+    capable: true,
+    title: "The Colony",
+    statusBarStyle: "black-translucent",
+  },
   other: {
     referrer: "strict-origin-when-cross-origin",
     "X-Content-Type-Options": "nosniff",

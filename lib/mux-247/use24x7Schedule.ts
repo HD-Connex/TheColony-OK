@@ -201,6 +201,10 @@ export function use24x7Schedule(): ScheduleState & {
     } catch {
       // Silent fail - schedule will update on next Realtime event
     }
+    // `state` is a mutable external store synced via notify()/listenersRef (not React
+    // state) — these reads intentionally use the latest values without re-creating the
+    // callback; adding `state` wouldn't re-render and would churn the subscription.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.current, state.upcoming, fetchSchedule, notify]);
 
   return { ...state, refresh, subscribe, forceNext };

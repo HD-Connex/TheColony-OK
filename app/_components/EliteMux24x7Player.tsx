@@ -219,6 +219,7 @@ export default function EliteMux24x7Player({
   if (scheduleError && !activeProgram) {
     return (
       <div className="elite-player elite-player--error" role="alert">
+        {/* eslint-disable-next-line @next/next/no-img-element -- full-bleed decorative slate (0.4 opacity), not an LCP image; MuxPlayer serves the optimized poster */}
         <img src={SLATE_DEFAULT} alt="" className="elite-player__slate" />
         <div className="elite-player__message">
           <p>Failed to load 24/7 channel</p>
@@ -233,7 +234,13 @@ export default function EliteMux24x7Player({
   if (activeProgram?.isPremium && !isMember) {
     return (
       <div className="elite-player elite-player--gated">
-        <img src={resolvedThumbnail} alt="" className="elite-player__slate" />
+        {/* eslint-disable-next-line @next/next/no-img-element -- full-bleed decorative slate; not LCP */}
+        <img
+          src={resolvedThumbnail}
+          alt=""
+          className="elite-player__slate"
+          onError={(e) => { const img = e.currentTarget; if (img.src !== SLATE_DEFAULT) img.src = SLATE_DEFAULT; }}
+        />
         <div className="elite-player__message">
           <p>Premium content — membership required</p>
           <a href="/membership" className="btn btn--outline">Join to watch</a>
@@ -274,7 +281,13 @@ export default function EliteMux24x7Player({
         />
       ) : (
         <div className="elite-player__slate-container">
-          <img src={resolvedThumbnail} alt="The Colony" className="elite-player__slate" />
+          {/* eslint-disable-next-line @next/next/no-img-element -- full-bleed decorative slate; not LCP */}
+          <img
+            src={resolvedThumbnail}
+            alt="The Colony"
+            className="elite-player__slate"
+            onError={(e) => { const img = e.currentTarget; if (img.src !== SLATE_DEFAULT) img.src = SLATE_DEFAULT; }}
+          />
           {activeProgram && (
             <div className="elite-player__message">
               <p>{activeProgram.title}</p>
