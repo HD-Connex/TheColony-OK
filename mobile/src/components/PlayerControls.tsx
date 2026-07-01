@@ -272,6 +272,10 @@ const styles = StyleSheet.create({
   },
   skipButton: {
     padding: 8,
+    minWidth: 44,
+    minHeight: 44,
+    justifyContent: "center",
+    alignItems: "center",
   },
   skipIcon: {
     color: "#ffffff",
@@ -316,6 +320,10 @@ const styles = StyleSheet.create({
   },
   fullscreenButton: {
     padding: 8,
+    minWidth: 44,
+    minHeight: 44,
+    justifyContent: "center",
+    alignItems: "center",
   },
   stateOverlay: {
     position: "absolute",

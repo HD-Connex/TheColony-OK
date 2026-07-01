@@ -12,6 +12,13 @@ const securityHeaders = [
     key: "Strict-Transport-Security",
     value: "max-age=63072000; includeSubDomains; preload",
   },
+  // Declares the reporting group referenced by the CSP `report-to default` directive
+  // below. Modern Reporting API v1 replacement for the legacy `Report-To` header;
+  // without this, `report-to default` points at an undefined group and is inert.
+  {
+    key: "Reporting-Endpoints",
+    value: 'default="/api/csp-report"',
+  },
   // Phase 3: Enforce CSP (was report-only). Tighten over time as needed.
   // Allows current stack: Plausible, Stripe, YouTube/Rumble embeds, Supabase, Vercel Blob (clips), plausible analytics.
   // report-uri still present for violation reporting (via /api/csp-report).

@@ -105,7 +105,9 @@ Add a second job to `ci.yml` (minimum: typecheck + lint; ideal: EAS build on tag
 > (public routes: progress, watchlist, contributors/follow now log + return generic
 > bodies). D-4 admin routes ✅ (admin/episodes, admin/live/start,
 > admin/contributors/applications, admin/articles now log + generic). D-5 ✅. D-8 was
-> **already satisfied** in code (false positive — see below). **Still open:** D-6, D-7, D-9.
+> **already satisfied** in code (false positive — see below). D-9 ✅ **verified —
+> already satisfied** (row is a labeled `TouchableOpacity`; inner image would double-announce).
+> **Still open:** D-6 (needs DB migration), D-7 (needs vitest devDep — lockfile risk).
 
 - **D-1. No `Sentry.captureException` anywhere.** Enhance `lib/log.ts` `error()` to
   also call `Sentry.captureException` when a DSN is set, then every existing
@@ -146,9 +148,12 @@ Add a second job to `ci.yml` (minimum: typecheck + lint; ideal: EAS build on tag
   fails **closed** in production: when Upstash is unconfigured and `NODE_ENV ===
   'production'`, `rateLimit()` returns `{ ok: false, ... }` (callers emit 429) rather
   than silently using the in-memory Map. The Map is dev-only. No change needed.
-- **D-9. Mobile a11y label** `ScheduleList.tsx` image → add
-  `accessibilityLabel={item.title}` (verify the row isn't already wrapped in a
-  labeled Pressable, like ProgramCard was).
+- **D-9. ✅ Already satisfied (verified).** `ScheduleList.tsx` row is a
+  `TouchableOpacity` already carrying `accessibilityLabel={\`${isCurrent ? "Now
+  playing: " : ""}${item.title}\`}` + `accessibilityRole="button"`. The inner
+  `Image` has no label, so there is **no double-announcement** — adding one would
+  regress a11y (same pattern as the ProgramCard false positive). `keyExtractor` is
+  also already a unique composite `\`${item.programId}-${index}\``. No change.
 
 ---
 
@@ -196,14 +201,17 @@ Add a second job to `ci.yml` (minimum: typecheck + lint; ideal: EAS build on tag
 
 ## F. Minor — remaining (batch when convenient)
 
-- `Header.tsx` ticker keys → unique key `\`${item.href}-${i}\``.
-- `LiveChat.tsx` send button → disable + spinner while `sending`.
-- `ScheduleList.tsx` FlashList `keyExtractor` → `item.programId` if unique.
+> **Applied 2026-06-30 (§F batch, tsc clean):** several of these were **already
+> satisfied** on inspection (audit false positives). Only two needed real changes.
+
+- ✅ **Already satisfied** — `Header.tsx` ticker keys already use `\`${item.href}-${i}\`` (line 13).
+- ✅ **Already satisfied** — `LiveChat.tsx` send button already `disabled={!isMember || !input.trim() || sending}` + `aria-busy={sending}` + `'Sending...'` label; input also disabled while sending.
+- ✅ **Already satisfied** — `ScheduleList.tsx` FlashList `keyExtractor` already unique composite `\`${item.programId}-${index}\``.
+- ✅ **DONE** — `PlayerControls.tsx` touch targets: added `minWidth/minHeight: 44` + centering to `skipButton` and `fullscreenButton` (center play is already 64×64).
+- ✅ **DONE** — `next.config.ts` CSP: CSP already emitted `report-to default;` but no header declared the group. Added a modern `Reporting-Endpoints: default="/api/csp-report"` header so the directive is no longer inert (kept legacy `report-uri` for back-compat).
 - `mobile usePlaybackAnalytics` / web silent catches → `if (__DEV__) console.warn(...)`, never throw.
 - `vitest.config.ts` → add coverage provider + low initial threshold (after D-7).
 - `tests/e2e/mobile.spec.ts` conditional `test.skip` → split into per-platform `describe` blocks.
-- `next.config.ts` CSP `report-uri` → `report-to` (cosmetic; `report-uri` still works).
-- `PlayerControls.tsx` touch targets → `minWidth: 44, minHeight: 44`.
 - Hardcoded `https://thecolonyok.com` fallback in ~15 files → derive from `VERCEL_URL` for correct preview canonicals.
 - `lib/env.ts` → add `EXPO_PUBLIC_*` to documented/validated set; consider promoting Stripe/Mux to required when those features are enabled.
 - `app/layout.tsx` inline theme script → move to nonce'd `next/script` for strict CSP.
