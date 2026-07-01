@@ -185,8 +185,8 @@ Add a second job to `ci.yml` (minimum: typecheck + lint; ideal: EAS build on tag
   source maps; otherwise prod stack traces are minified).
 - **E-9. Governance docs** — add `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`,
   `CHANGELOG.md`.
-- **E-10. Mobile build metadata** — add `ios.buildNumber` / `android.versionCode`
-  to `mobile/app.json` (stores reject submissions without them).
+- **E-10. ✅ DONE.** Added `ios.buildNumber: "1"` + `android.versionCode: 1` to
+  `mobile/app.json` (stores reject submissions without them). Bump per release.
 - **E-11. ESLint hardening** — add `@typescript-eslint`, `eslint-plugin-security`,
   `eslint-plugin-import`, `unused-imports`; add a lint step to CI.
 - **E-12. Shared-lib platform leaks** — `lib/theme.ts`, `lib/viewer.ts`,
@@ -209,7 +209,7 @@ Add a second job to `ci.yml` (minimum: typecheck + lint; ideal: EAS build on tag
 - ✅ **Already satisfied** — `ScheduleList.tsx` FlashList `keyExtractor` already unique composite `\`${item.programId}-${index}\``.
 - ✅ **DONE** — `PlayerControls.tsx` touch targets: added `minWidth/minHeight: 44` + centering to `skipButton` and `fullscreenButton` (center play is already 64×64).
 - ✅ **DONE** — `next.config.ts` CSP: CSP already emitted `report-to default;` but no header declared the group. Added a modern `Reporting-Endpoints: default="/api/csp-report"` header so the directive is no longer inert (kept legacy `report-uri` for back-compat).
-- `mobile usePlaybackAnalytics` / web silent catches → `if (__DEV__) console.warn(...)`, never throw.
+- ⏭️ **Optional (skipped).** `usePlaybackAnalytics` (mobile `src/hooks/` + web `lib/mux-247/`) catches are **already documented intentional** best-effort swallows (`// Analytics are best-effort; never throw`). A `__DEV__ console.warn` is marginal value and risks a mobile-tsc break; leave unless dev-visibility is wanted.
 - `vitest.config.ts` → add coverage provider + low initial threshold (after D-7).
 - `tests/e2e/mobile.spec.ts` conditional `test.skip` → split into per-platform `describe` blocks.
 - Hardcoded `https://thecolonyok.com` fallback in ~15 files → derive from `VERCEL_URL` for correct preview canonicals.
