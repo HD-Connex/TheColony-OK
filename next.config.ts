@@ -30,7 +30,7 @@ const securityHeaders = [
       "style-src 'self' 'unsafe-inline'; " +
       "img-src 'self' data: https: blob:; " +
       "font-src 'self' data:; " +
-      "connect-src 'self' https://*.supabase.co https://plausible.io https://api.stripe.com https://*.vercel.app blob: https://*.public.blob.vercel-storage.com; " +
+      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://plausible.io https://api.stripe.com https://*.vercel.app blob: https://*.public.blob.vercel-storage.com; " +
       "media-src 'self' blob: https:; " +
       "frame-src https://www.youtube.com https://www.youtube-nocookie.com https://rumble.com https://js.stripe.com; " +
       "report-uri /api/csp-report; report-to default;",
