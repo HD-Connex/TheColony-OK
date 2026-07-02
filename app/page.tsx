@@ -4,6 +4,8 @@ import JsonLd from "./_components/JsonLd";
 import Countdown from "./_components/Countdown";
 import StoryCard from "./_components/StoryCard";
 import LiveStageMount from "./_components/LiveStageMount";
+import VideoEmbed from "./_components/VideoEmbed";
+import { COLONY_247_YOUTUBE_URL } from "@/lib/live-247";
 import { type StageItem } from "./_components/LiveStage";
 import MotionStagger, { MotionStaggerItem } from "./_components/motion/MotionStagger";
 import MotionReveal from "./_components/motion/MotionReveal";
@@ -136,6 +138,27 @@ export default async function HomePage() {
       )}
 
       <main id="main">
+        {/* Featured broadcast — first thing on load. Plays the 24/7 channel
+            (COLONY_247_YOUTUBE_URL) as a muted-autoplay youtube-nocookie embed:
+            browsers only allow autoplay when muted, so toEmbedSrc emits
+            autoplay=1&mute=1 and YouTube's own controls let viewers click to unmute.
+            Non-bare VideoEmbed reuses the .live-player 16:9 box. */}
+        <section className="section featured-broadcast" aria-label="Featured broadcast">
+          <div className="container">
+            <header className="section-header">
+              <span className="section-header__number">▶</span>
+              <div className="section-header__group">
+                <h2 className="section-title">Now Streaming</h2>
+                <span className="section-header__dateline">THE COLONY 24/7 · LIVE</span>
+              </div>
+              <Link className="section-link" href="/live">
+                Watch Live →
+              </Link>
+            </header>
+            <VideoEmbed url={COLONY_247_YOUTUBE_URL} title="The Colony — Now Streaming" />
+          </div>
+        </section>
+
         {/* Phase 4: cinematic hero + standardized MotionReveal on lead elements for motion polish.
             .hero--cinematic adds overlays/grain/rule depth (see hero.css). Reduced-motion respected in primitives. */}
         <section className="hero hero--cinematic" aria-label="Lead story">

@@ -67,8 +67,11 @@
   align-items: center;
   gap: var(--space-6);
   flex-wrap: nowrap;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
+  /* Was overflow-x:auto — a non-visible overflow-x forces overflow-y to auto too,
+     which clipped/boxed the absolutely-positioned .nav__dropdown-menu (top:100%).
+     .nav__links only renders on desktop (parent .nav__desktop is display:none ≤1024px),
+     so no horizontal scroll strip is needed. Keep overflow visible so dropdowns overlap. */
+  overflow: visible;
 }
 
 .nav__link {

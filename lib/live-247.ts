@@ -2,17 +2,16 @@
  * 24/7 "Colony Live" channel — persistent fallback when no scheduled
  * live_event is active. Stream source resolves from env config only.
  *
- * Jake Merrick YouTube demo stream as permanent 24/7 fallback until real Mux ingest.
- * Primary demo uses the project's JAKE_MERRICK_CHANNEL_URL (@jakemerrick212)
- * which VideoEmbed + toEmbedSrc turns into an embeddable continuous YouTube player
- * (falls back to JAKE_MERRICK_PLACEHOLDER_VIDEO_ID yEjlzfS4k1s VOD for demo continuity).
+ * Featured YouTube video as the permanent 24/7 fallback until real Mux ingest.
+ * Default source is COLONY_247_YOUTUBE_URL, which VideoEmbed + toEmbedSrc turn
+ * into an embeddable continuous YouTube player (muted autoplay; click to unmute).
  *
  * Source priority:
  *   1. NEXT_PUBLIC_247_HLS_URL          — direct HLS manifest (real 24/7)
  *   2. NEXT_PUBLIC_MUX_247_PLAYBACK_ID  — Mux playback id (built to HLS URL; real 24/7)
- *   3. NEXT_PUBLIC_247_YOUTUBE_URL      — YouTube embed (override for Jake Merrick or other)
+ *   3. NEXT_PUBLIC_247_YOUTUBE_URL      — YouTube embed override
  *   4. NEXT_PUBLIC_247_MP4_URL          — direct MP4 loop (legacy)
- *   DEFAULT (no env): JAKE_MERRICK_STREAMS_URL — Jake Merrick YouTube demo stream (permanent)
+ *   DEFAULT (no env): COLONY_247_YOUTUBE_URL — featured YouTube video (permanent)
  *
  * When no source the channel reports streamUrl: null and player shows honest "Off Air".
  * isLive remains true for the 24/7 channel state.
@@ -20,7 +19,16 @@
 
 import { getLiveEvents } from "./live-events";
 import { STOCK } from "./media-map";
-import { JAKE_MERRICK_CHANNEL_URL } from "./video";
+
+/**
+ * Featured 24/7 source — a muted-autoplay YouTube video. This is the default
+ * "Colony Live" stream shown on the homepage featured band, the /live page, and
+ * anywhere the 24/7 channel plays. VideoEmbed + toEmbedSrc turn it into a
+ * continuous youtube-nocookie embed (autoplay=1&mute=1; viewers click to unmute).
+ * Override with NEXT_PUBLIC_247_YOUTUBE_URL, or a real HLS/Mux source higher in
+ * the priority chain below.
+ */
+export const COLONY_247_YOUTUBE_URL = "https://youtu.be/5ddYtEMU2NQ";
 
 export interface Live247Channel {
   id: "colony-247";
@@ -50,11 +58,11 @@ function resolve247StreamUrl(): string | null {
   if (process.env.NEXT_PUBLIC_247_MP4_URL) {
     return process.env.NEXT_PUBLIC_247_MP4_URL;
   }
-  // Jake Merrick YouTube demo stream as permanent 24/7 fallback until real Mux ingest.
-  // Uses @jakemerrick212/streams (embed-friendly; resolves to continuous YT iframe via VideoEmbed).
-  // Guarantees the live TV player (LiveStage -> VideoEmbed for YT) always runs the Jake Merrick stream.
+  // Featured YouTube video as the permanent 24/7 fallback until real Mux ingest.
+  // Embed-friendly; resolves to a continuous YT iframe via VideoEmbed (muted autoplay).
+  // Guarantees the live TV player (LiveStage -> VideoEmbed for YT) always runs the featured stream.
   // Set NEXT_PUBLIC_247_YOUTUBE_URL to override with a specific watch?v= or /live URL.
-  return JAKE_MERRICK_CHANNEL_URL;
+  return COLONY_247_YOUTUBE_URL;
 }
 
 export const COLONY_247: Live247Channel = {
